@@ -1,13 +1,11 @@
 #include "Shader.h"
-#include <GL/glew.h>	// extension wrangler
-#include <GLFW/glfw3.h> // framework
-
+#include "OpenGL.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <exception>
-#include <GLM/gtc/type_ptr.hpp>
+#include <gtc/type_ptr.hpp>
 
 struct ShaderSource
 {

@@ -1,8 +1,8 @@
-#include <GLM/glm.hpp>	// mathematics
-#include <GL/glew.h>	// extension wrangler
-#include <GLFW/glfw3.h> // framework
+// #include <GLM/glm.hpp>	// mathematics
+// #include <GL/glew.h>	// extension wrangler
+// #include <GLFW/glfw3.h> // framework
 #include "Tentil.h"
-#include <glm/gtc/matrix_transform.hpp>
+#include <gtc/matrix_transform.hpp>
 #include <iostream>
 #include "OpenGL.h"
 
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	glm::mat4 view_mat = glm::lookAt(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // position, target, orientation
 	glm::mat4 model_mat = glm::mat4(1.0f);
 	
-	entityReg.create(RenderComponent{&mesh, &shader});
+	Entity E(RenderComponent{ &mesh, &shader });
 	
 	glm::vec4 test_vec1 = proj_mat * view_mat * model_mat * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	std::cout << "max:" << test_vec1.x << ", " << test_vec1.y << ", " << test_vec1.z << ", " << test_vec1.w << std::endl;
@@ -29,31 +29,27 @@ int main(int argc, char** argv)
 	shader.SetUniformMatrix4f("u_model", model_mat);
 
 	// main loop
+	float glfwTime;
+	float deltaTime;
 	float curtime = 0;
-	
 	while (!wnd.Closed())
 	{
 		// process new frame
-		float glfwTime = glfwGetTime();
-		float deltaTime = glfwTime - curtime;
+		glfwTime = glfwGetTime();
+		deltaTime = glfwTime - curtime;
 		curtime = glfwTime;
-		
-		
 
-		/* uniform block example
-		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &v);
-		*/
-		//shader.SetUniform4f("u_color", 0.2f, (sinf(curtime * 2) + 1) / 2, 0.8f, 1.0f);
-		//model_mat = glm::translate(model_mat, glm::vec3(0, 0, 1.0f));
-		model_mat = glm::rotate(model_mat, glm::radians(0.5f), glm::vec3(-1.0f, 0.5f, 0));
+		model_mat = glm::rotate(model_mat, deltaTime, glm::vec3(-1.0f, 0.5f, 0));
 		shader.SetUniformMatrix4f("u_model", model_mat);
+
+		unsigned int x = GL_MAX_UNIFORM_BUFFER_BINDINGS;
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		entityReg.for_each<RenderComponent>([](const auto entityID, const RenderComponent& RC) {
+		entityReg.for_each<RenderComponent>([&deltaTime](const auto entityID, const RenderComponent& RC) {
 			RC.shader->Bind();
 			RC.mesh->Draw();
+			deltaTime += 1;
 		});
 
 		wnd.Refresh();

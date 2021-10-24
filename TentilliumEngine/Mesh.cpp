@@ -1,6 +1,5 @@
 #include "Mesh.h"
 #include "OpenGL.h"
-
 #include <vector>
 #include <string>
 #include <fstream>

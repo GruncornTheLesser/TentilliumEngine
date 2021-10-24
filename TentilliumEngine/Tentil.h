@@ -21,6 +21,10 @@ struct RenderComponent
 	}
 };
 
+
+
+
+
 Registry<entityID, Archetype_Set_builder
 	::add<Archetype<>>
 	::add<Archetype<RenderComponent>>

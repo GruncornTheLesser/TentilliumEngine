@@ -1,7 +1,7 @@
 #pragma once
-#include <GLM/glm.hpp>
-#include <GL/glew.h>	// extension wrangler
-#include <GLFW/glfw3.h> // framework
+#include <glm.hpp>
+#include <glew.h>	// extension wrangler
+#include <glfw3.h> // framework
 #include <iostream>
 #include <vector>
 
@@ -10,7 +10,8 @@
 
 namespace gl
 {
-	struct Vertex {
+	struct Vertex 
+	{
 		glm::vec3 p;
 		glm::vec3 n;
 		glm::vec2 t;

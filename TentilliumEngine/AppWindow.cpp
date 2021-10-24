@@ -1,8 +1,8 @@
-#include <GL/glew.h>	// extension wrangler
-#include <GLFW/glfw3.h> // framework
+#include "AppWindow.h"
+#include "OpenGL.h"
 #include <iostream>
 #include <thread>
-#include "AppWindow.h"
+
 
 static bool GLInitialized = false;
 

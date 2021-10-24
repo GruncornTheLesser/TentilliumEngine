@@ -1,5 +1,5 @@
 #pragma once
-#include <GLM/glm.hpp>		// mathematics
+#include <glm.hpp>		// mathematics
 #include <unordered_map>
 #include <string>
 
