@@ -13,7 +13,8 @@ struct RenderComponent
 	RenderComponent() : mesh(nullptr), shader(nullptr) { }
 	RenderComponent(Mesh* mesh, Shader* shader) : mesh(mesh), shader(shader) { }
 	RenderComponent(RenderComponent& orig) : mesh(orig.mesh), shader(orig.shader) { }
-	RenderComponent& operator=(const RenderComponent& other) {
+	RenderComponent& operator=(const RenderComponent& other) 
+	{
 		if (this == &other) return *this;
 		shader = other.shader;
 		mesh = other.mesh;
@@ -21,8 +22,8 @@ struct RenderComponent
 	}
 };
 
-
-
+struct LightComponent { };
+struct OccluderComponent { };
 
 
 Registry<entityID, Archetype_Set_builder

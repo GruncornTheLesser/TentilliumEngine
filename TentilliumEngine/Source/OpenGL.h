@@ -2,12 +2,10 @@
 #include <glm.hpp>
 #include <glew.h>	// extension wrangler
 #include <glfw3.h> // framework
+
+
 #include <iostream>
 #include <vector>
-
-
-
-
 namespace gl
 {
 	struct Vertex 

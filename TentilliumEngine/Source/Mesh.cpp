@@ -76,13 +76,11 @@ void load_obj(std::string filepath)
 		// objects not currently supported
 		// materials not currently supported
 	}
-	
-	gl::Buffer<GL_ARRAY_BUFFER, gl::Vertex> vbo_Buffer(vertexdata);				// the vertex buffer object
-	gl::Buffer<GL_ELEMENT_ARRAY_BUFFER, unsigned int> ibo_Buffer(indicedata);	// the index buffer object
-	std::tuple ibo_key(vbo_Buffer.m_handle, GL_TRIANGLES);						// buffer key to get the ibo
 
-	s_vbo_cache[filepath] = vbo_Buffer;
-	s_ibo_cache[ibo_key] =  ibo_Buffer;
+	s_vbo_cache[filepath] = gl::Buffer<GL_ARRAY_BUFFER, gl::Vertex>(vertexdata);			// the vertex buffer object
+	std::tuple ibo_key(s_vbo_cache[filepath].m_handle, GL_TRIANGLES);						// buffer key to get the ibo	
+	s_ibo_cache[ibo_key] = gl::Buffer<GL_ELEMENT_ARRAY_BUFFER, unsigned int>(indicedata);	// the index buffer object
+
 }
 
 void generate_primitive(unsigned int vbo_handle, int Primitive)

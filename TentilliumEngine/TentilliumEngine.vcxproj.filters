@@ -23,52 +23,49 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AppWindow.cpp">
+    <ClCompile Include="Source\AppWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
+    <ClCompile Include="Source\Shader.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
+    <ClCompile Include="Source\Mesh.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Default.shader">
+    <None Include="Resources\shaders\Default.shader">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="Hat.mtl">
-      <Filter>Resource Files\meshes</Filter>
-    </None>
-    <None Include="cube.mtl">
+    <None Include="Resources\meshes\Hat.mtl">
       <Filter>Resource Files\meshes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppWindow.h">
+    <ClInclude Include="Source\AppWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
+    <ClInclude Include="Source\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
+    <ClInclude Include="Source\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tentil.h">
+    <ClInclude Include="Source\Tentil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGL.h">
+    <ClInclude Include="Source\OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="Hat.obj">
+    <Object Include="Resources\meshes\Hat.obj">
       <Filter>Resource Files\meshes</Filter>
     </Object>
-    <Object Include="cube.obj">
+    <Object Include="Resources\meshes\cube.obj">
       <Filter>Resource Files\meshes</Filter>
     </Object>
   </ItemGroup>

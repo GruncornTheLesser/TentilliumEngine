@@ -17,7 +17,8 @@ void framebuffer_size_callback(GLFWwindow* wnd, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-AppWindow::AppWindow(int width, int height, const char* title, bool vsync) : m_Title(title), m_Width(width), m_Height(height), m_Vsync(vsync)
+AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
+	: m_Title(title), m_Width(width), m_Height(height), m_Vsync(vsync)
 {
 	if (!GLInitialized)
 	{
@@ -37,6 +38,7 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync) : m_T
 			throw std::runtime_error("[Engine Error] : Window failed to initialize");
 		}
 
+		// make window current context
 		glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_Window));
 
 		if (glewInit() != GLEW_OK)
@@ -61,8 +63,7 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync) : m_T
 	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_Window), key_callback);
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_Window), framebuffer_size_callback);
 
-	if (m_Vsync)
-		glfwSwapInterval(1);
+	glfwSwapInterval(m_Vsync);
 	
 	glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_Window));
 
