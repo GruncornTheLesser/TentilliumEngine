@@ -20,10 +20,9 @@ void main() {
 #shader fragment
 #version 460 core
 
-layout(location = 0) in vec2 f_texel;
-
+layout(location = 0) in vec2 v_texel;
 layout(location = 0) out vec4 color;
 
 void main() {
-	color = vec4(f_texel, 0, 1);
+	color = vec4(v_texel, 0, 1);
 };

@@ -6,44 +6,81 @@
 
 using entityID = uint32_t;
 
-struct RenderComponent
+/*
+struct TransformComponent { };
+struct HierarchyComponent
 {
-	Mesh* mesh;
-	Shader* shader;
-	RenderComponent() : mesh(nullptr), shader(nullptr) { }
-	RenderComponent(Mesh* mesh, Shader* shader) : mesh(mesh), shader(shader) { }
-	RenderComponent(RenderComponent& orig) : mesh(orig.mesh), shader(orig.shader) { }
-	RenderComponent& operator=(const RenderComponent& other) 
-	{
-		if (this == &other) return *this;
-		shader = other.shader;
-		mesh = other.mesh;
-		return *this;
-	}
+private:
+	const int m_depth;
+public:
+	const int m_parent;
+
+	HierarchyComponent() : m_depth(), m_parent() { };
+	// 2 systems -> 1 to set parent and 1 to update transform
+	// set parent -> recalculate heirachy calcuation order, ie inserts component and children into new position in array
+	// calculate breadth first graph which means just iterate down the array so the top gets updated first
 };
 
 struct LightComponent { };
 struct OccluderComponent { };
 
 
-Registry<entityID, Archetype_Set_builder
-	::add<Archetype<>>
+*/
+class RenderComponent 
+{
+private:
+	unsigned int m_vao;
+	unsigned int m_length;
+	RenderComponent() 
+		: m_vao(0), m_length(0) { }
+public:
+	RenderComponent(const char* filepath)
+	{
+
+	}
+	void Draw()
+	{
+
+	}
+};
+class ShadowComponent 
+{ 
+private:
+	unsigned int m_vao;
+	unsigned int m_length;
+	ShadowComponent()
+		: m_vao(0), m_length(0) { }
+public:
+	ShadowComponent(const char* filepath)
+	{
+
+	}
+	void Draw()
+	{
+
+	}
+};
+
+
+struct CustomShader : Shader { };
+struct SkeletonComponent { };
+// entity registry
+Registry<entityID, Archetype_Set_builder // TODO: need a better way to build registry
 	::add<Archetype<RenderComponent>>
-	::build> entityReg; // entity registry
+	::add<Archetype<RenderComponent, CustomShader>>
+	::build> entityReg;
 
 // wrapper class
 class Entity
 {
 private:
-	entityID m_ID;
+	const entityID m_ID;
 
 public:
 	template<class ... Components>
 	Entity(const Components&... comps) : m_ID(entityReg.create<Components...>(comps...)) { }
-	~Entity()
-	{
-		entityReg.destroy(m_ID);
-	}
+	~Entity() { entityReg.destroy(m_ID); }
+
 
 	template <class Component>
 	bool Has()

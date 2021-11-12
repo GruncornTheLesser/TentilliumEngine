@@ -5,10 +5,7 @@
 #include <type_traits>
 
 template<typename ... Types>
-struct Set
-{
-
-};
+struct Set { };
 
 
 

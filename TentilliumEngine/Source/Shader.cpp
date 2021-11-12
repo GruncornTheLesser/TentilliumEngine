@@ -132,7 +132,8 @@ Shader::Shader(const char* filepath) : m_program(CreateShader(filepath)) { }
 
 Shader::~Shader()
 {
-	glDeleteProgram(m_program);
+	std::cout << "program would've got deleted and broken everything" << std::endl;
+	//glDeleteProgram(m_program);
 }
 
 
