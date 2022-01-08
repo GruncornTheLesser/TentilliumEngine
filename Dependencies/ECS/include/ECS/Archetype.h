@@ -90,48 +90,41 @@ constexpr auto is_same_types_v = is_same_types<ASet, BSet>::value;
 
 template<typename... Sets>
 struct Unique_Sets : std::true_type { };
-
 template<typename Set, typename... Sets>
-struct Unique_Sets<Set, Sets...>
-    : std::conjunction<std::negation<std::disjunction<is_same_types<Set, Sets>...>>, Unique_Sets<Sets...>>
-{};
+struct Unique_Sets<Set, Sets...> : std::conjunction<std::negation<std::disjunction<is_same_types<Set, Sets>...>>, Unique_Sets<Sets...>> {};
 
 template<typename... Sets>
 constexpr auto Unique_Sets_v = Unique_Sets<Sets...>::value;
 
 template<typename Type, typename Set>
 struct push_front;
-
 template<typename Type, typename... Types, template<typename...> class Set>
 struct push_front<Type, Set<Types...>>
 {
     using type = Set<Type, Types...>;
 };
-
 template<typename Type, typename Set>
 using push_front_t = typename push_front<Type, Set>::type;
 
+
 template<typename Type, typename Set>
 struct push_back;
-
 template<typename Type, typename... Types, template<typename...> class Set>
 struct push_back<Type, Set<Types...>>
 {
     using type = Set<Types..., Type>;
 };
-
 template<typename Type, typename Set>
 using push_back_t = typename push_back<Type, Set>::type;
 
+
 template<typename SetOfSets, typename... Types>
 struct find_for;
-
 template<typename... Sets, template<typename...> class SetOfSets, typename... Types>
 struct find_for<SetOfSets<Sets...>, Types...>
 {
     using type = Set<>;
 };
-
 template<typename HeadSet, typename... Sets, template<typename...> class SetOfSets, typename... Types>
 struct find_for<SetOfSets<HeadSet, Sets...>, Types...>
 {
@@ -186,9 +179,9 @@ template<typename Archetype>
 struct verify_Archetype;
 
 template<typename... Components>
-struct verify_Archetype<Archetype<Components...>> : verify_component<Components>...
+struct verify_Archetype<Set<Components...>> : verify_component<Components>...
 {
-    static_assert(unique_types_v<Components...>, "Every component must be unique (Archetype is a SET of components)");
+    static_assert(unique_types_v<Components...>, "Every component must be unique (Archetype is a set of components)");
 };
 
 template<typename ArchetypeSet>
@@ -203,14 +196,30 @@ struct verify_Archetype_Set<Set<Archetypes...>> : verify_Archetype<Archetypes>..
 namespace Internal
 {
     template<typename... Archetypes>
-    struct Archetype_list_builder
+    struct Archetype_set_builder
     {
         template<typename Archetype>
-        using add = Archetype_list_builder<Archetype, Archetypes...>;
+        using add = Archetype_set_builder<Archetype, Archetypes...>;
+        using build = Set<Archetypes...>;
+    };
+
+    template<typename... Component_Sets>
+    struct Component_set_builder;
+
+    template<typename... Archetypes>
+    struct Component_set_builder
+    {
+        template<typename Component>
+        using add = Component_set_builder <Archetypes..., push_front_t<Component, Archetypes>...> ; // builds a power set from component
         using build = Set<Archetypes...>;
     };
 }
 
-struct Archetype_Set_builder : Internal::Archetype_list_builder<> { };
-
-
+/// <summary>
+/// builds a set of all sets added to the builder
+/// </summary>
+struct Archetype_Set_builder : Internal::Archetype_set_builder<> { };
+/// <summary>
+/// builds a power set of all components added to the builder
+/// </summary>
+struct Component_Set_builder : Internal::Component_set_builder<Set<>> { };

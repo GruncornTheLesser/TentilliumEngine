@@ -26,14 +26,14 @@
     <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\AppWindow.cpp">
+    <ClCompile Include="Source\Rendering\AppWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Shader.cpp">
+    <ClCompile Include="Source\Rendering\Shader.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mesh.cpp">
-      <Filter>Source Files\Resources</Filter>
+    <ClCompile Include="Source\Components\ModelComponent.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,21 +45,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\AppWindow.h">
+    <ClInclude Include="Source\Rendering\AppWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh.h">
+    <ClInclude Include="Source\Rendering\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Tentil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\OpenGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="Source\Components\Components.h" />
+    <ClInclude Include="Source\Components\ModelComponent.h" />
+    <ClInclude Include="Source\Rendering\ResourceManager.h" />
+    <ClInclude Include="Source\Rendering\Image.h" />
+    <ClInclude Include="Source\Rendering\Material.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
@@ -68,5 +67,13 @@
     <Object Include="Resources\meshes\cube.obj">
       <Filter>Resource Files\meshes</Filter>
     </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\images\Image.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\images\Image.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

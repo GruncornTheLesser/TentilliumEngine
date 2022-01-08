@@ -1,0 +1,9 @@
+newmtl BLUE
+Ns 0.000000					  // specular highlights  [0, 1]
+Ka 1.000000 1.000000 1.000000 // ambient colour		  [0, 1]
+Ni 1.000000				      // optical density      [0.001, 10]
+Kd 0.000000 0.003666 1.000000 // diffuse colour       [0, 1]
+d 1.000000					  // disolve/transparency [0, 1]
+Ks 1.000000 1.000000 1.000000 // specular colour      [0, 1]
+Ke 0.000000 0.000000 0.000000 // emission             [0, +]
+

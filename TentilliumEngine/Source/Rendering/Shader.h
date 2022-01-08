@@ -1,16 +1,19 @@
 #pragma once
-#include <glm.hpp>		// mathematics
+#include <glm.hpp>				// mathematics
 #include <unordered_map>
 #include <string>
+#include "ResourceManager.h"
 
-class Shader
+
+
+struct Shader
 {
+	friend struct ResourceManager<Shader>;
 private:
 	unsigned int m_program;
-	mutable std::unordered_map<std::string, unsigned int> uniform_cache; // uniform locations
-	mutable std::unordered_map<std::string, unsigned int> block_cache; // uniform block locations
+	mutable std::unordered_map<std::string, unsigned int> uniform_cache;	// uniform locations
+	mutable std::unordered_map<std::string, unsigned int> block_cache;		// uniform block locations
 public:
-	Shader(const char* filepath);
 	~Shader();
 
 	void Bind() const;
@@ -49,6 +52,7 @@ public:
 private:
 	unsigned int GetUniformLocation(const std::string& uniform_name) const;
 	unsigned int GetUniformBlockLocation(const std::string& block_name) const;
-
 };
+
+const Shader* ResourceManager<Shader>::Load(const char* filepath);
 

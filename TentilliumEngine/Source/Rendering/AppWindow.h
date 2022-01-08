@@ -1,4 +1,6 @@
 #pragma once
+#include <glew.h>	// GL extension wrangler
+#include <glfw3.h>	// GL framework
 
 class AppWindow
 {

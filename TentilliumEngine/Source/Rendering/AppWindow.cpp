@@ -1,5 +1,4 @@
 #include "AppWindow.h"
-#include "OpenGL.h"
 #include <iostream>
 #include <thread>
 
