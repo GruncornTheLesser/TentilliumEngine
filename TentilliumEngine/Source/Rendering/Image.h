@@ -5,6 +5,7 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 #include <exception>
+#include <iostream>
 #include "ResourceManager.h"
 
 struct Image {
@@ -12,6 +13,11 @@ struct Image {
 private:
 	GLuint handle;
 public:
+	void Init(GLuint handle) {
+		if (this->handle)
+			glDeleteTextures(1, &handle);
+		this->handle = handle;
+	}
 	void Bind() const {
 		glBindTexture(GL_TEXTURE_2D, handle);
 	}
@@ -19,7 +25,7 @@ public:
 
 const Image* ResourceManager<Image>::Load(const char* filepath)
 {
-	unsigned int texture;
+	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	// set the texture wrapping/filtering options (on the currently bound texture object)
@@ -44,6 +50,6 @@ const Image* ResourceManager<Image>::Load(const char* filepath)
 	}
 	stbi_image_free(data);
 
-	cache[filepath].handle = texture;
+	cache[filepath].Init(texture);
 	return &cache[filepath];
 }

@@ -1,11 +1,14 @@
 #include "Tentil.h"
 #include <iostream>
 #include <gtc/matrix_transform.hpp>
-
 using namespace glm;
 
 int main(int argc, char** argv)
 {
+	test();
+
+
+
 	AppWindow* wnd = new AppWindow(640, 480, argv[0], true);
 	//Scene*	   scn = new Scene;
 
@@ -16,18 +19,16 @@ int main(int argc, char** argv)
 		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
 		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
 		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		
 	};
 
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
-
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
 	
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
-
 	glBindVertexArray(VAO);
 
 	// recognise vertex attributes eg position, UV, colour, bone weight and bone index
@@ -37,20 +38,23 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	// load resources from file
 	auto program = ResourceManager<Shader>::Load("Resources/shaders/Default.shader");
 	auto img = ResourceManager<Image>::Load("Resources/images/Image.png");
+
 	// tells shader to use texture block 1
-	program->SetUniform1i("tex", 0); 
+	program->SetUniform1i("tex", 0);
 	// puts texture into texture block 1
 	glActiveTexture(GL_TEXTURE0); 
+	
 	img->Bind();
 	
 	program->Bind();
-
+	
+	glBindVertexArray(VAO);
 
 	while (!wnd->Closed())
 	{
-		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		wnd->Refresh();
@@ -58,11 +62,6 @@ int main(int argc, char** argv)
 
 
 	/*
-	
-
-
-
-
 	auto entity = scn->Create(ModelComponent("Resources/meshes/hat.obj"));
 	
 	while (!wnd->Closed())

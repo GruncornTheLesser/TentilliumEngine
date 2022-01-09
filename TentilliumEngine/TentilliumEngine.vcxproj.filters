@@ -59,6 +59,7 @@
     <ClInclude Include="Source\Rendering\ResourceManager.h" />
     <ClInclude Include="Source\Rendering\Image.h" />
     <ClInclude Include="Source\Rendering\Material.h" />
+    <ClInclude Include="Source\Components\HierarchyComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
