@@ -14,4 +14,3 @@ class PostProcessComponent {};
 	// entity w model must have Hierarchy
 	// if no transform component its the root of a scene
 #include "HierarchyComponent.h"
-class TransformComponent {};

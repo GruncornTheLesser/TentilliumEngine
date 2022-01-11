@@ -6,6 +6,16 @@
 #include <assimp/postprocess.h>
 
 
+struct mesh
+{
+
+};
+
+struct material
+{
+
+};
+
 /*
 void loadModel(const char* path)
 {
