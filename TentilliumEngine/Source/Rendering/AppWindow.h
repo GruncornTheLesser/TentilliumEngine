@@ -16,5 +16,7 @@ public:
 	void MakeCurrent();
 	void Refresh();
 	bool Closed() const;
+
+
 };
 

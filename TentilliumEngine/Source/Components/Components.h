@@ -1,16 +1,13 @@
 #pragma once
-#include<stdint.h>
+#include "TransformComponent.h"
+#include "HierarchyComponent.h"
 #include "ModelComponent.h"
 
-class AnimatorComponent {};
-class LightComponent {};
-class ShadowComponent {};
-class PostProcessComponent {};
+#include <entt/entt.hpp>
+using namespace entt;
+registry reg;
 
 
 
 
 
-	// entity w model must have Hierarchy
-	// if no transform component its the root of a scene
-#include "HierarchyComponent.h"

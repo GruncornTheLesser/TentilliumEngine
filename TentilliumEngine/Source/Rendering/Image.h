@@ -13,11 +13,8 @@ struct Image {
 private:
 	GLuint handle;
 public:
-	void Init(GLuint handle) {
-		if (this->handle)
-			glDeleteTextures(1, &handle);
-		this->handle = handle;
-	}
+	Image() : handle(0) { }
+	~Image() { glDeleteTextures(1, &handle); }
 	void Bind() const {
 		glBindTexture(GL_TEXTURE_2D, handle);
 	}
@@ -50,6 +47,10 @@ const Image* ResourceManager<Image>::Load(const char* filepath)
 	}
 	stbi_image_free(data);
 
-	cache[filepath].Init(texture);
-	return &cache[filepath];
+	auto ptr = &cache[filepath];
+	if (ptr->handle)
+		glDeleteTextures(1, &(ptr->handle));
+	else
+		ptr->handle = texture;
+	return ptr;
 }
