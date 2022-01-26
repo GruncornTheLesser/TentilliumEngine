@@ -57,6 +57,7 @@
     <ClInclude Include="Source\Rendering\Material.h" />
     <ClInclude Include="Source\Components\HierarchyComponent.h" />
     <ClInclude Include="Source\Components\TransformComponent.h" />
+    <ClInclude Include="Source\Components\Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

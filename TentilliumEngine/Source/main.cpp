@@ -1,115 +1,49 @@
 #include "Tentil.h"
 #include <iostream>
 #include <queue>
-#include <stack>
-#include "Components/Components.h"
-
-// If i try and give a type to these V they stop working
-// so i have to use auto
-
-template<int sceneID = 0>
-struct SceneTag {};
-
-template<int sceneID>
-auto sceneView			= reg.view<SceneTag<sceneID>>();
-template<int sceneID>
-auto groupSceneGraph	= reg.group<SceneTag<sceneID>, Hierarchy, Transform>();
-template<int sceneID>
-auto viewHierarchy		= reg.view<SceneTag<sceneID>, Hierarchy>();
-template<int sceneID>
-auto viewTransformRoot	= reg.view<SceneTag<sceneID>, Transform>(exclude<Hierarchy>);
-
-template<int sceneID>
-class Scene
-{
-public:
-	/// <summary>
-	/// adds already existing entity to the scene and adds components to the entity. 
-	/// if entity already belong to scene just adds components.
-	/// </summary>
-	template<class ... components>
-	static void Add(entity ent, components ... comps)
-	{
-		if (!reg.all_of<SceneTag<sceneID>>(ent)) // if entity does not already belong to scene
-			reg.emplace<SceneTag<sceneID>>(ent); // mark it to belong to this scene
-
-		(reg.emplace<components>(ent, comps), ...);
-
-	}
-	
-	template<class ... components>
-	static entity Create(components...comps)
-	{
-		auto ent = reg.create();
-		(reg.emplace<components>(ent, comps), ...);
-	}
-
-	static void HierarchySystem()
-	{
-		// TODO: could try and identify updated hierarchy entities in an observer to be used by transform system
-		// PROS: could allow transform and other systems to update only those that changed
-		// CONS: much more complex
-		for (auto [entity, hierarchy] : viewHierarchy<sceneID>.each())
-		{
-			if (!reg.valid(hierarchy.parent)) // invalid orphaned children moved to root
-				reg.erase<Hierarchy>(entity);
-			else if (auto parent = reg.try_get<Hierarchy>(hierarchy.parent))
-				hierarchy.depth = 1 + parent->depth;
-			else
-				hierarchy.depth = 1;
-		}
-	}
-
-	static void TransformSystem()
-	{
-		// TODO: could create reactive system by updating local matrix in an observer
-		// PROS: faster, only updates components that change
-		// CONS: requires use to update with a patch or replace call, more complicated, requires more views/observers/...
-		
-
-		// update root transforms
-		for (auto [entity, transform] : viewTransformRoot<sceneID>.each()) // transform and no hierarchy
-		{
-			transform.localMatrix =
-				glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform.position.x, transform.position.y, transform.position.z, 1);// *
-				//glm::mat4(transform.scale.x, 0, 0, 0, 0, transform.scale.y, 0, 0, 0, 0, transform.scale.z, 0, 0, 0, 0, 1);// *
-				//(mat4)transform.rotation;
-			transform.worldMatrix = transform.localMatrix;
-		}
-
-		// update transform world matrix
-		for (auto [entity, hierarchy, transform] : groupSceneGraph<sceneID>.each()) // transform and hierarchy
-		{
-			transform.localMatrix =
-				glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform.position.x, transform.position.y, transform.position.z, 1);// *
-				//glm::mat4(transform.scale.x, 0, 0, 0, 0, transform.scale.y, 0, 0, 0, 0, transform.scale.z, 0, 0, 0, 0, 1);// *
-				//(mat4)transform.rotation;
-
-			if (reg.valid(hierarchy.parent))
-			{
-				if (auto parent = reg.try_get<Transform>(hierarchy.parent))
-				{
-					transform.worldMatrix = parent->worldMatrix * transform.localMatrix;
-					continue;
-				}
-			}
-			else
-			{
-				reg.erase<Hierarchy>(entity); // if parent is invalid it should be treated as hierarchy root 
-			}
-			transform.worldMatrix = transform.localMatrix;
-			
-		}
-	}
-};
-
-
-
-
-
+#include "Components/Scene.h"
 
 int main(int argc, char** argv)
 {
+	struct A { int test; };
+	struct B { int test; };
+	struct C { };
+
+	auto g = reg.group<A, B>();
+	auto o = observer{ reg, collector.update<A>().update<B>().where<A, B>() };
+
+	auto t0 = reg.create();
+	reg.emplace<A>(t0);
+	reg.emplace<B>(t0);
+	auto t1 = reg.create();
+	reg.emplace<A>(t1);
+	reg.emplace<B>(t1);
+	auto t2 = reg.create();
+	reg.emplace<A>(t2);
+	reg.emplace<B>(t2);
+	auto t3 = reg.create();
+	reg.emplace<A>(t3);
+	reg.emplace<B>(t3);
+
+	g.sort<A>([](const A& lhs, const A& rhs) { return rand() & 1 == 1; });
+
+	std::cout << "random entity order" << std::endl;
+	for (auto entity : g)
+		std::cout << (int)entity << std::endl;
+
+	o.clear();
+
+	reg.emplace<C>(t0);
+	reg.emplace<C>(t1);
+	reg.emplace<C>(t2);
+	reg.emplace<C>(t3);
+
+	std::cout << "observer order" << std::endl;
+	for (auto entity : o)
+		std::cout << (int)entity << std::endl;
+
+
+
 	auto e0 = reg.create();
 	auto e1 = reg.create();
 	auto e2 = reg.create();
@@ -133,21 +67,21 @@ int main(int argc, char** argv)
 	scn.Add(e1, Hierarchy(e0), Transform(vec3(2, 1, 1)));
 	scn.Add(e0, Transform(vec3(1, 1, 0)));	
 	
-	Scene<0>::HierarchySystem();
-	Scene<0>::TransformSystem();
+	scn.HierarchySystem();
+	scn.TransformSystem();
 	
 	AppWindow* wnd = new AppWindow(640, 480, argv[0], true);
 
-	// mesh data
+	// vertex data
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
 		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
 		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
 	};
-	unsigned int indices[] = { 0, 1, 2, 2, 1, 3 };
+	unsigned int indices[] = { 0, 1, 2, 2, 1, 3 }; // mesh indices
 
-	GLuint VAO; // container for these V and other stuff
+	GLuint VAO; // vertex array object - container for buffers and vertex data
 	GLuint VBO; // vertex buffer object - all unique vertices
 	GLuint IBO; // index buffer object - array of pointers to VBO indices to spell out primitives eg Triangles
 	// generate buffers
@@ -161,6 +95,7 @@ int main(int argc, char** argv)
 	// set buffer data
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	
 	// recognise vertex attributes eg position, UV, colour, bone weight and bone index
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);

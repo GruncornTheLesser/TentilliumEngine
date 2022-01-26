@@ -177,6 +177,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Components\Scene.h" />
     <ClInclude Include="Source\Components\HierarchyComponent.h" />
     <ClInclude Include="Source\Components\TransformComponent.h" />
     <ClInclude Include="Source\Rendering\Image.h" />

@@ -5,7 +5,6 @@ struct Hierarchy
 {
 public:
 	entity parent;
-	int version;
 	unsigned int depth;
 public:
 	Hierarchy() {} // creates a root hierarchy component
