@@ -8,7 +8,7 @@
 #include <iostream>
 #include <exception>
 #include <gtc/type_ptr.hpp>
-#include "ResourceManager.h"
+#include "Resource.h"
 
 static GLuint CompileShader(const GLenum type, std::string source)
 {
@@ -38,7 +38,7 @@ static GLuint CompileShader(const GLenum type, std::string source)
 	return shader;
 }
 
-const Shader* ResourceManager<Shader>::Load(const char* filepath)
+const Shader* Resource<Shader>::Load(const char* filepath)
 {
 	std::ifstream stream(filepath);
 	std::stringstream source;
@@ -92,122 +92,117 @@ const Shader* ResourceManager<Shader>::Load(const char* filepath)
 	// delete and detach shaders
 	//glDetachShader(program, gs);
 	//glDeleteShader(gs);
-
-	cache[filepath].m_program = program;
-	return &cache[filepath];
+	Resource<Shader>::cache->emplace(filepath, program);
+	return &(Resource<Shader>::cache->at(filepath));
 }
 
 Shader::~Shader()
 {
 	glDeleteProgram(m_program);
+	std::cout << "deleting shader " << m_program << std::endl;
 }
 
-void Shader::Bind() const
+void Shader::bind() const
 {
 	glUseProgram(m_program);
 }
 
-void Shader::UnBind() const
+void Shader::setUniform1i(const std::string& uniform_name, int v) const
 {
-	glUseProgram(0);
+	glProgramUniform1i(m_program, getUniformLocation(uniform_name), v);
 }
 
-void Shader::SetUniform1i(const std::string& uniform_name, int v) const
+void Shader::setUniform1f(const std::string& uniform_name, float v) const
 {
-	glProgramUniform1i(m_program, GetUniformLocation(uniform_name), v);
+	glProgramUniform1f(m_program, getUniformLocation(uniform_name), v);
 }
 
-void Shader::SetUniform1f(const std::string& uniform_name, float v) const
+void Shader::setUniform2i(const std::string& uniform_name, int v1, int v2) const
 {
-	glProgramUniform1f(m_program, GetUniformLocation(uniform_name), v);
+	glProgramUniform2i(m_program, getUniformLocation(uniform_name), v1, v2);
 }
 
-void Shader::SetUniform2i(const std::string& uniform_name, int v1, int v2) const
+void Shader::setUniform2i(const std::string& uniform_name, glm::i32vec2& value) const
 {
-	glProgramUniform2i(m_program, GetUniformLocation(uniform_name), v1, v2);
+	glProgramUniform2iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform2i(const std::string& uniform_name, glm::i32vec2& value) const
+void Shader::setUniform2f(const std::string& uniform_name, float v1, float v2) const
 {
-	glProgramUniform2iv(m_program, GetUniformLocation(uniform_name), 1, glm::value_ptr(value));
+	glProgramUniform2f(m_program, getUniformLocation(uniform_name), v1, v2);
 }
 
-void Shader::SetUniform2f(const std::string& uniform_name, float v1, float v2) const
+void Shader::setUniform2f(const std::string& uniform_name, glm::vec2& value) const
 {
-	glProgramUniform2f(m_program, GetUniformLocation(uniform_name), v1, v2);
+	glProgramUniform2fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform2f(const std::string& uniform_name, glm::vec2& value) const
+void Shader::setUniform3i(const std::string& uniform_name, int v1, int v2, int v3) const
 {
-	glProgramUniform2fv(m_program, GetUniformLocation(uniform_name), 1, glm::value_ptr(value));
+	glProgramUniform3i(m_program, getUniformLocation(uniform_name), v1, v2, v3);
 }
 
-void Shader::SetUniform3i(const std::string& uniform_name, int v1, int v2, int v3) const
+void Shader::setUniform3i(const std::string& uniform_name, glm::i32vec3& value) const
 {
-	glProgramUniform3i(m_program, GetUniformLocation(uniform_name), v1, v2, v3);
+	glProgramUniform3iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform3i(const std::string& uniform_name, glm::i32vec3& value) const
+void Shader::setUniform3f(const std::string& uniform_name, float v1, float v2, float v3) const
 {
-	glProgramUniform3iv(m_program, GetUniformLocation(uniform_name), 1, glm::value_ptr(value));
+	glProgramUniform3f(m_program, getUniformLocation(uniform_name), v1, v2, v3);
 }
 
-void Shader::SetUniform3f(const std::string& uniform_name, float v1, float v2, float v3) const
+void Shader::setUniform3f(const std::string& uniform_name, glm::vec3& value) const
 {
-	glProgramUniform3f(m_program, GetUniformLocation(uniform_name), v1, v2, v3);
+	glProgramUniform3fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform3f(const std::string& uniform_name, glm::vec3& value) const
+void Shader::setUniform4i(const std::string& uniform_name, int v1, int v2, int v3, int v4) const
 {
-	glProgramUniform3fv(m_program, GetUniformLocation(uniform_name), 1, glm::value_ptr(value));
+	glProgramUniform4i(m_program, getUniformLocation(uniform_name), v1, v2, v3, v4);
 }
 
-void Shader::SetUniform4i(const std::string& uniform_name, int v1, int v2, int v3, int v4) const
+void Shader::setUniform4i(const std::string& uniform_name, glm::i32vec4& value) const
 {
-	glProgramUniform4i(m_program, GetUniformLocation(uniform_name), v1, v2, v3, v4);
+	glProgramUniform4iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform4i(const std::string& uniform_name, glm::i32vec4& value) const
+void Shader::setUniform4f(const std::string& uniform_name, float v1, float v2, float v3, float v4) const
 {
-	glProgramUniform4iv(m_program, GetUniformLocation(uniform_name), 1, glm::value_ptr(value));
+	glProgramUniform4f(m_program, getUniformLocation(uniform_name), v1, v2, v3, v4);
 }
 
-void Shader::SetUniform4f(const std::string& uniform_name, float v1, float v2, float v3, float v4) const
+void Shader::setUniform4f(const std::string& uniform_name, glm::vec4& value) const
 {
-	glProgramUniform4f(m_program, GetUniformLocation(uniform_name), v1, v2, v3, v4);
+	glProgramUniform4fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform4f(const std::string& uniform_name, glm::vec4& value) const
+void Shader::setUniformMatrix3f(const std::string& uniform_name, float value[9]) const
 {
-	glProgramUniform4fv(m_program, GetUniformLocation(uniform_name), 1, glm::value_ptr(value));
+	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false,&value[0]);
 }
 
-void Shader::SetUniformMatrix3f(const std::string& uniform_name, float value[9]) const
+void Shader::setUniformMatrix3f(const std::string& uniform_name, glm::mat3& value) const
 {
-	glProgramUniformMatrix3fv(m_program, GetUniformLocation(uniform_name), 1, false,&value[0]);
+	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false,glm::value_ptr(value));
 }
 
-void Shader::SetUniformMatrix3f(const std::string& uniform_name, glm::mat3& value) const
+void Shader::setUniformMatrix4f(const std::string& uniform_name, float value[16]) const
 {
-	glProgramUniformMatrix3fv(m_program, GetUniformLocation(uniform_name), 1, false,glm::value_ptr(value));
+	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, &value[0]);
 }
 
-void Shader::SetUniformMatrix4f(const std::string& uniform_name, float value[16]) const
+void Shader::setUniformMatrix4f(const std::string& uniform_name, glm::mat4& value) const
 {
-	glProgramUniformMatrix4fv(m_program, GetUniformLocation(uniform_name), 1, false, &value[0]);
+	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
 }
 
-void Shader::SetUniformMatrix4f(const std::string& uniform_name, glm::mat4& value) const
+void Shader::setUniformBlock(const std::string& block_name, unsigned int Binding) const
 {
-	glProgramUniformMatrix4fv(m_program, GetUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
+	glUniformBlockBinding(m_program, getUniformBlockLocation(block_name), Binding);
 }
 
-void Shader::SetUniformBlock(const std::string& block_name, unsigned int Binding) const
-{
-	glUniformBlockBinding(m_program, GetUniformBlockLocation(block_name), Binding);
-}
-
-unsigned int Shader::GetUniformLocation(const std::string& uniform_name) const
+unsigned int Shader::getUniformLocation(const std::string& uniform_name) const
 {
 	GLint location;
 	if (uniform_cache.find(uniform_name) != uniform_cache.end())
@@ -221,7 +216,7 @@ unsigned int Shader::GetUniformLocation(const std::string& uniform_name) const
 	return location;
 }
 
-unsigned int Shader::GetUniformBlockLocation(const std::string& block_name) const
+unsigned int Shader::getUniformBlockLocation(const std::string& block_name) const
 {
 	GLint location;
 	if (block_cache.find(block_name) != block_cache.end())

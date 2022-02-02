@@ -32,6 +32,9 @@
     <ClCompile Include="Source\Rendering\Shader.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Rendering\Image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\Default.shader">
@@ -52,12 +55,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Components.h" />
-    <ClInclude Include="Source\Rendering\ResourceManager.h" />
+    <ClInclude Include="Source\Rendering\Resource.h" />
     <ClInclude Include="Source\Rendering\Image.h" />
     <ClInclude Include="Source\Rendering\Material.h" />
-    <ClInclude Include="Source\Components\HierarchyComponent.h" />
-    <ClInclude Include="Source\Components\TransformComponent.h" />
+    <ClInclude Include="Source\Components\Hierarchy.h" />
+    <ClInclude Include="Source\Components\Transform.h" />
     <ClInclude Include="Source\Components\Scene.h" />
+    <ClInclude Include="Source\Components\Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

@@ -1,245 +1,202 @@
 #pragma once
 #include "Components.h"
-template<int sceneID = 0>
-struct SceneTag {};
+#include <list>
 
-template<int sceneID>
-auto sceneView				= reg.view<SceneTag<sceneID>>();
-template<int sceneID>
-auto groupSceneGraph		= reg.group<SceneTag<sceneID>, Hierarchy, Transform>();
-template<int sceneID>
-auto viewHierarchy			= reg.view<SceneTag<sceneID>, Hierarchy>();
-template<int sceneID>
-auto viewTransformRoot		= reg.view<SceneTag<sceneID>, Transform>(exclude<Hierarchy>);
+auto groupIncHierTran		= reg.group<Hierarchy, Transform>();
+auto viewIncHier			= reg.view<Hierarchy>();
+auto viewIncTranExcHier		= reg.view<Transform>(exclude<Hierarchy>);
+auto viewIncHierExcTran		= reg.view<Hierarchy>(exclude<Transform>);
 
+// I dont like the scene tag. like at all.
+// Tags wont compile unless they're constants -> maybe runtime views will help?
+// I need a way to isolate entities that belong to a scene.
+// 
 
-
-
-/*
-// reactive transform hierarchy system
-
-could use version ids
-	when you change a transform value update the version
-	iterate over transforms looking for where update happened in current version
-
-maybe observer will preserve grouping order??? that would be rly fuckin convenient -> it doesnt
-	ENTT docs - "In general, observers don't stay true to the order of any set of components"
-
-could add tag when value has changed and iterate over a view
+// I also need a naming convention
 
 
 
+// VALIDATE HIERARCHY SYSTEM
+// reorder hierarchy such that parents are iterated over before children
+// tree builder algorithm thing:
 
-// user patches transform to change transform values
-// user adds or removes hierarchy component to change hierarchy values
+// allocate array size as 2x number of entity
+// for each entity include hierarchy:
+//		if entity in roots array:
+//			remove entity from roots
+//			if not entity parent in root:
+//				add entity parent to root
+//			add to front of array
+//		else
+//			add to end of array
+// copy array from allocated section
+
+// BUILD RENDER SYSTEM
+// i have no idea how to do this
+// i thought maybe i could have a bunch of group observers for Transform, skinning etc
+// i can obviously do just a flat 'if entity has component' but thats not very ECS
+// 
+// what does it need to do:
+// when any relevant component is added or removed from an entity with the render component
+// adjust the shader program to take only the uniform buffer inputs available to give
+// 
+// alternatively i could make it so the uniform buffer slots are always same for each shader program.
+// then when a value isnt used its just ignored???
 
 
-
-
-
-// reactive system with versions ids
-for each Hierarchy:
-	temp = Hierarchy.depth
-
-	if not Hierarchy.parent exists:
-		Hierarchy.depth = 0
-	else if Hierarchy.parent has Hierarchy:
-		Hierarchy.depth = Hierarchy.parent->Hierarchy.depth + 1
-	else:
-		Hierarchy.depth = 1
-
-	if not temp == Hierarchy.depth:
-		Hierarchy.version = currentVersion
-
-for each entity include Transform, exclude Hierarchy:
-	if Transform.version == currentVersion:
-		Transform.local = { recaclulate Transform matrix }
-		Transform.world = Transform.local
-
-for each entity include Transform, include Hierarchy:
-	if Transform.version == currentVersion or Hierarchy.version == currentVersion:
-		Transform.local = { recaclulate Transform matrix }
-
-		if Hierarchy.parent has Transform:
-			Transform.world = Transform.world * Transform.local
-		else:
-			Transform.world = Transform.local
-
-for each entity include Hierarchy:
-	if Hierarchy.depth == 0:
-		remove Hierarchy component
-
-	
+auto viewRender = reg.view<Render>();
 
 
 
 
 
-
-
-
-
-
-
-
-// non reactive transform hierarchy system
-
-for each entity with Hierarchy:
-	if not Hierarchy.parent exists:
-		remove hierarchy from entity;
-
-	if Hierarchy.parent has Hierarchy:
-		Hierarchy.depth = Hierarchy.parent->Hierarchy.depth + 1
-	else:
-		Hierarchy.depth = 1
-
-for each entity with Transform and not Hierarchy:
-	Transform.local = { calculate local transform }
-	Transform.world = Transform.local
-
-for each entity with Transform and Hierarchy:
-	Transform.local = { calculate local transform }
-
-	if Hierarchy.parent has Transform:
-		Transform.world = Transform.world * Transform.local
-	else:
-		Transform.world = Transform.local
-
-*/
-
-template<int sceneID>
-auto viewRender = reg.view<SceneTag<sceneID>, Render>();
-
-
-template<int sceneID>
 class Scene
 {
+private:
+	static inline Scene* instance;
+
+	Scene() {}
+
 public:
+	static Scene* GetInstance()
+	{
+		if (!instance)
+			instance = new Scene();
+		return instance;
+	}
+
+	void Load(const char* filepath)
+	{
+		Clear();
+	}
+	void Clear()
+	{
+		reg.clear();
+	}
+
 	/// <summary>
 	/// adds already existing entity to the scene and adds components to the entity. 
 	/// if component already belongs to entity, original is preserved.
 	/// </summary>
 	template<class ... components>
-	static void Add(entity ent, components ... comps)
-	{
-		reg.emplace_or_replace<SceneTag<sceneID>>(ent);				// mark it to belong to this scene
+	void Add(entity ent, components ... comps)
+	{	
 		((void)reg.get_or_emplace<components>(ent, comps), ...);	// add each component with copy constructor
 	}
 
 	template<class ... components>
-	static entity Create(components...comps)
+	entity Create(components...comps)
 	{
 		auto ent = reg.create();
 		(reg.emplace<components>(ent, comps), ...);
 		return ent;
 	}
 
-	static void HierarchySystem()
+	/// <summary>
+	/// O(n^2)
+	/// </summary>
+	void Validate()
 	{
-		// TODO: could try and identify updated hierarchy entities in an observer to be used by transform system
-		// PROS: could allow transform and other systems to update only those that changed
-		// CONS: much more complex
-		for (auto [entity, hierarchy] : viewHierarchy<sceneID>.each())
+		std::list<entity> arr;
+		
+		for (auto [ent, hierarchy] : viewIncHier.each())
 		{
-			if (!reg.valid(hierarchy.parent)) // invalid orphaned children moved to root
+
+			bool Valid = false;
+			for (entity e : arr)
 			{
-				reg.erase<Hierarchy>(entity);
-				continue;
+				if (e == hierarchy.parent)
+				{
+					Valid = true;
+					break;
+				}
 			}
 				
+			if (Valid)
+				arr.push_front(ent);
+			else
+				arr.push_back(ent);
+		}
+
+		int i = 0;
+		for (entity e : arr)
+		{
+			i++;
+			auto &h = reg.get<Hierarchy>(e);
+			h.depth = i;
+		}
+
+		//reg.sort<Hierarchy>([](Hierarchy& lhs, Hierarchy& rhs) {lhs.depth > rhs.depth; });
+	}
+
+	void tick()
+	{
+
+		// recalculate hierarchy depth and check for orphaned children
+		for (auto [entity, hierarchy] : viewIncHier.each())
+		{
+			auto temp = hierarchy.depth;
+
+			if (!reg.valid(hierarchy.parent)) // invalid orphaned children moved to root
+				hierarchy.depth = 0;		
 			else if (auto parent = reg.try_get<Hierarchy>(hierarchy.parent))
 				hierarchy.depth = 1 + parent->depth;
 			else
 				hierarchy.depth = 1;
+
+			if (temp != hierarchy.depth)
+				hierarchy.version = Hierarchy::currentVersion;
 		}
-	}
-
-	static void ValidateHierarchySystem()
-	{
-		// reorder hierarchy such that parents are iterated over before children
-		// tree builder algorithm thing:
-
-		// allocate array size as 2x number of entity
-		// for each entity include hierarchy:
-		//		if entity in roots array:
-		//			remove entity from roots
-		//			if not entity parent in root:
-		//				add entity parent to root
-		//			add to front of array
-		//		else
-		//			add to end of array
-		// copy array from allocated section
-
-	}
-
-	static void TransformSystem()
-	{
-		// TODO: could create reactive system by updating local matrix in an observer
-		// PROS: faster, only updates components that change
-		// CONS: requires use to update with a patch or replace call, more complicated, requires more views/observers/...
-
 
 		// update root transforms
-		for (auto [entity, transform] : viewTransformRoot<sceneID>.each()) // transform and no hierarchy
+		for (auto [entity, transform] : viewIncTranExcHier.each()) // transform and no hierarchy
 		{
-			transform.localMatrix =
-				glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform.position.x, transform.position.y, transform.position.z, 1);// *
-				//glm::mat4(transform.scale.x, 0, 0, 0, 0, transform.scale.y, 0, 0, 0, 0, transform.scale.z, 0, 0, 0, 0, 1);// *
-				//(mat4)transform.rotation;
-			transform.worldMatrix = transform.localMatrix;
+			if (transform.version == Transform::currentVersion)
+			{
+				transform.localMatrix =
+					glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform.position.x, transform.position.y, transform.position.z, 1);// *
+					//glm::mat4(transform.scale.x, 0, 0, 0, 0, transform.scale.y, 0, 0, 0, 0, transform.scale.z, 0, 0, 0, 0, 1);// *
+					//(mat4)transform.rotation;
+				transform.worldMatrix = transform.localMatrix;
+			}
+			
 		}
 
 		// update transform world matrix
-		for (auto [entity, hierarchy, transform] : groupSceneGraph<sceneID>.each()) // transform and hierarchy
+		for (auto [entity, hierarchy, transform] : groupIncHierTran.each()) // transform and hierarchy
 		{
-			transform.localMatrix =
-				glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform.position.x, transform.position.y, transform.position.z, 1);// *
-				//glm::mat4(transform.scale.x, 0, 0, 0, 0, transform.scale.y, 0, 0, 0, 0, transform.scale.z, 0, 0, 0, 0, 1);// *
-				//(mat4)transform.rotation;
+			if (transform.version == Transform::currentVersion || hierarchy.version == Hierarchy::currentVersion)
+			{
+				transform.localMatrix =
+					glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, transform.position.x, transform.position.y, transform.position.z, 1);// *
+					//glm::mat4(transform.scale.x, 0, 0, 0, 0, transform.scale.y, 0, 0, 0, 0, transform.scale.z, 0, 0, 0, 0, 1);// *
+					//(mat4)transform.rotation;
 
-			if (auto parent = reg.try_get<Transform>(hierarchy.parent)) // if parent has transform 
-				transform.worldMatrix = parent->worldMatrix * transform.localMatrix; // use parent world transform as root
-			else
-				transform.worldMatrix = transform.localMatrix;			// use local transform as root
+				if (hierarchy.depth == 0)
+				{
+					transform.worldMatrix = transform.localMatrix;
+					reg.erase<Hierarchy>(entity);
+				}
+				else if (auto parent = reg.try_get<Transform>(hierarchy.parent))			// if parent has transform 
+					transform.worldMatrix = parent->worldMatrix * transform.localMatrix;	// use parent world transform as root
+				else
+					transform.worldMatrix = transform.localMatrix;							// use local transform as root
+			}
 		}
+
+		for (auto [entity, hierarchy] : viewIncHierExcTran.each())
+			if (hierarchy.depth == 0)
+				reg.erase<Hierarchy>(entity);
+
+		Hierarchy::currentVersion++;
+		Transform::currentVersion++;
+
+		// for testing
+		for (auto [entity, hierarchy, transform] : groupIncHierTran.each())
+			std::cout << (int)entity << ": parent = " << (int)hierarchy.parent << "[Has Transform]" << std::endl;
+
+		for (auto [entity, hierarchy] : viewIncHierExcTran.each())
+			std::cout << (int)entity << ": parent = " << (int)hierarchy.parent << "[No Transform]" << std::endl;
+
 	}
-
-	static void BuildRenderSystem()
-	{
-		// reactive system
-		// with a tag?
-		// with a group observer?
-		// with a version id?
-	}
-
-	static void RenderSystem()
-	{
-		// Model			// contained in vbo
-		// mesh				// contained in ibo
-		// material			// contained in ubo
-		//									vao???
-		// Transform		// contained in ubo
-		// camera			// contained in ubo
-		// light			// contained in ubo
-		// atmosphere		// contained in ubo
-		// skeleton data	// contained in ubo
-		
-		// normal forward rendering
-		// camera.bind()
-		// for each entity include Render:
-		//		if includes Transform:
-		//			Transform.bind()
-		//		if includes Skinning:
-		//			Skinning.bind()
-		//		...
-		// 
-		// 
-		//		for mesh in Render:
-		//			material.bind()
-		//			mesh.render()
-		//			
-	}
-
-	
-
 };
