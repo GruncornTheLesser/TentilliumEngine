@@ -125,6 +125,8 @@ int main(int argc, char** argv)
 	mat = scale(mat, sca);
 	mat *= mat4(rot);
 	
+
+
 	std::cout << "pos : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
 	std::cout << "scl : " << sca.x << ", " << sca.y << ", " << sca.z << std::endl;
 	std::cout << "rot : " << rot.x << ", " << rot.y << ", " << rot.z << ", " << rot.w << std::endl;

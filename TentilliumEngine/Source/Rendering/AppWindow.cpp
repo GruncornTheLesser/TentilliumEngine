@@ -27,9 +27,7 @@ static void movecursor_callback(GLFWwindow* wnd, double posX, double posY)
 
 static void enter_callback(GLFWwindow* wnd, int entered)
 {
-	currentWindow->onEnter(entered);
-
-
+		currentWindow->onEnter(entered);
 }
 
 static void resize_callback(GLFWwindow* wnd, int width, int height)
@@ -63,7 +61,7 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
 		if (glewInit() != GLEW_OK)
 			throw std::runtime_error("[Engine Error] : GLEW failed to initialize");
 
-		glfwMakeContextCurrent(NULL);
+		glfwMakeContextCurrent(NULL); // to make it the same as when window
 	}
 	else
 	{
@@ -75,8 +73,8 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
 
 	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_window), key_callback);					// key event
 	glfwSetMouseButtonCallback(static_cast<GLFWwindow*>(m_window), mouse_callback);			// mouse button event
-	glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);
-	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);
+	glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);		// cursor move event
+	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);			// cursor enters window event
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);	// resize event
 
 	glfwSwapInterval(m_vsync);
@@ -113,12 +111,6 @@ void AppWindow::onKey(int key, int action)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(static_cast<GLFWwindow*>(m_window), GLFW_TRUE);
-
-	if (key == GLFW_MOUSE_BUTTON_LEFT)
-	{
-		std::cout << "new context" << std::endl;
-		glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
-	}
 }
 
 void AppWindow::onMouse(int button, int action)

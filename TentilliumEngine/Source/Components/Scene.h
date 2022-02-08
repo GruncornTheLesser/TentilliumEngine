@@ -10,7 +10,6 @@ auto viewIncHierExcTran		= reg.view<Hierarchy>(exclude<Transform>);
 // I dont like the scene tag. like at all.
 // Tags wont compile unless they're constants -> maybe runtime views will help?
 // I need a way to isolate entities that belong to a scene.
-// 
 
 // I also need a naming convention
 
@@ -131,11 +130,14 @@ public:
 
 	void tick()
 	{
+		Hierarchy::currentVersion++;
 
 		// recalculate hierarchy depth and check for orphaned children
 		for (auto [entity, hierarchy] : viewIncHier.each())
 		{
 			auto temp = hierarchy.depth;
+
+
 
 			if (!reg.valid(hierarchy.parent)) // invalid orphaned children moved to root
 				hierarchy.depth = 0;		
@@ -144,7 +146,7 @@ public:
 			else
 				hierarchy.depth = 1;
 
-			if (temp != hierarchy.depth)
+			if (temp == hierarchy.depth)
 				hierarchy.version = Hierarchy::currentVersion;
 		}
 
@@ -188,7 +190,7 @@ public:
 			if (hierarchy.depth == 0)
 				reg.erase<Hierarchy>(entity);
 
-		Hierarchy::currentVersion++;
+		
 		Transform::currentVersion++;
 
 		// for testing

@@ -41,14 +41,14 @@ const Image* Resource<Image>::Load(const char* filepath)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		stbi_image_free(data);
 	}
 	else
 	{
-		std::cerr << "Failed to load texture" << std::endl;
+		std::cerr << "[Loading Error] - Failed to load texture from: '" << filepath << "'" << std::endl;
 		throw std::exception();
 	}
-	stbi_image_free(data);
-
+	
 	Resource<Image>::cache->emplace(filepath, handle);
 	return &Resource<Image>::cache->at(filepath);
 }

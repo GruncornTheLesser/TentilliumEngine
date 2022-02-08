@@ -6,7 +6,8 @@
 class AppWindow
 {
 private:
-	ResourceManager<Image, Shader> m_resManager; // all resources that get managed in this context
+	// all resources that get managed in this context
+	ResourceManager<Image, Shader> m_resManager;
 
 	void* m_window;
 	int m_width, m_height;
@@ -30,7 +31,7 @@ public:
 private:
 	void resize(AppWindow* wnd, int width, int height);
 	void pressKey(AppWindow* wnd, int key, int scancode, int action, int mods);
-	void pressMouse(AppWindow* wnd, int idk0, int idk1, int idk2);
+	void pressMouse(AppWindow* wnd, int idk0, int idk1, int idk2); // gotta work out what these parameters are
 	void moveCursor(AppWindow* wnd, int posX, int posY);
 	void enterWindow(AppWindow* wnd, int enter);
 };

@@ -72,10 +72,13 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\images\Image.png">
+    <Image Include="Resources\images\Image1.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\images\Image.jpg">
+    <Image Include="Resources\images\Image2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\images\Image3.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
