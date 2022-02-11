@@ -1,16 +1,20 @@
 #pragma once
 #include <entt/entt.hpp>
-using namespace entt;
+
+
 struct Hierarchy
 {
-public:
-	entity parent;
-	unsigned int depth;
-	unsigned int version;
+friend class Scene;
 
-	static inline unsigned int currentVersion = 0;
+private:
+	entt::entity parent;
 	
 public:
-	Hierarchy() : version(currentVersion) { } // creates a root hierarchy component
-	Hierarchy(entity p) : parent(p), version(currentVersion) { }
+	Hierarchy() { }
+	Hierarchy(entt::entity p) : parent(p) { }
+
+	entt::entity getParent()
+	{
+		return parent;
+	}
 };

@@ -163,10 +163,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Components\Scene.cpp" />
     <ClCompile Include="Source\Rendering\AppWindow.cpp" />
     <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\Rendering\Image.cpp" />
-    <ClCompile Include="Source\Rendering\Shader.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\Image.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
+    <ClCompile Include="Source\Rendering\UniformBuffer.cpp" />
+    <ClCompile Include="Source\Rendering\UniformBuffer.Types.cpp" />
+    <ClCompile Include="Source\Rendering\Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\Default.shader" />
@@ -178,17 +182,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Components\Camera.h" />
     <ClInclude Include="Source\Components\Scene.h" />
+    <ClInclude Include="Source\Components\Camera.h" />
     <ClInclude Include="Source\Components\Hierarchy.h" />
     <ClInclude Include="Source\Components\Transform.h" />
-    <ClInclude Include="Source\Rendering\Image.h" />
-    <ClInclude Include="Source\Rendering\Material.h" />
-    <ClInclude Include="Source\Rendering\Resource.h" />
+    <ClInclude Include="Source\Rendering\Resources\Image.h" />
+    <ClInclude Include="Source\Rendering\Resources\Material.h" />
+    <ClInclude Include="Source\Rendering\Resources\Resource.h" />
     <ClInclude Include="Source\Rendering\AppWindow.h" />
     <ClInclude Include="Source\Components\Components.h" />
-    <ClInclude Include="Source\Rendering\Shader.h" />
+    <ClInclude Include="Source\Rendering\Resources\Shader.h" />
+    <ClInclude Include="Source\Rendering\UniformBuffer.h" />
     <ClInclude Include="Source\Tentil.h" />
+    <ClInclude Include="Source\Rendering\Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\cube.obj">

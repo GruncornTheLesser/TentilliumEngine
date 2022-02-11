@@ -12,28 +12,55 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{a6d8ffda-7a91-4f2e-beb5-8db1ddcbaa10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Resources">
-      <UniqueIdentifier>{cd7a311c-370c-4572-b66d-94c6e3e9c917}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{ea5e3121-09c9-4b58-a896-7c3ea4e92ce7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\meshes">
       <UniqueIdentifier>{2c9ace03-ff62-4b9c-ac17-f6cb4853800c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{c6e87dfd-e88c-4251-826d-53911e972d83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering\Resources">
+      <UniqueIdentifier>{97077f1d-7a2e-4fbf-8928-2c88488e6f6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Components">
+      <UniqueIdentifier>{a0c3fda5-a803-43c6-8179-352b3132cce2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Components">
+      <UniqueIdentifier>{dc095a29-1a58-4da3-876d-e0d79d8450a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{71a2a272-d879-4ec6-97d0-3068fe2c47c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering\Resources">
+      <UniqueIdentifier>{cd7a311c-370c-4572-b66d-94c6e3e9c917}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Shader.cpp">
+      <Filter>Source Files\Rendering\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Image.cpp">
+      <Filter>Source Files\Rendering\Resources</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Rendering\AppWindow.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Shader.cpp">
-      <Filter>Source Files\Resources</Filter>
+    <ClCompile Include="Source\Rendering\Viewport.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Image.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\Components\Scene.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\UniformBuffer.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\UniformBuffer.Types.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,23 +72,45 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Rendering\AppWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Rendering\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Tentil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Components.h" />
-    <ClInclude Include="Source\Rendering\Resource.h" />
-    <ClInclude Include="Source\Rendering\Image.h" />
-    <ClInclude Include="Source\Rendering\Material.h" />
-    <ClInclude Include="Source\Components\Hierarchy.h" />
-    <ClInclude Include="Source\Components\Transform.h" />
-    <ClInclude Include="Source\Components\Scene.h" />
-    <ClInclude Include="Source\Components\Camera.h" />
+    <ClInclude Include="Source\Rendering\Resources\Image.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\Material.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\Resource.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\Shader.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Components\Hierarchy.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Components\Transform.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Components\Components.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\AppWindow.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Components\Camera.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\UniformBuffer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Viewport.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Components\Scene.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

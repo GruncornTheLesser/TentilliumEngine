@@ -1,14 +1,30 @@
 #include "AppWindow.h"
-#include "Resource.h"
+#include "Resources/Resource.h"
 #include <iostream>
 #include <thread>
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 
+class GLEWContext;
+
+struct aWindow
+{
+	GLFWwindow* m_window;
+	unsigned int m_width;
+	unsigned int m_height;
+	unsigned int m_id;
+};
 
 
-static bool GLInitialized = false;
-static AppWindow* currentWindow;
+
+bool GLInitialized = false;
+AppWindow* currentWindow;
+std::list<AppWindow*> windows;
+
+static void error_callback(int code, const char* text)
+{
+	std::cout << "error code [" << code << "] : " << text << std::endl;
+}
 
 static void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
 {
@@ -34,6 +50,10 @@ static void resize_callback(GLFWwindow* wnd, int width, int height)
 {
 	std::cout << "resizing window : " << width << ", " << height << std::endl;
 	glViewport(0, 0, width, height);
+	
+	for (int i = -16; i < 16; i++)
+		std::cout << ((float*)wnd)[i] << ", ";
+	std::cout << std::endl;
 }
 
 AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
@@ -41,10 +61,9 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
 {
 	if (!GLInitialized)
 	{
-		if (!glfwInit())
-			throw std::runtime_error("[Engine Error] - GLFW failed to initialize");
+		glfwSetErrorCallback(error_callback);
 
-
+		glfwInit();
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -56,7 +75,7 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
 
 		// make window current context
 		glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
-
+		
 		// requires a window to have been created
 		if (glewInit() != GLEW_OK)
 			throw std::runtime_error("[Engine Error] : GLEW failed to initialize");
@@ -88,6 +107,7 @@ AppWindow::~AppWindow()
 void AppWindow::makeCurrent()
 {
 	m_resManager.makeCurrent();
+
 	glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
 	currentWindow = this;
 }

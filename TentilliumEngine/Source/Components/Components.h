@@ -1,10 +1,8 @@
 #pragma once
+
 #include "Transform.h"
 #include "Hierarchy.h"
 
-#include <entt/entt.hpp>
-using namespace entt;
-registry reg;
 
 struct Render {
 private:

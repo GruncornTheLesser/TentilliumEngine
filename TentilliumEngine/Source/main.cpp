@@ -1,11 +1,16 @@
-#include "Tentil.h"
-#include "Components/Scene.h"
-#include <iostream>
-#include <queue>
-#include <list>
+#define GLEW_STATIC
 #include <glm.hpp>	// GL maths
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
+#include <iostream>
+#include <list>
+
+#include "Rendering/AppWindow.h"
+#include "Rendering/UniformBuffer.h"
+
+//#include "Components/Scene.h"
+
+
 
 class TestWindow : public AppWindow
 {
@@ -81,88 +86,51 @@ public:
 		refresh();
 	}
 };
-/*
-	auto e0 = reg.create();
-	auto e1 = reg.create();
-	auto e2 = reg.create();
-	auto e3 = reg.create();
-	auto e4 = reg.create();
-	auto e5 = reg.create();
-	auto e6 = reg.create();
-	auto e7 = reg.create();
-
-	// components must be initiated such that the components parent is before the child
-	// however because the entt storage iterates backwards it means that the component
-	// order is reversed. bottom line:
-	// components parents must be sorted after their children or the system will break
-	auto scn = Scene::GetInstance();
-	scn->Add(e7, Hierarchy(e4), Transform(vec3(8, 1, 2)));
-	scn->Add(e6, Hierarchy(e4), Transform(vec3(7, 1, 2)));
-	scn->Add(e5, Hierarchy(e4), Transform(vec3(6, 1, 2)));
-	scn->Add(e4, Hierarchy(e1), Transform(vec3(5, 1, 2)));
-	scn->Add(e3, Hierarchy(e0), Transform(vec3(4, 1, 1)));
-	scn->Add(e2, Hierarchy(e0), Transform(vec3(3, 1, 1)));
-	scn->Add(e1, Hierarchy(e0), Transform(vec3(2, 1, 1)));
-	scn->Add(e0, Transform(vec3(1, 1, 0)));
-
-	scn->tick();
-
-*/
 
 int main(int argc, char** argv)
 {
+	/*
+	Scene scn;
 
-	glm::mat4 mat = mat4(1.0);
+	auto e0 = scn.CreateEntity();
+	auto e1 = scn.CreateEntity();
+	auto e2 = scn.CreateEntity();
+	auto e3 = scn.CreateEntity();
+	auto e4 = scn.CreateEntity();
+	auto e5 = scn.CreateEntity();
+	auto e6 = scn.CreateEntity();
+	auto e7 = scn.CreateEntity();
 
-	vec3 pos = vec3(2, 12, 4);
-	vec3 r = vec3(radians(100.0f), radians(20.0f), radians(120.0f));
-	quat rot = quat(r);
-	vec3 sca = vec3(2, 1, 9);
-	
-	
+	scn.AddComponents(e7, Hierarchy(e4), Transform(vec3(19, 1, 7)));
+	scn.AddComponents(e6, Hierarchy(e4), Transform(vec3(17, 1, 6)));
+	scn.AddComponents(e5, Hierarchy(e4), Transform(vec3(13, 1, 5)));
+	scn.AddComponents(e4, Hierarchy(e1), Transform(vec3(11, 1, 4)));
+	scn.AddComponents(e3, Hierarchy(e0), Transform(vec3(7,  1, 3)));
+	scn.AddComponents(e2, Hierarchy(e0), Transform(vec3(5,  1, 2)));
+	scn.AddComponents(e1, Hierarchy(e0), Transform(vec3(3,  1, 1)));
+	scn.AddComponents(e0,				 Transform(vec3(2,  1, 0)));
 
-	mat = translate(mat4(1.0f), pos);
-	mat = scale(mat, sca);
-	mat *= mat4(rot);
-	
-	std::cout << "pos : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
-	std::cout << "scl : " << sca.x << ", " << sca.y << ", " << sca.z << std::endl;
-	std::cout << "rot : " << rot.x << ", " << rot.y << ", " << rot.z << ", " << rot.w << std::endl;
-	std::cout << "r   : " << degrees(r.x) << ", " << degrees(r.y) << ", " << degrees(r.z) << std::endl;
-	
-	pos = vec3();
-	r = vec3();
-	rot = quat();
-	sca = vec3();
-
-	std::cout << std::endl;
-
-	Transform::ExtractRotation(mat, pos, sca, rot);
-	r = eulerAngles(rot);
-
-	std::cout << "pos : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
-	std::cout << "scl : " << sca.x << ", " << sca.y << ", " << sca.z << std::endl;
-	std::cout << "rot : " << rot.x << ", " << rot.y << ", " << rot.z << ", " << rot.w << std::endl;
-	std::cout << "r   : " << degrees(r.x) << ", " << degrees(r.y) << ", " << degrees(r.z) << std::endl;
-
-	std::cout << std::endl;
-	
-
-	// vertex data
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-	};
-	unsigned int indices[] = { 0, 1, 2, 2, 1, 3 }; // mesh indices
-
+	//scn.TagUpdate();
+	//scn.Calculate();
+	*/
 
 	std::list<TestWindow*> windows;
-	windows.push_back(new TestWindow("Resources/images/Image1.png", "title 1"));
-	windows.push_back(new TestWindow("Resources/images/Image2.png", "title 2"));//new AppWindow(640, 480, "2", true);//
-	windows.push_back(new TestWindow("Resources/images/Image3.png", "title 3"));
+	windows.push_back(new TestWindow("Resources/images/Image3.png", "title 1"));
+	windows.front()->makeCurrent();
+	
+	//windows.push_back(new TestWindow("Resources/images/Image2.png", "title 2"));//new Context(640, 480, "2", true);//
+	//windows.push_back(new TestWindow("Resources/images/Image3.png", "title 3"));
 
+	auto mat = Material(vec4(1, 1, 0, 1), vec4(2, 0, 2, 2), vec3(1, 2 ,3));
+	mat.setBufferData();
+
+	float* arr = (float*)mat.getBufferData();
+	// iterates over buffer data
+	for (int i = 0; i < mat.size() / 4; i++)
+		std::cout << arr[i] << ", ";
+	std::cout << std::endl;
+
+	
 	while (windows.size() > 0)
 	{
 		windows.remove_if([](TestWindow* wnd) 
@@ -177,5 +145,5 @@ int main(int argc, char** argv)
 		});
 	}
 
-	glfwTerminate(); // technically unnecessary
+	glfwTerminate();
 }
