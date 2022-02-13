@@ -5,18 +5,6 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 
-class GLEWContext;
-
-struct aWindow
-{
-	GLFWwindow* m_window;
-	unsigned int m_width;
-	unsigned int m_height;
-	unsigned int m_id;
-};
-
-
-
 bool GLInitialized = false;
 AppWindow* currentWindow;
 std::list<AppWindow*> windows;
@@ -50,10 +38,6 @@ static void resize_callback(GLFWwindow* wnd, int width, int height)
 {
 	std::cout << "resizing window : " << width << ", " << height << std::endl;
 	glViewport(0, 0, width, height);
-	
-	for (int i = -16; i < 16; i++)
-		std::cout << ((float*)wnd)[i] << ", ";
-	std::cout << std::endl;
 }
 
 AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
@@ -80,6 +64,8 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
 		if (glewInit() != GLEW_OK)
 			throw std::runtime_error("[Engine Error] : GLEW failed to initialize");
 
+		glfwSwapInterval(m_vsync);
+
 		glfwMakeContextCurrent(NULL); // to make it the same as when window
 	}
 	else
@@ -96,7 +82,7 @@ AppWindow::AppWindow(int width, int height, const char* title, bool vsync)
 	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);			// cursor enters window event
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);	// resize event
 
-	glfwSwapInterval(m_vsync);
+	
 }
 
 AppWindow::~AppWindow()
@@ -125,12 +111,12 @@ bool AppWindow::Closed() const
 
 void AppWindow::onResize(int width, int height)
 {
+
 }
 
 void AppWindow::onKey(int key, int action)
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(static_cast<GLFWwindow*>(m_window), GLFW_TRUE);
+
 }
 
 void AppWindow::onMouse(int button, int action)

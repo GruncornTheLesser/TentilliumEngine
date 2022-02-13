@@ -57,10 +57,7 @@
       <Filter>Source Files\Components</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\UniformBuffer.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\UniformBuffer.Types.cpp">
-      <Filter>Source Files\Rendering</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,15 +99,13 @@
     <ClInclude Include="Source\Components\Camera.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\UniformBuffer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Rendering\Viewport.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Rendering\UniformBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

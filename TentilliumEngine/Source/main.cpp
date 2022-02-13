@@ -1,4 +1,3 @@
-#define GLEW_STATIC
 #include <glm.hpp>	// GL maths
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
@@ -6,11 +5,8 @@
 #include <list>
 
 #include "Rendering/AppWindow.h"
+#include "Rendering/Resources/Material.h"
 #include "Rendering/UniformBuffer.h"
-
-//#include "Components/Scene.h"
-
-
 
 class TestWindow : public AppWindow
 {
@@ -118,30 +114,24 @@ int main(int argc, char** argv)
 	windows.push_back(new TestWindow("Resources/images/Image3.png", "title 1"));
 	windows.front()->makeCurrent();
 	
-	//windows.push_back(new TestWindow("Resources/images/Image2.png", "title 2"));//new Context(640, 480, "2", true);//
-	//windows.push_back(new TestWindow("Resources/images/Image3.png", "title 3"));
-
 	auto mat = Material(vec4(1, 1, 0, 1), vec4(2, 0, 2, 2), vec3(1, 2 ,3));
-	mat.setBufferData();
 
-	float* arr = (float*)mat.getBufferData();
-	// iterates over buffer data
-	for (int i = 0; i < mat.size() / 4; i++)
-		std::cout << arr[i] << ", ";
-	std::cout << std::endl;
+	auto arr = mat.getBufferData();
+	delete[] arr;
 
-	
 	while (windows.size() > 0)
 	{
 		windows.remove_if([](TestWindow* wnd) 
 		{ 
-			wnd->makeCurrent();
 			wnd->Draw();
 
 			if (wnd->Closed()) 
+			{
 				delete wnd;
-				
-			return wnd->Closed();
+				return true;
+			}
+			else
+				return false;
 		});
 	}
 
