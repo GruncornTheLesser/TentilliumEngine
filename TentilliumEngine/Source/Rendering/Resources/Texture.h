@@ -1,14 +1,14 @@
 #pragma once
 #include "Resource.h"
 
-struct Image : Resource<Image> 
+struct Texture : Resource<Texture> 
 {
 private:
 	unsigned int handle;
 
 public:
-	Image(unsigned int  hnd) : handle(hnd) { }
-	~Image();
+	Texture(unsigned int  hnd) : handle(hnd) { }
+	~Texture();
 	void bind() const;
 
 };

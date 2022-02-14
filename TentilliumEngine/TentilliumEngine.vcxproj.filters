@@ -44,7 +44,7 @@
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Image.cpp">
+    <ClCompile Include="Source\Rendering\Resources\Texture.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\AppWindow.cpp">
@@ -56,7 +56,7 @@
     <ClCompile Include="Source\Components\Scene.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\UniformBuffer.cpp">
+    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,7 +72,7 @@
     <ClInclude Include="Source\Tentil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\Resources\Image.h">
+    <ClInclude Include="Source\Rendering\Resources\Texture.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Source\Rendering\Resources\Material.h">
@@ -105,7 +105,7 @@
     <ClInclude Include="Source\Components\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\UniformBuffer.h" />
+    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

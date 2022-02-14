@@ -6,7 +6,9 @@
 
 #include "Rendering/AppWindow.h"
 #include "Rendering/Resources/Material.h"
-#include "Rendering/UniformBuffer.h"
+#include "Rendering/Resources/Shader.h"
+#include "Rendering/Resources/Texture.h"
+#include "Rendering/Resources/GLbuffer.h"
 
 class TestWindow : public AppWindow
 {
@@ -16,12 +18,16 @@ public:
 	GLuint VBO; // vertex buffer object - all unique vertices
 	GLuint IBO; // index buffer object - array of pointers to VBO indices to spell out primitives eg Triangles
 
+	// local to context ie shared
+	// big objects eg programs, buffers, textures
 	const Shader* shader;
-	const Image* image;
+	const Texture* image;
+
+	//local to window
+	// "state containers" eg vao, fbo
 
 	TestWindow(const char* imgpath, const char* title) : AppWindow(800, 600, title) {
-		makeCurrent();
-		
+	
 		// vertex data
 		float vertices[] = {
 			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -56,30 +62,24 @@ public:
 
 		// load resources from file
 		shader = Shader::Load("Resources/shaders/Default.shader");
-		image = Image::Load(imgpath);
+		image = Texture::Load(imgpath);
 		//auto msh = Mesh::Load();
-
-
 
 		shader->setUniform1i("tex", 0);		// tells shader to use texture block 0
 		glActiveTexture(GL_TEXTURE0);		// selects which texture unit subsequent texture state calls will affect. 
 		image->bind();						// subsequent texture state call. ie adds img texture to unit GL_TEXTURE0
-		
-		shader->bind();						// use shader program
-		glBindVertexArray(VAO);				// use mesh
-
-		glfwMakeContextCurrent(NULL);
-
 
 	}
-
-	void Draw()
+	
+	void draw()
 	{
+		glActiveTexture(GL_TEXTURE0);		// selects which texture unit subsequent texture state calls will affect. 
+		image->bind();						// subsequent texture state call. ie adds img texture to unit GL_TEXTURE0
+
 		shader->bind();						// use shader program
 		glBindVertexArray(VAO);				// use mesh
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL); // draw mesh in current
-		refresh();
 	}
 };
 
@@ -110,30 +110,25 @@ int main(int argc, char** argv)
 	//scn.Calculate();
 	*/
 
-	std::list<TestWindow*> windows;
-	windows.push_back(new TestWindow("Resources/images/Image3.png", "title 1"));
-	windows.front()->makeCurrent();
+	auto win1 = new TestWindow("Resources/images/Image1.png", "title 1");
+	auto win2 = new TestWindow("Resources/images/Image2.png", "title 2");
+	auto win3 = new TestWindow("Resources/images/Image3.png", "title 3");
+	auto win4 = new TestWindow("Resources/images/Image1.png", "title 4");
+	auto win5 = new TestWindow("Resources/images/Image2.png", "title 5");
+	auto win6 = new TestWindow("Resources/images/Image3.png", "title 6");
 	
-	auto mat = Material(vec4(1, 1, 0, 1), vec4(2, 0, 2, 2), vec3(1, 2 ,3));
+	struct Mat { vec4 a; vec4 b; vec3 c; };
+	auto mat1 = new Mat{ vec4(1, 1, 0, 1), vec4(2, 0, 2, 2), vec3(3, 0, 3) };
+	auto buf = new GLbuffer(GL_ARRAY_BUFFER, sizeof(Mat), mat1);
+	delete mat1;
 
-	auto arr = mat.getBufferData();
-	delete[] arr;
+	auto mat2 = (float*)buf->get<Mat>();
+	int i;
+	for (i = 0; i < (sizeof(Mat) / sizeof(float)) - 1; i++)
+		std::cout << mat2[i] <<", ";
+	std::cout << mat2[i] << std::endl;
+	delete mat2;
+	delete buf;
 
-	while (windows.size() > 0)
-	{
-		windows.remove_if([](TestWindow* wnd) 
-		{ 
-			wnd->Draw();
-
-			if (wnd->Closed()) 
-			{
-				delete wnd;
-				return true;
-			}
-			else
-				return false;
-		});
-	}
-
-	glfwTerminate();
+	AppWindow::Init();
 }

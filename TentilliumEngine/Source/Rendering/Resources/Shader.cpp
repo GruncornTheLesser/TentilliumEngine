@@ -92,8 +92,8 @@ const Shader* Resource<Shader>::Load(const char* filepath)
 	// delete and detach shaders
 	//glDetachShader(program, gs);
 	//glDeleteShader(gs);
-	Resource<Shader>::cache->emplace(filepath, program);
-	return &(Resource<Shader>::cache->at(filepath));
+	Resource<Shader>::cache.emplace(filepath, program);
+	return &(Resource<Shader>::cache.at(filepath));
 }
 
 Shader::~Shader()

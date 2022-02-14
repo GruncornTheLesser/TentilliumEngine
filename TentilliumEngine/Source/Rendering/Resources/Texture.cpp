@@ -1,6 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include "Image.h"
+#include "stb_image.h" 
+#include "Texture.h"
 
 #include <glm.hpp>	// GL maths
 #include <glew.h>	// GL extension wrangler
@@ -10,19 +10,19 @@
 
 
 
-Image::~Image()
+Texture::~Texture()
 {
 	glDeleteTextures(1, &handle);
 	std::cout << "deleting image " << handle << std::endl;
 }
 
-void Image::bind() const
+void Texture::bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, handle);
 }
 
 
-const Image* Resource<Image>::Load(const char* filepath)
+const Texture* Resource<Texture>::Load(const char* filepath)
 {
 	unsigned int handle;
 	glGenTextures(1, &handle);
@@ -49,6 +49,6 @@ const Image* Resource<Image>::Load(const char* filepath)
 		throw std::exception();
 	}
 	
-	Resource<Image>::cache->emplace(filepath, handle);
-	return &Resource<Image>::cache->at(filepath);
+	Resource<Texture>::cache.emplace(filepath, handle);
+	return &Resource<Texture>::cache.at(filepath);
 }
