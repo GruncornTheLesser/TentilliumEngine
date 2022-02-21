@@ -50,13 +50,19 @@
     <ClCompile Include="Source\Rendering\AppWindow.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Viewport.cpp">
+    <ClCompile Include="Source\Rendering\FrameBuffer.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Components\Scene.cpp">
+    <ClCompile Include="Source\Scene.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\Transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\FlagManager.h">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,13 +105,14 @@
     <ClInclude Include="Source\Components\Camera.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\Viewport.h">
+    <ClInclude Include="Source\Rendering\FrameBuffer.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Scene.h">
+    <ClInclude Include="Source\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Components\Flag.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

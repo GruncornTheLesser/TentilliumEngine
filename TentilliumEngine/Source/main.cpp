@@ -2,7 +2,6 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 #include <iostream>
-#include <list>
 
 #include "Rendering/AppWindow.h"
 #include "Rendering/Resources/Material.h"
@@ -18,7 +17,7 @@ public:
 	GLuint VBO; // vertex buffer object - all unique vertices
 	GLuint IBO; // index buffer object - array of pointers to VBO indices to spell out primitives eg Triangles
 
-	// local to context ie shared
+	// shared between windows (local to context which is currently shared between all windows) 
 	// big objects eg programs, buffers, textures
 	const Shader* shader;
 	const Texture* image;
@@ -27,7 +26,8 @@ public:
 	// "state containers" eg vao, fbo
 
 	TestWindow(const char* imgpath, const char* title) : AppWindow(800, 600, title) {
-	
+
+
 		// vertex data
 		float vertices[] = {
 			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -61,8 +61,8 @@ public:
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		// load resources from file
-		shader = Shader::Load("Resources/shaders/Default.shader");
-		image = Texture::Load(imgpath);
+		shader = Shader::Get("Resources/shaders/Default.shader");
+		image = Texture::Get(imgpath);
 		//auto msh = Mesh::Load();
 
 		shader->setUniform1i("tex", 0);		// tells shader to use texture block 0
@@ -71,7 +71,7 @@ public:
 
 	}
 	
-	void draw()
+	void onDraw(float delta)
 	{
 		glActiveTexture(GL_TEXTURE0);		// selects which texture unit subsequent texture state calls will affect. 
 		image->bind();						// subsequent texture state call. ie adds img texture to unit GL_TEXTURE0
@@ -80,6 +80,8 @@ public:
 		glBindVertexArray(VAO);				// use mesh
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL); // draw mesh in current
+	
+		setTitle(std::to_string(delta));
 	}
 };
 
@@ -110,18 +112,15 @@ int main(int argc, char** argv)
 	//scn.Calculate();
 	*/
 
-	auto win1 = new TestWindow("Resources/images/Image1.png", "title 1");
-	auto win2 = new TestWindow("Resources/images/Image2.png", "title 2");
-	auto win3 = new TestWindow("Resources/images/Image3.png", "title 3");
-	auto win4 = new TestWindow("Resources/images/Image1.png", "title 4");
-	auto win5 = new TestWindow("Resources/images/Image2.png", "title 5");
-	auto win6 = new TestWindow("Resources/images/Image3.png", "title 6");
-	
+	auto win1 = new TestWindow("Resources/images/Image1.png", "wnd 1");
+	auto win2 = new TestWindow("Resources/images/Image1.png", "wnd 2");
+
+
 	struct Mat { vec4 a; vec4 b; vec3 c; };
 	auto mat1 = new Mat{ vec4(1, 1, 0, 1), vec4(2, 0, 2, 2), vec3(3, 0, 3) };
 	auto buf = new GLbuffer(GL_ARRAY_BUFFER, sizeof(Mat), mat1);
 	delete mat1;
-
+	
 	auto mat2 = (float*)buf->get<Mat>();
 	int i;
 	for (i = 0; i < (sizeof(Mat) / sizeof(float)) - 1; i++)

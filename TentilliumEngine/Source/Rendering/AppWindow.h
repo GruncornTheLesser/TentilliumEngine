@@ -1,31 +1,32 @@
 #pragma once
-
-
-
+#include <string>
 
 class AppWindow
 {
 private:
 	void* m_window;
+	unsigned int m_width, m_height;
+	std::string title;
 
-	int m_width, m_height;
+
+public:
 	const char* m_title;
-
 public:
 	AppWindow(int width, int height, const char* title);
 	~AppWindow();
-	virtual void draw() = 0;
+
+	void close();
+	void setTitle(std::string title);
+
 	void refresh();
-	bool Closed() const;
+	virtual void onDraw(float delta) = 0;
+	//virtual void onKeyDown() = 0;
+	//virtual void onResize()
+	
+
+
 
 	static void Init();
-	/*
-	virtual void onResize(int width, int height);
-	virtual void onKey(int key, int action);
-	virtual void onMouse(int button, int action);
-	virtual void onMoveCursor(double posX, double posY);
-	virtual void onEnter(int entering);
-	*/
 };
 
 

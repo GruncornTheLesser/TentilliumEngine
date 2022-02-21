@@ -1,104 +1,38 @@
 #pragma once
 #include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
 #include <gtc/quaternion.hpp>
-using namespace glm;
+#include "Flag.h"
+
 
 struct Transform
 {
-friend class Scene;
+	friend class Scene;
 private:
-	static inline unsigned int currentVersion = 0;
-	unsigned int version;
+	Flag localUpdateFlag;
+	Flag worldUpdateFlag;
 
-	vec3 scale;
-	vec3 position;
-	quat rotation;
-	mat4 localMatrix;
-	mat4 worldMatrix;
-
+	glm::vec3 scale;
+	glm::vec3 position;
+	glm::quat rotation;
+	glm::mat4 localMatrix;
+	glm::mat4 worldMatrix;
 public:
-	Transform() :
-		scale(1, 1, 1),
-		position(0, 0, 0),
-		rotation(quat(vec3(0, 0, 0))),
-		worldMatrix(),
-		localMatrix(),
-		version(currentVersion)
-	{ }
-	Transform(vec3 position = vec3(0, 0, 0), vec3 scale = vec3(1, 1, 1), quat rotation = quat(vec3(0, 0, 0))) :
-		scale(scale),
-		position(position),
-		rotation(rotation),
-		worldMatrix(),
-		localMatrix(),
-		version(currentVersion)
-	{ }
+	Transform(glm::vec3 position = glm::vec3(0, 0, 0), glm::vec3 scale = glm::vec3(1, 1, 1), glm::quat rotation = glm::quat(glm::vec3(0, 0, 0)));
+private:
+	void UpdateLocal();
+	void UpdateWorld();
+	void UpdateWorld(Transform* parent);
+public:
+	inline glm::vec3 getPosition();
+	inline glm::vec3 getScale();
+	inline glm::quat getRotation();
+	inline glm::mat4 getLocalMatrix();
 
-	vec3 getPosition() 
-	{ 
-		return position; 
-	}
-	vec3 getScale() 
-	{ 
-		return scale; 
-	}
-	quat getRotation() 
-	{ 
-		return rotation; 
-	}
+	inline void setPosition(glm::vec3 pos);
+	inline void setScale(glm::vec3 scl);
+	inline void setRotation(glm::quat rot);
 
-	void setPosition(vec3 pos)
-	{
-		position = pos;
-		version = currentVersion;
-	}
-	
-	void setScale(vec3 scl)
-	{
-		scale = scl;
-		version = currentVersion;
-	}
-	
-	void setRotation(quat rot)
-	{
-		rotation = rot;
-		version = currentVersion;
-
-	}
-
-	static void Decompose(mat4 mat, vec3& pos, vec3& sca, quat& rot)
-	{
-		pos = vec3(mat[3]);
-
-		sca.x = length(vec3(mat[0][0], mat[1][0], mat[2][0]));
-		sca.y = length(vec3(mat[0][1], mat[1][1], mat[2][1]));
-		sca.z = length(vec3(mat[0][2], mat[1][2], mat[2][2]));
-
-		mat[0][0] /= sca.x;
-		mat[1][0] /= sca.x;
-		mat[2][0] /= sca.x;
-
-		mat[0][1] /= sca.y;
-		mat[1][1] /= sca.y;
-		mat[2][1] /= sca.y;
-
-		mat[0][2] /= sca.z;
-		mat[1][2] /= sca.z;
-		mat[2][2] /= sca.z;
-
-		rot.w = sqrt(std::max(0.0f, 1 + mat[0][0] + mat[1][1] + mat[2][2])) / 2;
-		rot.x = sqrt(std::max(0.0f, 1 + mat[0][0] - mat[1][1] - mat[2][2])) / 2;
-		rot.y = sqrt(std::max(0.0f, 1 - mat[0][0] + mat[1][1] - mat[2][2])) / 2;
-		rot.z = sqrt(std::max(0.0f, 1 - mat[0][0] - mat[1][1] + mat[2][2])) / 2;
-
-		rot.x = copysign(rot.x, mat[1][2] - mat[2][1]);
-		rot.y = copysign(rot.y, mat[2][0] - mat[0][2]);
-		rot.z = copysign(rot.z, mat[0][1] - mat[1][0]);
-	}
-
-
-
-	operator const mat4& () { return worldMatrix; }
+	static void Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot);
+	operator const glm::mat4& () { return worldMatrix; }
 };
 

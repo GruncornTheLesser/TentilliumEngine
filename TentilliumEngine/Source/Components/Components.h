@@ -2,6 +2,7 @@
 
 #include "Transform.h"
 #include "Hierarchy.h"
+#include "Camera.h"
 
 
 struct Render {

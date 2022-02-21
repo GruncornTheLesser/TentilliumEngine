@@ -7,14 +7,20 @@ struct Hierarchy
 friend class Scene;
 
 private:
+	unsigned int depth;
 	entt::entity parent;
-	
+		
 public:
-	Hierarchy() { }
-	Hierarchy(entt::entity p) : parent(p) { }
+	Hierarchy() : parent((entt::entity)0), depth(0) { }
+	Hierarchy(entt::entity p) : parent(p), depth(0) { }
 
-	entt::entity getParent()
+	inline entt::entity getParent()
 	{
 		return parent;
+	}
+
+	inline void setParent(entt::entity newParent)
+	{
+		parent = newParent;
 	}
 };
