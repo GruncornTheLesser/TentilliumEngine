@@ -23,9 +23,6 @@ public:
 	//virtual void onKeyDown() = 0;
 	//virtual void onResize()
 	
-
-
-
 	static void Init();
 };
 

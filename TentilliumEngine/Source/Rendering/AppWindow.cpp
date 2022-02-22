@@ -86,7 +86,7 @@ AppWindow::AppWindow(int width, int height, const char* title)
 
 		glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
 	}
-	
+
 	glfwSetWindowUserPointer(static_cast<GLFWwindow*>(m_window), this);
 
 	windows.push_back(this);
@@ -96,6 +96,14 @@ AppWindow::AppWindow(int width, int height, const char* title)
 	//glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);		// cursor move event
 	//glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);			// cursor enters window event
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);		// resize event
+	
+	// per frame buffer (i think)
+	glClearColor(0, 0, 0, 1); 
+	glClearDepth(1);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	glEnable(GL_CULL_FACE);
 }
 
 AppWindow::~AppWindow()
@@ -116,6 +124,7 @@ void AppWindow::setTitle(std::string title)
 void AppWindow::refresh()
 {
 	glfwSwapBuffers(static_cast<GLFWwindow*>(m_window));
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void AppWindow::Init()
