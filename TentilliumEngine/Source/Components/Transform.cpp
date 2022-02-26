@@ -1,8 +1,5 @@
-#include "Transform.h"
-#include "FlagManager.h"
-#include <glm.hpp>
+#include "Transform.h""
 #include <gtc/matrix_transform.hpp>
-#include <gtc/quaternion.hpp>
 #include <algorithm>
 
 Transform::Transform(glm::vec3 position, glm::vec3 scale, glm::quat rotation) :
@@ -39,7 +36,6 @@ glm::mat4 Transform::getLocalMatrix()
 void Transform::setPosition(glm::vec3 pos)
 {
 	position = pos;
-	worldUpdateFlag.Raise();
 	localUpdateFlag.Raise();
 
 }
@@ -47,14 +43,12 @@ void Transform::setPosition(glm::vec3 pos)
 void Transform::setScale(glm::vec3 scl)
 {
 	scale = scl;
-	worldUpdateFlag.Raise();
 	localUpdateFlag.Raise();
 }
 
 void Transform::setRotation(glm::quat rot)
 {
 	rotation = rot;
-	worldUpdateFlag.Raise();
 	localUpdateFlag.Raise();
 }
 
@@ -68,6 +62,7 @@ void Transform::UpdateLocal()
 void Transform::UpdateWorld()
 {
 	worldMatrix = localMatrix;
+	worldUpdateFlag.Raise();
 }
 
 void Transform::UpdateWorld(Transform* parent)
@@ -76,9 +71,8 @@ void Transform::UpdateWorld(Transform* parent)
 		worldMatrix = parent->worldMatrix * localMatrix;
 	else
 		worldMatrix = localMatrix;
+	worldUpdateFlag.Raise();
 }
-
-
 
 void Transform::Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot)
 {
@@ -109,4 +103,3 @@ void Transform::Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::qu
 	rot.y = copysign(rot.y, mat[2][0] - mat[0][2]);
 	rot.z = copysign(rot.z, mat[0][1] - mat[1][0]);
 }
-

@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <glm.hpp>
-
+#include <iostream>
 
 struct Shader : Resource<Shader>
 {
@@ -14,7 +14,7 @@ private:
 
 	
 public:
-	Shader(unsigned int prg) : m_program(prg) { }
+	Shader(unsigned int prg) : m_program(prg) { std::cout << "Creating Shader " << prg << std::endl; }
 	~Shader();
 
 	const void bind() const;

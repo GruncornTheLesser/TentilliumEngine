@@ -43,20 +43,15 @@ public:
 	// hierarchy/transform system
 private:
 	GROUP(groupSceneGraph, OWN(Transform, Hierarchy), GET(), EXC())
-
 	VIEW(viewTransform, GET(Transform), EXC())
 	VIEW(viewHierarchy, GET(Hierarchy), EXC())
 	VIEW(viewRootTransform, GET(Transform), EXC(Hierarchy))
 
-public:
-	void HierarchyUpdate();
-	void TransformUpdate();
-
-	// camera system
-private:
 	VIEW(viewCamera, GET(Camera), EXC())
 public:
-	void ResizeCameraMatrix();
+
+	void HierarchyUpdate();
+	void TransformUpdate();
 
 };
 

@@ -18,9 +18,4 @@ public:
 	{
 		return parent;
 	}
-
-	inline void setParent(entt::entity newParent)
-	{
-		parent = newParent;
-	}
 };

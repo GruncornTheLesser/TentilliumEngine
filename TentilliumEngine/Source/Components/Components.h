@@ -13,7 +13,6 @@ private:
 
 
 struct LightEmitter { };
-struct ShadowCaster { };
 struct LightOccluder { };
 struct CustomMaterial { };
 
@@ -33,15 +32,12 @@ construct screenspace grid/tiles with fixed pixel size
 
 */
 
-// geometry pre pass
-/*
-render into geometry buffers
-*/
-
-// calculate the min and max depth for each tile
-/**/
-
 // calculate the per tile frustums created by the corner of each tile
+
+// geometry pre pass 
+	//render into geometry buffers
+	// calculate the min and max depth for each tile
+
 /*
 float maxDepthZ = float(float(maxDepth) / float(0xffffffffu));
 float minDepthZ = float(minDepth / float(0xffffffffu));
@@ -62,7 +58,7 @@ tileCorners[3] = unProject(vec4( (float(minX)/SCREEN_WIDTH) * 2.0f - 1.0f, (floa
 //Create the frustum planes by using the cross product between these points
 vec4 frustum[4];
 for(int i = 0; i &amp;lt; 4; i++)
-frustum[i] = CreatePlane(tileCorners[i],tileCorners[(i+1) &amp;amp; 3]);
+frustum[i] = CreatePlane(tileCorners[i], tileCorners[(i+1) &amp; amp; 3]);
 
 barrier();
 */

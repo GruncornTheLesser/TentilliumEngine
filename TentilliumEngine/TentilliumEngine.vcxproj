@@ -167,6 +167,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Rendering\Resources\Model.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\Mesh.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
@@ -187,6 +189,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Rendering\Resources\Model.h" />
+    <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
     <ClInclude Include="Source\Scene.h" />

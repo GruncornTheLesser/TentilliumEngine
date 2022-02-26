@@ -37,7 +37,7 @@ GLuint CompileShader(const GLenum type, std::string source)
 	return shader;
 }
 
-const Shader* Resource<Shader>::Load(const char* filepath)
+Shader* Resource<Shader>::Load(std::string filepath)
 {
 	std::ifstream stream(filepath);
 	std::stringstream source;
@@ -45,7 +45,7 @@ const Shader* Resource<Shader>::Load(const char* filepath)
 	GLenum type;
 
 	GLuint program = glCreateProgram();
-	std::cout << "creating shader program" << program << std::endl;
+
 	while (getline(stream, line))
 	{
 		if (line[0] == '#')
@@ -92,7 +92,7 @@ const Shader* Resource<Shader>::Load(const char* filepath)
 	//glDetachShader(program, gs);
 	//glDeleteShader(gs);
 
-	return Resource::Init(filepath, program);
+	return Resource::Emplace(filepath, program);
 }
 
 Shader::~Shader()

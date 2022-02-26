@@ -19,7 +19,7 @@
 
 struct GLbuffer
 {
-private:
+protected:
 	unsigned int length;
 	unsigned int target;
 	unsigned int handle;
@@ -28,20 +28,22 @@ public:
 
 	~GLbuffer();
 
-	void assign(unsigned int  offset, unsigned int length, void* data);
-	
 	template<typename t>
 	void assign(t* data) {
 		assign(0, sizeof(t), data);
 	}
 
-	char* get(const unsigned int offset, const unsigned int length);
+	void assign(unsigned int offset, unsigned int length, void* data);
 
 	template<typename t>
 	t* get(const unsigned int offset = 0)
 	{
 		return (t*)get(offset, sizeof(t));
 	}
+
+	char* get(const unsigned int offset, const unsigned int length);
+
+	operator unsigned int() { return handle; }
 
 };
 

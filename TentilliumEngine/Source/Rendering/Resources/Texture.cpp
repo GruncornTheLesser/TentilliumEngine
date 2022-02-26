@@ -7,14 +7,10 @@
 #include <exception>
 #include <iostream>
 
-Texture::Texture(unsigned int handle, int width, int height, unsigned int format, unsigned int minFilter, unsigned int magFilter)
-	: m_handle(handle), m_width(width), m_height(height), m_format(format), m_minFilter(minFilter), m_magFilter(magFilter)
-{ }
-
 Texture::~Texture()
 {
 	glDeleteTextures(1, &m_handle);
-	std::cout << "deleting image " << m_handle << std::endl;
+	std::cout << "deleting Texture " << m_handle << std::endl;
 }
 
 void Texture::bind() const
@@ -22,7 +18,7 @@ void Texture::bind() const
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
-const Texture* Resource<Texture>::Load(const char* filepath)
+Texture* Resource<Texture>::Load(std::string filepath)
 {
 	unsigned int handle;
 	int width;
@@ -35,7 +31,7 @@ const Texture* Resource<Texture>::Load(const char* filepath)
 	glBindTexture(GL_TEXTURE_2D, handle);
 	
 	stbi_set_flip_vertically_on_load(true);
-	uint8_t* data = stbi_load(filepath, &width, &height, (int*)(&format), 4); // desired no of channels
+	uint8_t* data = stbi_load(filepath.c_str(), &width, &height, (int*)(&format), 4); // desired no of channels
 
 	if (!data)
 	{
@@ -68,7 +64,7 @@ const Texture* Resource<Texture>::Load(const char* filepath)
 
 	glBindTexture(GL_TEXTURE_2D, NULL);
 
-	return Resource<Texture>::Init(filepath, handle, width, height, format, GL_NEAREST, GL_NEAREST);
+	return Resource::Emplace(filepath, handle, width, height, format, GL_NEAREST, GL_NEAREST);
 }
 
 

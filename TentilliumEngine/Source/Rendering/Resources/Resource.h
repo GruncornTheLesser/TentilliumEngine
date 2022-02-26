@@ -1,24 +1,26 @@
 #pragma once
 #include <map>
-
+#include <memory>
+#include <string>
+// special pointers???
+// resources never destructed until static map destroyed
+// shared pointer is exactly what i want
+// when destructed, invalidating pointers???
 template<class t>
 struct Resource
 {
 private:
-	inline static std::map<const char*, t> cache;
+	inline static std::map<std::string, t> cache;
 
-protected:
-	const static t* Find(const char* filepath)
+	static t* Load(std::string filepath);
+
+	template<typename ... args>
+	static t* Emplace(std::string filepath, args ... Args)
 	{
-		auto it = cache.find(filepath);
-		if (it == cache.end()) return 0;
-		return &(it->second);
-	}
-
-	template<typename ... types>
-	const static t* Init(const char* filepath, types ... initList) {
-		cache.emplace(std::piecewise_construct, std::forward_as_tuple(filepath), std::forward_as_tuple(initList...));
-		return &cache.at(filepath);
+		auto inserted = cache.emplace(std::piecewise_construct,
+			std::forward_as_tuple(filepath),
+			std::forward_as_tuple(Args...));
+		return &(inserted.first->second);
 	}
 
 public:
@@ -31,17 +33,30 @@ public:
 	
 	return Init(filepath, values, to, initiate...);
 	}*/
-	const static t* Get(const char* filepath)
+	const static std::shared_ptr<t> Get(std::string filepath)
 	{
-		if (auto ptr = Find(filepath))
-			return ptr;
-		else
-			return Load(filepath);
+		std::initializer_list<t> x;
+
+		auto it = cache.find(filepath);
+		if (it != cache.end()) 
+			return std::shared_ptr<t>(&(it->second));
+
+		t* ptr = Load(filepath);
+
+		return std::shared_ptr<t>(ptr);
 	}
 
-	const static t* Load(const char* filepath);
 
+
+	
 	/*
+	void Save(const char* filepath)
+	{
+		// do stuff
+	}
+	
+	
+	creates copy of loaded resource
 	{
 		t* ptr = Find(filepath);
 		if (!ptr)
