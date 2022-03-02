@@ -25,5 +25,3 @@ struct Material final : GLbuffer, public Resource<Material>
     void setShine(float value) { assign(11, sizeof(float), (&value)); }
 
 };
-
-Material* Resource<Material>::Load(std::string filepath);

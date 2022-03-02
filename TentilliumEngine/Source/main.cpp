@@ -4,6 +4,9 @@
 #include <gtc/matrix_transform.hpp>
 #include <iostream>
 #include "Scene.h"
+
+
+
 #include "Rendering/AppWindow.h"
 #include "Rendering/Resources/Model.h"
 #include "Rendering/Resources/Shader.h"
@@ -57,32 +60,39 @@ public:
 	Transform transform;
 	glm::mat4 perspective;
 
-	unsigned int VAO, VBO, IBO;
-
 	TestWindow(const char* imgpath, const char* title)
 		: AppWindow(800, 600, title)
 	{
-		// load resources
+		// load shared resources
 		shader = Shader::Get("Resources/shaders/Default.shader");
-		texture = Texture::Get(imgpath);
+		unsigned int data[] = { 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, };
+		texture = std::shared_ptr<Texture>(new Texture(2, 2, 4, (void*)data));
+		//texture = Texture::Get(imgpath);
+		// create load unique resource
+		//Shader unique("Resources/shaders/Default.shader");
+
 
 		// load function hasnt been finished
 		material = std::shared_ptr<Material>(new Material(glm::vec3(1, 2, 3), glm::vec3(4, 5, 5), glm::vec3(4, 3, 2), 1));
-		// .mtl, gltf
-
-
+		//material = Material::Load("Resources/materials/BLU.mtl");
 		mesh = std::shared_ptr<Mesh>(new Mesh(vertices, sizeof(vertices), indices, sizeof(indices), setupVertex<glm::vec3, glm::vec2>));
+		// .mtl, gltf
 
 		// local to window
 		model = Model({ mesh }, { material });
 
 		shader->setUniform1i("tex", 0);		// tells shader to use texture block 0
-		glActiveTexture(GL_TEXTURE0);		// selects which texture unit subsequent texture state calls will affect. 
-		texture->bind();					// subsequent texture state call. ie adds img texture to unit GL_TEXTURE0
 
-		perspective = glm::perspective(2.0f, 4.0f/3.0f, 0.001f, 100.0f);
+
+		perspective = glm::perspective(2.0f, 4.0f / 3.0f, 0.001f, 100.0f);
 	}
 	
+	~TestWindow() {
+		std::cout << "window go bye bye \n";
+	}
+
+
+
 	void onDraw(float delta)
 	{
 		glActiveTexture(GL_TEXTURE0);		// selects which texture unit subsequent texture state calls will affect. 
@@ -129,9 +139,13 @@ int main(int argc, char** argv)
 	//scn.TagUpdate();
 	//scn.Calculate();
 	*/
+	{
+		//auto win1 = TestWindow("Resources/images/Image1.png", "wnd 1");
+		//auto win2 = TestWindow("Resources/images/Image2.png", "wnd 2");
+		//auto win3 = TestWindow("Resources/images/Image3.png", "wnd 3");
+		auto win4 = TestWindow("Resources/images/Image4.png", "wnd 4");
 
-	auto win1 = new TestWindow("Resources/images/Image4.png", "wnd 1");
-	//auto win2 = new TestWindow("Resources/images/Image1.png", "wnd 2");
-	
-	AppWindow::Init();
+		AppWindow::Init({ &win4 });
+
+	}
 }

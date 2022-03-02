@@ -7,9 +7,6 @@
 #include <vector>
 
 
-std::vector<AppWindow*> windows;
-
-
 AppWindow* getAppWindow(void* wnd)
 {
 	return (AppWindow*)glfwGetWindowUserPointer(static_cast<GLFWwindow*>(wnd));
@@ -30,71 +27,58 @@ static void mouse_callback(GLFWwindow* wnd, int er, int idk, int wtf)
 {
 	auto appWnd = getAppWindow(wnd);
 }
-/*
+
 static void movecursor_callback(GLFWwindow* wnd, double posX, double posY)
 {
-	currentWindow->onMoveCursor(posX, posY);
+	//getAppWindow(wnd)->onMoveCursor(posX, posY);
 }
 
 static void enter_callback(GLFWwindow* wnd, int entered)
 {
-		currentWindow->onEnter(entered);
+	//getAppWindow(wnd)->onEnter(entered);
 }
-*/
+
 static void resize_callback(GLFWwindow* wnd, int width, int height)
 {
-	auto appWnd = getAppWindow(wnd);
-
-	std::cout << "resizing " << appWnd->m_title << " : " << width << ", " << height << std::endl;
-	
+	std::cout << "resizing " << getAppWindow(wnd)->getTitle() << " : " << width << ", " << height << '\n';
 	glViewport(0, 0, width, height);
-
 }
 
+GLFWwindow* glfwContext;
 
-
-AppWindow::AppWindow(int width, int height, const char* title)
-	: m_title(title), m_width(width), m_height(height)
+AppWindow::AppWindow(int width, int height, std::string title)
+	: title(title), m_width(width), m_height(height)
 {
-	if (windows.size() == 0)
+	if (!glfwContext)
 	{
-		glfwSetErrorCallback(error_callback);
-
 		glfwInit();
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-		m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-		
-		if (!m_window)
-			throw std::runtime_error("[Engine Error] : Window failed to initialize");
+		glfwSetErrorCallback(error_callback);
+	}
 
-		glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
+	m_window = glfwCreateWindow(width, height, title.c_str(), nullptr, glfwContext);
+	
+	if (!m_window)
+		throw std::runtime_error("[Engine Error] : Window failed to initialize");
 
+
+	glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
+	
+	if (!glfwContext) 
+	{
+		glfwContext = static_cast<GLFWwindow*>(m_window);
 		if (glewInit() != GLEW_OK)
 			throw std::runtime_error("[Engine Error] : GLEW failed to initialize");
-		
-		glfwSwapInterval(true);
-	}
-	else
-	{
-		m_window = glfwCreateWindow(width, height, title, nullptr, static_cast<GLFWwindow*>(windows.front()->m_window));
-
-		if (!m_window) // check window valid
-			throw std::runtime_error("[Engine Error] : Window failed to initialize");
-
-		glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
 	}
 
 	glfwSetWindowUserPointer(static_cast<GLFWwindow*>(m_window), this);
-
-	windows.push_back(this);
-
 	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_window), key_callback);						// key event
-	glfwSetMouseButtonCallback(static_cast<GLFWwindow*>(m_window), mouse_callback);			// mouse button event
-	//glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);		// cursor move event
-	//glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);			// cursor enters window event
+	glfwSetMouseButtonCallback(static_cast<GLFWwindow*>(m_window), mouse_callback);				// mouse button event
+	glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);			// cursor move event
+	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);				// cursor enters window event
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);		// resize event
 	
 	// per frame buffer (i think)
@@ -102,13 +86,12 @@ AppWindow::AppWindow(int width, int height, const char* title)
 	glClearDepth(1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
 	glEnable(GL_CULL_FACE);
 }
 
 AppWindow::~AppWindow()
 {
-	glfwDestroyWindow(static_cast<GLFWwindow*>(m_window));
+	std::cout << "destroying: " << getTitle() << std::endl;
 }
 
 void AppWindow::close()
@@ -116,50 +99,51 @@ void AppWindow::close()
 	glfwSetWindowShouldClose(static_cast<GLFWwindow*>(m_window), true);
 }
 
+std::string AppWindow::getTitle()
+{
+	return title;
+}
+
 void AppWindow::setTitle(std::string title)
 {
+	this->title = title;
 	glfwSetWindowTitle(static_cast<GLFWwindow*>(m_window), title.c_str());
 }
 
-void AppWindow::refresh()
-{
-	glfwSwapBuffers(static_cast<GLFWwindow*>(m_window));
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void AppWindow::Init()
+void AppWindow::Init(std::vector<AppWindow*> windows)
 {
 	glfwSetTime(0);
-	double oldTime = 0;
-	double newTime;
-	double delta;
+	double temp, delta, time = 0;
 	for (;;)
 	{
-		newTime = glfwGetTime();
-		delta = newTime - oldTime;
-		oldTime = newTime;
+		temp = glfwGetTime();
+		delta = temp - time;
+		time = temp;
 
-		for (auto wnd_itr = windows.begin(); wnd_itr != windows.end();)
+		for (auto wnd = windows.begin(); wnd != windows.end(); )
 		{
-			AppWindow* pItem = *wnd_itr;
-
-			if (glfwWindowShouldClose(static_cast<GLFWwindow*>((*wnd_itr)->m_window)))
+			if (glfwWindowShouldClose(static_cast<GLFWwindow*>((*wnd)->m_window))) 
 			{
-				delete *wnd_itr;
-				wnd_itr = windows.erase(wnd_itr);
+				glfwDestroyWindow(static_cast<GLFWwindow*>((*wnd)->m_window));
+				wnd = windows.erase(wnd);
 
-				if (windows.size() == 0)
-					return;
+				if (!windows.empty()) 
+					continue;
+				
+				glfwContext = nullptr;
+				return;
 			}
-			else
-			{
-				glfwMakeContextCurrent(static_cast<GLFWwindow*>((*wnd_itr)->m_window));
-				glfwPollEvents(); // -> goes to callbacks eg onkey, onMouse etc
-				(*wnd_itr)->onDraw(delta);
-				(*wnd_itr)->refresh();
-				++wnd_itr;
-			}
+
+			glfwMakeContextCurrent(static_cast<GLFWwindow*>((*wnd)->m_window));
+			glfwPollEvents(); // -> goes to callbacks eg onkey, onMouse etc
+			(*wnd)->onDraw(delta);
+
+			glfwSwapBuffers(static_cast<GLFWwindow*>((*wnd)->m_window));
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			wnd++;
 		}
 	}
+
 
 }

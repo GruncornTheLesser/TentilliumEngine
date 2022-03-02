@@ -2,6 +2,9 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 void setupAttrib(int size, unsigned int stride, unsigned int& no, unsigned int& offset)
@@ -32,4 +35,3 @@ Mesh::Mesh(const float* vertexdata, size_t vertexsize, const unsigned int* index
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
 }
-
