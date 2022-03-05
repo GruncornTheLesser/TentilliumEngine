@@ -52,28 +52,6 @@ void Transform::setRotation(glm::quat rot)
 	localUpdateFlag.Raise();
 }
 
-void Transform::UpdateLocal()
-{
-	localMatrix = glm::translate(glm::mat4(1.0f), position);
-	localMatrix = glm::scale(localMatrix, scale);
-	localMatrix *= glm::mat4(rotation);
-}
-
-void Transform::UpdateWorld()
-{
-	worldMatrix = localMatrix;
-	worldUpdateFlag.Raise();
-}
-
-void Transform::UpdateWorld(Transform* parent)
-{
-	if (parent)
-		worldMatrix = parent->worldMatrix * localMatrix;
-	else
-		worldMatrix = localMatrix;
-	worldUpdateFlag.Raise();
-}
-
 void Transform::Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot)
 {
 	pos = glm::vec3(mat[3]);

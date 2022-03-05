@@ -16,6 +16,8 @@ private:
 	glm::quat rotation;
 	glm::mat4 localMatrix;
 	glm::mat4 worldMatrix;
+
+	Transform(void* aiTransform) {};
 public:
 	Transform(glm::vec3 position = glm::vec3(0, 0, 0), glm::vec3 scale = glm::vec3(1, 1, 1), glm::quat rotation = glm::quat(glm::vec3(0, 0, 0)));
 
@@ -28,11 +30,6 @@ public:
 	void setPosition(glm::vec3 pos);
 	void setScale(glm::vec3 scl);
 	void setRotation(glm::quat rot);
-
-public: // private
-	void UpdateLocal();
-	void UpdateWorld();
-	void UpdateWorld(Transform* parent);
 
 public:
 	static void Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot);

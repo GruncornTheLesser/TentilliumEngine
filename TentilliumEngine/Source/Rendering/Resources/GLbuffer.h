@@ -29,7 +29,7 @@ public:
 	~GLbuffer();
 
 	template<typename t>
-	void assign(t* data) {
+	void assign(const t* data) {
 		assign(0, sizeof(t), data);
 	}
 

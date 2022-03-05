@@ -41,35 +41,32 @@
     <ClCompile Include="Source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Rendering\AppWindow.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\Transform.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\FlagManager.h">
+      <Filter>Header Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
+      <Filter>Source Files\Rendering\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Mesh.cpp">
+      <Filter>Source Files\Rendering\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Model.cpp">
+      <Filter>Source Files\Rendering\Resources</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\AppWindow.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\FrameBuffer.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Components\Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Components\FlagManager.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Model.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,19 +105,24 @@
     <ClInclude Include="Source\Rendering\AppWindow.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Camera.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Rendering\FrameBuffer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
-    <ClInclude Include="Source\Components\Flag.h" />
-    <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
-    <ClInclude Include="Source\Rendering\Resources\Model.h" />
+    <ClInclude Include="Source\Components\Flag.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\Mesh.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\Camera.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Rendering\Resources\Model.h">
+      <Filter>Header Files\Rendering\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

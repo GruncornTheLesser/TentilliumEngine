@@ -4,13 +4,17 @@
 #include <string>
 struct Texture : Resource<Texture>
 {
+	friend class Scene;
 private:
 	unsigned int m_handle;
 
+	Texture(void* aiTex);
 public:
 	Texture(std::string filepath);
-	Texture(unsigned int width, unsigned int height, unsigned int channels, void* data = nullptr);
-
+	Texture(int width, int height, int channels);
+	Texture(int width, int height, int channels, float* data = nullptr);
+	Texture(int width, int height, int channels, unsigned int* data = nullptr);
+	//Texture(int width, int height, int channels, unsigned char* data = nullptr);
 	~Texture();
 
 	int getWidth();

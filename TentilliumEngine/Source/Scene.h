@@ -1,9 +1,11 @@
 #pragma once
+
 #include <entt/entity/registry.hpp>
 #include "Components/Hierarchy.h"
 #include "Components/Transform.h"
-#include "Components/Camera.h"
-
+#include "Rendering/Resources/Model.h"
+#include "Rendering/Resources/Shader.h"
+#include "Rendering/Resources/Camera.h"
 
 using entt::literals::operator""_hs;
 
@@ -18,11 +20,16 @@ using entt::literals::operator""_hs;
 
 class Scene : private entt::basic_registry<entt::entity>
 {
-private:
-	unsigned int currentVersion = 0;
+	using entt::basic_registry<entt::entity>::try_get;
 
 public:
-	Scene() {}
+	Camera camera;
+
+public:
+	Scene();
+
+
+	entt::entity Load(std::string filepath);
 
 	template<class ... Components>
 	entt::entity CreateEntity(Components ... components)
@@ -38,7 +45,7 @@ public:
 		((void)emplace<Components>(e, components), ...);
 	}
 
-	// systems
+	void Testing(float time);
 
 	// hierarchy/transform system
 private:
@@ -46,13 +53,20 @@ private:
 	VIEW(viewTransform, GET(Transform), EXC())
 	VIEW(viewHierarchy, GET(Hierarchy), EXC())
 	VIEW(viewRootTransform, GET(Transform), EXC(Hierarchy))
-
-	VIEW(viewCamera, GET(Camera), EXC())
 public:
-
 	void HierarchyUpdate();
 	void TransformUpdate();
 
+private:
+	VIEW(viewCamera, GET(Camera), EXC())
+public:
+	void updateCameraMatrix();
+
+private:
+	VIEW(viewRenderer, GET(Model, Transform), EXC())
+public:
+	void UpdateUniforms();
+	void Render(const Shader& shader);
 };
 
 #undef OWN

@@ -3,39 +3,46 @@
 #include <glfw3.h>	// GL framework
 
 
-Model::Model(std::vector<std::shared_ptr<Mesh>> p_meshes, std::vector<std::shared_ptr<Material>> p_materials)
-	: meshes(std::min(p_meshes.size(), p_materials.size()))
+Model::RenderInfo::RenderInfo(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
 {
-	for (int i = 0; i < meshes.size(); i++) 
-	{
-		glGenVertexArrays(1, &(meshes[i].VAO));
+	glGenVertexArrays(1, &VAO);
 
-		glBindVertexArray(meshes[i].VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, p_meshes[i]->VBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_meshes[i]->IBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->IBO);
 
-		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		//glEnableVertexAttribArray(0);
-		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		//glEnableVertexAttribArray(1);
+	mesh->vertexSetup();
 
-		p_meshes[i]->vertexSetup();
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	size /= 4;
 
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &(meshes[i].Size));
-		meshes[i].Size /= 4; 
+	glBindVertexArray(NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
 
-		glBindVertexArray(NULL);
-		glBindBuffer(GL_ARRAY_BUFFER, NULL);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
-	}
+	this->mesh = mesh;
+	this->material = material;
+}
+
+Model::RenderInfo::~RenderInfo()
+{
+	glDeleteVertexArrays(1, &VAO);
+}
+
+Model::Model(std::vector<std::shared_ptr<Mesh>> meshes, std::vector<std::shared_ptr<Material>> materials)
+{
+	m_meshes = std::shared_ptr<std::vector<RenderInfo>>(new std::vector<RenderInfo>());
+
+	for (int i = 0; i < std::min(meshes.size(), materials.size()); i++)
+		m_meshes->emplace_back(meshes[i], materials[i]);
 }
 
 void Model::draw()
 {
-	for (RenderInfo renderInfo : meshes) 
+	for (RenderInfo& renderInfo : *m_meshes)
 	{
 		glBindVertexArray(renderInfo.VAO);
-		glDrawElements(GL_TRIANGLES, renderInfo.Size, GL_UNSIGNED_INT, NULL);
+		glDrawElements(GL_TRIANGLES, renderInfo.size, GL_UNSIGNED_INT, NULL);
 	}
-
 }
+

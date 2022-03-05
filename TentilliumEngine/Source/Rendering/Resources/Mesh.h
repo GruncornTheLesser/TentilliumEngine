@@ -1,5 +1,6 @@
 #pragma once
 #include "Resource.h"
+#include <vector>
 
 typedef void (*callback_setupVertex)();
 
@@ -18,12 +19,17 @@ void setupVertex()
 struct Mesh : Resource<Mesh>
 {
 	friend class Model;
+	friend class Scene;
 private:
 	unsigned int VBO;
 	unsigned int IBO;
 	callback_setupVertex vertexSetup; // difficult to load
+
+	Mesh(void* aiMesh);
 public:
 	Mesh(const float* vertexdata, size_t vertexsize, const unsigned int* indexdata, size_t indexsize, callback_setupVertex vertex);
+	Mesh(std::vector<float>& vertexdata, std::vector<unsigned int>& indexdata, callback_setupVertex vertex);
+
 };
 
 

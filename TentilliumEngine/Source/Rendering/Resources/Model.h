@@ -7,20 +7,22 @@
 struct Model
 {
 private:
-	struct RenderInfo
-	{
-		unsigned int VAO;
-		unsigned int Mat;
-		int Size;
+	struct RenderInfo 
+	{	
+		int size;
+		unsigned int VAO;						// non transportable between windows
+		std::shared_ptr<Mesh> mesh;				
+		std::shared_ptr<Material> material;
+		//entt::entity entityMap;
+
+		RenderInfo(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+		~RenderInfo();
 	};
-	
-	std::vector<RenderInfo> meshes;
-	
+
+	std::shared_ptr<std::vector<RenderInfo>> m_meshes;
 
 public:
-	Model() {}
 	Model(std::vector<std::shared_ptr<Mesh>> p_meshes, std::vector<std::shared_ptr<Material>> p_materials);
 
 	void draw();
-
 };

@@ -6,19 +6,60 @@
 #include <glfw3.h>	// GL framework
 #include <exception>
 #include <iostream>
+#include <assimp/scene.h>
 
-Texture::Texture(std::string filepath)
+Texture::Texture(void* aiTex)
 {
-	int width, height;
-	unsigned int format;
-	unsigned int min_filter = GL_NEAREST;
-	unsigned int mag_filter = GL_NEAREST;
+	aiTexture* texPtr = static_cast<aiTexture*>(aiTex);
 
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (texPtr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (texPtr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
+
+	if (texPtr->mHeight == 0) // if embedded compressed texture
+	{
+		int width, height, channels;
+		void* data = stbi_load_from_memory((unsigned char*)(texPtr->pcData), texPtr->mWidth, &width, &height, &channels, 4);
+		if (data == nullptr) {
+			throw std::exception();
+		}
+
+		switch (channels)
+		{
+		case 1: channels = GL_RED; break;
+		case 2: channels = GL_RG; break;
+		case 3: channels = GL_RGB; break;
+		case 4: channels = GL_RGBA; break;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		
+		stbi_image_free(data);
+	}
+	else if (false)	// if embedded uncompressed texture
+	{
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texPtr->mWidth, texPtr->mHeight, 0, GL_BGRA, GL_FLOAT, texPtr->pcData);
+	}
+	else
+	{
+					// if non embedded texture
+	}
+
+	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
+Texture::Texture(std::string filepath)
+{
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+
+	int width, height, channels;
 	stbi_set_flip_vertically_on_load(true);
-	uint8_t* data = stbi_load(filepath.c_str(), &width, &height, (int*)(&format), 4); // 4 = desired no of channels
+	void* data = stbi_load(filepath.c_str(), &width, &height, &channels, 4);
 
 	if (!data)
 	{
@@ -26,8 +67,32 @@ Texture::Texture(std::string filepath)
 		throw std::exception();
 	}
 
-	// this only works because 0-15 unsigned int = 0-15 signed int
-	// possibly platform dependant
+	switch (channels)
+	{
+	case 1: channels = GL_RED; break;
+	case 2: channels = GL_RG; break;
+	case 3: channels = GL_RGB; break;
+	case 4: channels = GL_RGBA; break;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	stbi_image_free(data);
+
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
+Texture::Texture(int width, int height, int format)
+{
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+
 	switch (format)
 	{
 	case 1: format = GL_RED; break;
@@ -36,38 +101,58 @@ Texture::Texture(std::string filepath)
 	case 4: format = GL_RGBA; break;
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	stbi_image_free(data);
-
-	//glGenerateMipmap(GL_TEXTURE_2D);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)min_filter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)mag_filter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	glBindTexture(GL_TEXTURE_2D, NULL);
-}
-
-Texture::Texture(unsigned int width, unsigned int height, unsigned int channels, void* data)
-{
-
-	glGenTextures(1, &m_handle);
-	glBindTexture(GL_TEXTURE_2D, m_handle);
-
-	switch (channels)
-	{
-	case 1: glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data); break;
-	case 2: glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, width, height, 0, GL_RG, GL_UNSIGNED_BYTE, data); break;
-	case 3: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); break;
-	case 4: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); break;
-	}
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
+	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
+Texture::Texture(int width, int height, int format, float* data)
+{
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+
+	switch (format)
+	{
+	case 1: format = GL_RED; break;
+	case 2: format = GL_RG; break;
+	case 3: format = GL_RGB; break;
+	case 4: format = GL_RGBA; break;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_FLOAT, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
+Texture::Texture(int width, int height, int format, unsigned int* data)
+{
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+
+	switch (format)
+	{
+	case 1: format = GL_RED; break;
+	case 2: format = GL_RG; break;
+	case 3: format = GL_RGB; break;
+	case 4: format = GL_RGBA; break;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_INT, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 	glBindTexture(GL_TEXTURE_2D, NULL);
 }

@@ -13,21 +13,23 @@ private:
 	inline static std::map<std::string, std::weak_ptr<t>> cache;
 
 public:
-	Resource() { std::cout << "resource is being allocated" << std::endl; }
-	~Resource() { std::cout << "resource is being deleted" << std::endl; }
+	//Resource() { std::cout << "resource is being allocated" << std::endl; }
+	//~Resource() { std::cout << "resource is being deleted" << std::endl; }
 
 
-	const static std::shared_ptr<t> Get(std::string filepath)
+	const static std::shared_ptr<t> get(std::string filepath)
 	{
 		auto it = cache.find(filepath);
 		if (it != cache.end() && !(it->second.expired()))
 			return std::shared_ptr<t>(it->second);
-
-		auto ptr = std::shared_ptr<t>(new t(filepath));
-		cache.emplace(filepath, ptr);
-
-		return ptr;
+		
+		return stash(filepath, new t(filepath));
 	}
 
-	
+	const static std::shared_ptr<t> stash(std::string filepath, t* resource)
+	{
+		auto ptr = std::shared_ptr<t>(resource);
+		cache.emplace(filepath, ptr);
+		return ptr;
+	}
 };

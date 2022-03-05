@@ -3,10 +3,9 @@
 #include <glm.hpp>	// GL maths
 #include <gtc/matrix_transform.hpp>
 #include <iostream>
+
+
 #include "Scene.h"
-
-
-
 #include "Rendering/AppWindow.h"
 #include "Rendering/Resources/Model.h"
 #include "Rendering/Resources/Shader.h"
@@ -15,8 +14,7 @@
 #include "Components/Transform.h"
 
 using namespace glm;
-
-const float vertices[80] = {
+std::vector<float> vertices = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // 0
 	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // 1
 	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // 2
@@ -34,7 +32,7 @@ const float vertices[80] = {
 	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // 14
 	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, // 15
 };
-const unsigned int indices[36] = {	// mesh indices
+std::vector<unsigned int> indices = {	// mesh indices
 	0, 2, 1, 2, 0, 3, 		// e(0, 2)	 = ---,++-	// back
 	4, 5, 6, 6, 7, 4,		// e(4, 6)   =	--+,+++	// front
 	8, 9, 10, 10, 4, 8,		// e(8, 10)  = -++,---	// right
@@ -53,99 +51,45 @@ public:
 
 	std::shared_ptr<Shader> shader;
 	std::shared_ptr<Texture> texture;
-	std::shared_ptr<Mesh> mesh; // meshes are local to the window
-	std::shared_ptr<Material> material;
-	Model model;
-
-	Transform transform;
-	glm::mat4 perspective;
 
 	TestWindow(const char* imgpath, const char* title)
 		: AppWindow(800, 600, title)
 	{
 		// load shared resources
-		shader = Shader::Get("Resources/shaders/Default.shader");
-		unsigned int data[] = { 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, };
-		texture = std::shared_ptr<Texture>(new Texture(2, 2, 4, (void*)data));
-		//texture = Texture::Get(imgpath);
-		// create load unique resource
-		//Shader unique("Resources/shaders/Default.shader");
+		float data[] = { 0, 0, 64, 64, 0, 64, 64, 0, 64, 0, 0, 64, };
+		//texture = Texture::stash("hehehe", new Texture(2, 2, 3, data));
+		texture = Texture::get(imgpath);
 
+		auto material = std::shared_ptr<Material>(new Material(glm::vec3(1, 2, 3), glm::vec3(4, 5, 5), glm::vec3(4, 3, 2), 1));
+		auto mesh = std::shared_ptr<Mesh>(new Mesh(vertices, indices, setupVertex<glm::vec3, glm::vec2>));
+		auto e = scene.CreateEntity(Transform(vec3(0, 0, -2)), Model({ mesh }, { material }));
 
-		// load function hasnt been finished
-		material = std::shared_ptr<Material>(new Material(glm::vec3(1, 2, 3), glm::vec3(4, 5, 5), glm::vec3(4, 3, 2), 1));
-		//material = Material::Load("Resources/materials/BLU.mtl");
-		mesh = std::shared_ptr<Mesh>(new Mesh(vertices, sizeof(vertices), indices, sizeof(indices), setupVertex<glm::vec3, glm::vec2>));
-		// .mtl, gltf
-
-		// local to window
-		model = Model({ mesh }, { material });
-
+		shader = Shader::get("Resources/shaders/Default.shader");
 		shader->setUniform1i("tex", 0);		// tells shader to use texture block 0
-
-
-		perspective = glm::perspective(2.0f, 4.0f / 3.0f, 0.001f, 100.0f);
-	}
+			}
 	
 	~TestWindow() {
 		std::cout << "window go bye bye \n";
 	}
-
-
 
 	void onDraw(float delta)
 	{
 		glActiveTexture(GL_TEXTURE0);		// selects which texture unit subsequent texture state calls will affect. 
 		texture->bind();					// subsequent texture state call. ie adds img texture to unit GL_TEXTURE0
 
-		// update transform
-		transform.setPosition(vec3(0, 0, -5));
-		transform.setRotation(quat(vec3(0.5f * sin(0.3f * glfwGetTime()), glfwGetTime(), 0)));
-		transform.UpdateLocal();
-		transform.UpdateWorld();
-
-		// adjust to camera perspective
-		mat4 mvp = perspective * (mat4)transform;
-		shader->setUniformMatrix4f("MVP", mvp);	// set uniform
-
-		shader->bind();							// use shader program
-		model.draw();
+		scene.Testing(glfwGetTime());
+		scene.TransformUpdate();
+		scene.Render(*shader);
 	}
 };
 
+
 int main(int argc, char** argv)
 {
-	/*
-	Scene scn;
-
-	auto e0 = scn.CreateEntity();
-	auto e1 = scn.CreateEntity();
-	auto e2 = scn.CreateEntity();
-	auto e3 = scn.CreateEntity();
-	auto e4 = scn.CreateEntity();
-	auto e5 = scn.CreateEntity();
-	auto e6 = scn.CreateEntity();
-	auto e7 = scn.CreateEntity();
-
-	scn.AddComponents(e7, Hierarchy(e4), Transform(vec3(19, 1, 7)));
-	scn.AddComponents(e6, Hierarchy(e4), Transform(vec3(17, 1, 6)));
-	scn.AddComponents(e5, Hierarchy(e4), Transform(vec3(13, 1, 5)));
-	scn.AddComponents(e4, Hierarchy(e1), Transform(vec3(11, 1, 4)));
-	scn.AddComponents(e3, Hierarchy(e0), Transform(vec3(7,  1, 3)));
-	scn.AddComponents(e2, Hierarchy(e0), Transform(vec3(5,  1, 2)));
-	scn.AddComponents(e1, Hierarchy(e0), Transform(vec3(3,  1, 1)));
-	scn.AddComponents(e0,				 Transform(vec3(2,  1, 0)));
-
-	//scn.TagUpdate();
-	//scn.Calculate();
-	*/
 	{
-		//auto win1 = TestWindow("Resources/images/Image1.png", "wnd 1");
-		//auto win2 = TestWindow("Resources/images/Image2.png", "wnd 2");
-		//auto win3 = TestWindow("Resources/images/Image3.png", "wnd 3");
-		auto win4 = TestWindow("Resources/images/Image4.png", "wnd 4");
-
-		AppWindow::Init({ &win4 });
-
+		auto win1 = TestWindow("Resources/images/Image4.png", "wnd 1");
+		win1.scene.Load("Resources/meshes/crate/glTF/wooden crate.glb");
+		auto win2 = TestWindow("texture", "I WANT SOMETHING TO HAPPEN");
+		AppWindow::Init({ &win1, &win2 });
 	}
 }
