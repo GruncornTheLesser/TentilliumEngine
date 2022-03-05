@@ -13,75 +13,74 @@
 
 Scene::Scene() : camera(2.0f, 4.0f / 3.0f, 0.1f, 100.0f) { }
 
-#define ResourceFile(dir, res, ptr) dir + "/" + #res + "/" + std::to_string((size_t)(ptr)) + (std::string(#res)).substr(0, 3)
-
+#define EMBEDDEDFILE(dir, res, ptr) (dir + "/" + #res + "/" + std::to_string((size_t)(ptr))).c_str()
 entt::entity Scene::Load(std::string filepath)
 {
 	std::string dir = filepath.substr(0, filepath.find_first_of('.'));
 	
 	Assimp::Importer imp;
 	const aiScene* scene = imp.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
-
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cerr << "ERROR::ASSIMP::" << imp.GetErrorString() << std::endl;
 		throw std::exception();
 	}
 
-	std::vector<std::shared_ptr<Texture>> textures;
-
-	// meshes, materials, textures, animations, 
-	if (scene->HasTextures())
-	{
-		aiTexture** it = scene->mTextures;
-		for (int i = 0; i < scene->mNumTextures; i++)
-		{
-			/*ResourceFile(dir, textures, *it)*/
-			emplace<std::shared_ptr<Texture>>(create(), Texture::stash(std::string("texture"), new Texture(*it)));
-		}
-	}
-	
-	if (scene->HasMaterials())
-	{
-		aiMaterial** it = scene->mMaterials;
-		for (int i = 0; i < scene->mNumMaterials; i++)
-			std::cout << "materials have not been implemented yet\n";
-			//Material::stash(ResourceFile(dir, materials, *it), new Material(*it++));
-	}
-	
-	if (scene->HasAnimations())
-	{
-		aiAnimation** it = scene->mAnimations;
-		for (int i = 0; i < scene->mNumAnimations; i++)
-			std::cout << "animations have not been implemented yet\n";
-	}
-	
-	if (scene->HasLights())
-	{
-		aiLight** it = scene->mLights;
-		for (int i = 0; i < scene->mNumAnimations; i++)
-			std::cout << "lights have not been implemented yet\n"; // god on day 3
-	}
-	
-
+	std::map<aiNode*, entt::entity> entt_lookup;
 	std::stack<aiNode*> sceneStack;
 	sceneStack.push(scene->mRootNode);
-	do {// depth first iteration
+	do {
+		
 		aiNode* node = sceneStack.top();
 		sceneStack.pop();
+		
+		// create entity
+		entt::entity e = create(); 
+		entt_lookup.emplace(node, e);
 
-		//auto e = CreateEntity();
-		//emplace<Transform>(e, node->mTransformation);
-		//if (node->mParent)
-		//	emplace<Hierarchy>(e, e); // get parent entity
+		if (node->mParent) 
+			emplace<Hierarchy>(e, entt_lookup[node->mParent]);
+
+		emplace<Transform>(e, *(glm::mat4*)(&(node->mTransformation)));	// may need swizzling but i think its fine
+
+		if (node->mNumMeshes > 0)
+		{
+			std::vector<std::shared_ptr<Mesh>> meshes;
+			for (int i = 0; i < node->mNumMeshes; i++)
+			{
+				auto aiMsh = *(scene->mMeshes);
+				auto aiMat = scene->mMaterials[aiMsh->mMaterialIndex];
+				auto mat = Material::get_emplace(EMBEDDEDFILE(dir, material, aiMat), aiMat);
+				meshes.push_back(Mesh::get_emplace(EMBEDDEDFILE(dir, texture, aiMsh), aiMsh, mat));
+			}
+			emplace<Model>(e, meshes);
+		}
+		
+		
+			
+		//emplace<Light>(e, );
+
+		// appropriate components add hierarchy, transform, animation, light, Mesh/Model, bone
 
 		for (int i = 0; i < node->mNumChildren; i++)
 			sceneStack.push(node->mChildren[i]);
 
 	} while (!sceneStack.empty()); 
 
-	return (entt::entity)0;
+	/*
+	if (scene->HasAnimations())
+		emplace<AnimationHandler>(entt_lookup[scene->mRootNode], scene->mAnimations, scene->mNumAnimations);
+	*/
+	return entt_lookup[scene->mRootNode]; // return scene root
 }
+
+
+
+
+
+
+
+
 
 void Scene::HierarchyUpdate()
 {
@@ -96,6 +95,8 @@ void Scene::HierarchyUpdate()
 		hierarchy.depth = 1;
 		if (auto parent = try_get<Hierarchy>(hierarchy.parent))
 			hierarchy.depth += parent->depth;
+
+		std::cout << (int)entity << " - " << hierarchy.depth << std::endl;
 	}
 
 	// simplest solution -> doesnt necessarily work
@@ -152,6 +153,9 @@ void Scene::TransformUpdate()
 
 
 
+
+
+
 void Scene::Render(const Shader& shader)
 {
 	for (auto [entity, model, transform] : viewRenderer.each())
@@ -167,6 +171,10 @@ void Scene::Render(const Shader& shader)
 void Scene::Testing(float time)
 {
 	// update transform
-	auto transform = try_get<Transform>((entt::entity)0);
-	transform->setRotation(glm::quat(glm::vec3(0.5f * sin(0.3f * time), time, 0)));
+
+	for (auto [entity, transform] : viewTransform.each()) {
+		transform.setRotation(glm::quat(glm::vec3(0.5f * sin(0.3f * time), time, 0)));
+	}
+
+	
 }

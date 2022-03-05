@@ -2,6 +2,17 @@
 #include <gtc/matrix_transform.hpp>
 #include <algorithm>
 
+Transform::Transform(glm::mat4 matrix) : 
+	localMatrix(matrix),
+	worldMatrix(1)
+{
+	localMatrix = matrix;
+	Decompose(localMatrix, position, scale, rotation);
+
+	worldUpdateFlag.Raise();
+	localUpdateFlag.Lower();
+}
+
 Transform::Transform(glm::vec3 position, glm::vec3 scale, glm::quat rotation) :
 	scale(scale),
 	position(position),

@@ -11,5 +11,7 @@ class FlagManager
 	void ClearFlags()
 	{
 		Flag::currentVersion++;
+		if (!Flag::currentVersion)		// to garentee 0 Flag version is never 0
+			Flag::currentVersion++;
 	}
 };

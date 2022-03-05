@@ -3,27 +3,48 @@
 #include "Resource.h"
 #include "GLbuffer.h"
 
-struct Material final : GLbuffer, public Resource<Material>
+//TODO: FINISH MATERIAL
+
+struct Material : GLbuffer, public Resource<Material>
 {
     friend class Model;
 
 public:
-    Material(void* aiMaterial) : GLbuffer(GL_UNIFORM_BUFFER, 12) { }
-    Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shine)
-        : GLbuffer(GL_UNIFORM_BUFFER, 12)
+    Material(void* aiPtr) : GLbuffer(GL_UNIFORM_BUFFER, 0) 
     { 
-        assign(0, sizeof(glm::vec3), (&ambient));
-        assign(4, sizeof(glm::vec3), (&diffuse));
-        assign(8, sizeof(glm::vec3), (&specular));
-        assign(11, sizeof(float), (&shine));
+       /*
+
+        auto aiMat = static_cast<aiMaterial*>(aiPtr);
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_DIFFUSE); i++)
+        {
+
+        }
+
+        auto aiMat = static_cast<aiMaterial*>(aiPtr);
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_NORMALS); i++)
+        {
+
+        }
+
+        auto aiMat = static_cast<aiMaterial*>(aiPtr);
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_AMBIENT); i++)
+        {
+
+        }
+        */
+    }
+    Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shine)
+        : GLbuffer(GL_UNIFORM_BUFFER, 0)
+    { 
+
     }
 
-    void setAmbient(glm::vec3 value) { assign(0, sizeof(glm::vec3), &value); }
+    void setAmbient(glm::vec3 value) { }
 
-    void setDiffuse(glm::vec3 value) { assign(4, sizeof(glm::vec3), &value); }
+    void setDiffuse(glm::vec3 value) { }
 
-    void setSpecular(glm::vec3 value) { assign(8, sizeof(glm::vec3), &value); }
+    void setSpecular(glm::vec3 value) { }
 
-    void setShine(float value) { assign(11, sizeof(float), (&value)); }
+    void setShine(float value) { }
 
 };

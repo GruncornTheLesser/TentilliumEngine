@@ -17,8 +17,8 @@ private:
 	glm::mat4 localMatrix;
 	glm::mat4 worldMatrix;
 
-	Transform(void* aiTransform) {};
 public:
+	Transform(glm::mat4 localMatrix);
 	Transform(glm::vec3 position = glm::vec3(0, 0, 0), glm::vec3 scale = glm::vec3(1, 1, 1), glm::quat rotation = glm::quat(glm::vec3(0, 0, 0)));
 
 public:

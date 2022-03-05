@@ -17,6 +17,8 @@ public:
 	std::string getTitle();
 	void setTitle(std::string title);
 
+	void refresh();
+
 	virtual void onDraw(float delta) = 0;
 	//virtual void onProcess(float delta) = 0;
 	//virtual void onKeyDown() = 0;

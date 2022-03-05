@@ -43,6 +43,9 @@ static void resize_callback(GLFWwindow* wnd, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+
+
+
 GLFWwindow* glfwContext;
 
 AppWindow::AppWindow(int width, int height, std::string title)
@@ -71,12 +74,14 @@ AppWindow::AppWindow(int width, int height, std::string title)
 		glfwContext = static_cast<GLFWwindow*>(m_window);
 		if (glewInit() != GLEW_OK)
 			throw std::runtime_error("[Engine Error] : GLEW failed to initialize");	
-	
-		const char* vendor = (const char*)glGetString(GL_VENDOR);
-		const char* renderer = (const char*)glGetString(GL_RENDERER);
-		const char* language = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-		std::cout << renderer << "\n" << language << std::endl;
+		const char* renderer = (const char*)glGetString(GL_RENDERER);
+		const char* vendor = (const char*)glGetString(GL_VENDOR);
+		const char* version = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+		//std::cout << renderer << std::endl;
+		//std::cout << vendor << std::endl;
+		std::cout << "OpenGL - " << version << std::endl;
 	}
 
 	glfwSetWindowUserPointer(static_cast<GLFWwindow*>(m_window), this);
@@ -87,8 +92,8 @@ AppWindow::AppWindow(int width, int height, std::string title)
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);		// resize event
 	
 	//  per frame buffer (i think)
-	glClearColor(0, 0, 0, 1); 
-	glClearDepth(1);
+	//glClearColor(0, 0, 0, 1); 
+	//glClearDepth(1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
@@ -97,8 +102,7 @@ AppWindow::AppWindow(int width, int height, std::string title)
 
 AppWindow::~AppWindow()
 {
-	std::cout << "destroying: " << getTitle() << std::endl;
-	if (m_window)
+	if (m_window) // if window not already destroyed -> destroy it
 		glfwDestroyWindow(static_cast<GLFWwindow*>(m_window));
 }
 
@@ -118,40 +122,62 @@ void AppWindow::setTitle(std::string title)
 	glfwSetWindowTitle(static_cast<GLFWwindow*>(m_window), title.c_str());
 }
 
+void AppWindow::refresh()
+{
+	glfwSwapBuffers(static_cast<GLFWwindow*>(m_window));
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void AppWindow::Init(std::vector<AppWindow*> windows)
 {
+	// check input
+	for (auto it = windows.begin(); it != windows.end(); )
+	{
+		if (!(*it)->m_window) // if window invalid
+		{
+			std::cerr << "trying to use invalid window" << std::endl;
+			it = windows.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+	
+	if (windows.empty()) // if no valid windows found
+		return;
+
+	// time setup
 	glfwSetTime(0);
-	double temp, delta, time = 0;
+	double delta = 0, time = 0;
 	for (;;)
 	{
-		temp = glfwGetTime();
-		delta = temp - time;
-		time = temp;
-
-		for (auto wnd = windows.begin(); wnd != windows.end(); )
+		for (auto it = windows.begin(); it != windows.end(); ) // iterate over all windows
 		{
-			if (glfwWindowShouldClose(static_cast<GLFWwindow*>((*wnd)->m_window))) 
+			if (glfwWindowShouldClose(static_cast<GLFWwindow*>((*it)->m_window))) // if window has been closed
 			{
-				glfwDestroyWindow(static_cast<GLFWwindow*>((*wnd)->m_window));
-				(*wnd)->m_window = nullptr;
-				wnd = windows.erase(wnd);
+				glfwDestroyWindow(static_cast<GLFWwindow*>((*it)->m_window));	// destroy window so its no longer visible
+				(*it)->m_window = nullptr;										// invalidate ptr
+				it = windows.erase(it);											// erase from windows
 
-				if (!windows.empty()) 
+				if (!windows.empty())											// if windows is not empty, continue loop
 					continue;
 				
-				glfwContext = nullptr;
-				glfwTerminate();
-				return;
+				glfwContext = nullptr;											// invalidate context
+				glfwTerminate();												// terminate glfw
+				return;															// return
 			}
 
-			glfwMakeContextCurrent(static_cast<GLFWwindow*>((*wnd)->m_window));
-			glfwPollEvents(); // -> goes to callbacks eg onkey, onMouse etc
-			(*wnd)->onDraw(delta);
+			glfwMakeContextCurrent(static_cast<GLFWwindow*>((*it)->m_window));	// render to this window
+			glfwPollEvents(); // -> goes to callbacks eg onkey, onMouse etc		// execute events
+			(*it)->onDraw(delta);												// draw to window
 
-			glfwSwapBuffers(static_cast<GLFWwindow*>((*wnd)->m_window));
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			wnd++;
+			it++;
 		}
+
+		// calculate delta time from last frame
+		double temp = glfwGetTime();
+		delta = temp - time;
+		time = temp;
 	}
 }
