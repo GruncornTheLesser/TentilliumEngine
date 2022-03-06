@@ -12,7 +12,7 @@
 #include "Rendering/Resources/Texture.h"
 #include "Rendering/Resources/GLbuffer.h"
 #include "Components/Transform.h"
-
+#include <stdint.h>
 using namespace glm;
 std::vector<float> vertices = {
 	-0.5f, -0.5f, -0.5f, 
@@ -62,12 +62,12 @@ public:
 		: AppWindow(800, 600, title)
 	{
 		// load shared resources
-		unsigned int temp[] = { 0, 0, 64, 64, 0, 64, 64, 0, 64, 0, 0, 64, };
-		texture = Texture::stash("hehehe", new Texture(2, 2, 3, temp));
-		texture = Texture::get(imgpath);
-		
-		//scene.Load("Resources/meshes/crate/glTF/wooden crate.glb");
-		scene.HierarchyUpdate();
+		float temp[12] = { 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1 };
+		//texture = Texture::stash("uh oh", new Texture(2, 2, 3, temp));
+		//texture = Texture::get(imgpath);
+		scene.Load("Resources/meshes/crate/glTF/wooden crate.glb");
+		texture = Texture::get("test_texture");
+		//scene.HierarchyUpdate();
 
 		auto material = std::shared_ptr<Material>(new Material(glm::vec3(1, 2, 3), glm::vec3(4, 5, 5), glm::vec3(4, 3, 2), 1));
 		auto mesh = std::shared_ptr<Mesh>(new Mesh(material, indices, vertices, &tCoords));

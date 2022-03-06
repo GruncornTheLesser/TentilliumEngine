@@ -58,7 +58,7 @@ Texture::Texture(void* aiTex)
 		
 		stbi_image_free(data);
 	}
-	else if (false)	// if embedded uncompressed texture -> needs testing
+	else if (false)	// if embedded uncompressed texture
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texPtr->mWidth, texPtr->mHeight, 0, GL_BGRA, GL_FLOAT, texPtr->pcData);
 	}

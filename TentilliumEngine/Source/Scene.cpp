@@ -26,6 +26,8 @@ entt::entity Scene::Load(std::string filepath)
 		throw std::exception();
 	}
 
+	emplace<std::shared_ptr<Texture>>(create(), Texture::stash("test_texture", new Texture(*scene->mTextures)));
+
 	std::map<aiNode*, entt::entity> entt_lookup;
 	std::stack<aiNode*> sceneStack;
 	sceneStack.push(scene->mRootNode);
@@ -48,10 +50,10 @@ entt::entity Scene::Load(std::string filepath)
 			std::vector<std::shared_ptr<Mesh>> meshes;
 			for (int i = 0; i < node->mNumMeshes; i++)
 			{
-				auto aiMsh = *(scene->mMeshes);
-				auto aiMat = scene->mMaterials[aiMsh->mMaterialIndex];
-				auto mat = Material::get_emplace(EMBEDDEDFILE(dir, material, aiMat), aiMat);
-				meshes.push_back(Mesh::get_emplace(EMBEDDEDFILE(dir, texture, aiMsh), aiMsh, mat));
+				//auto aiMsh = *(scene->mMeshes);
+				//auto aiMat = scene->mMaterials[aiMsh->mMaterialIndex];
+				//auto mat = Material::get_emplace(EMBEDDEDFILE(dir, material, aiMat), aiMat);
+				//meshes.push_back(Mesh::get_emplace(EMBEDDEDFILE(dir, texture, aiMsh), aiMsh, mat));
 			}
 			emplace<Model>(e, meshes);
 		}
