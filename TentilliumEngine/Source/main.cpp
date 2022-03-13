@@ -13,7 +13,11 @@
 #include "Rendering/Resources/GLbuffer.h"
 #include "Components/Transform.h"
 #include <stdint.h>
+
+
 using namespace glm;
+
+/*
 std::vector<float> vertices = {
 	-0.5f, -0.5f, -0.5f, 
 	 0.5f, -0.5f, -0.5f,  
@@ -32,12 +36,10 @@ std::vector<float> vertices = {
 	 0.5f, -0.5f, -0.5f,  
 	-0.5f,  0.5f,  0.5f  
 };
-
 std::vector<float> tCoords = {
 	0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 	0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
 };
-
 std::vector<unsigned int> indices = {	// mesh indices
 	0, 2, 1, 2, 0, 3, 		// e(0, 2)	 = ---,++-	// back
 	4, 5, 6, 6, 7, 4,		// e(4, 6)   =	--+,+++	// front
@@ -46,6 +48,7 @@ std::vector<unsigned int> indices = {	// mesh indices
 	10, 14, 5, 5, 4, 10,	// e(5, 10)  = +-+,---	// bottom
 	2, 3, 11, 11, 3, 15		// e(3, 11)  = -+-,+++	// top
 };
+*/
 
 class TestWindow : public AppWindow
 {
@@ -61,19 +64,31 @@ public:
 	TestWindow(const char* imgpath, const char* title)
 		: AppWindow(800, 600, title)
 	{
+		
 		// load shared resources
-		float temp[12] = { 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1 };
-		//texture = Texture::stash("uh oh", new Texture(2, 2, 3, temp));
-		//texture = Texture::get(imgpath);
-		scene.Load("Resources/meshes/crate/glTF/wooden crate.glb");
-		texture = Texture::get("test_texture");
+		//float temp[12] = { 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1 }; // this is the data in the image
+		//texture = Texture::stash(imgpath, new Texture(2, 2, 3, temp));
+		//texture = Texture::load(imgpath);
 		//scene.HierarchyUpdate();
 
-		auto material = std::shared_ptr<Material>(new Material(glm::vec3(1, 2, 3), glm::vec3(4, 5, 5), glm::vec3(4, 3, 2), 1));
-		auto mesh = std::shared_ptr<Mesh>(new Mesh(material, indices, vertices, &tCoords));
-		auto e = scene.CreateEntity(Transform(vec3(0, 0, -2)), Model({ mesh }));
 
-		shader = Shader::get("Resources/shaders/Default.shader");
+		//auto material = std::shared_ptr<Material>(new Material());
+		//auto mesh = std::shared_ptr<Mesh>(new Mesh(material, indices, vertices, &tCoords));
+		//auto e = scene.create();
+		//scene.emplace<Transform>(e, glm::vec3(0, 0, -2));
+		//scene.emplace<Model>(e, std::vector<std::shared_ptr<Mesh>>{ mesh });
+		//texture = Texture::load(imgpath);
+
+		scene.load("Resources/meshes/animals/fbx/deer_1.fbx");
+		//scene.load("Resources/meshes/animals/fbx/fox.fbx");
+		//scene.load("Resources/meshes/animals/fbx/bear.fbx");
+		texture = Texture::load("Resources/meshes/animals/texture/wild_animals_map.png");
+
+
+		//float temp[12] = { 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1 }; // this is the data in the image
+		texture = Texture::load("Resources/meshes/animals/texture/wild_animals_map.png");
+
+		shader = Shader::load("Resources/shaders/Default.shader");
 		shader->setUniform1i("tex", 0);		// tells shader to use texture block 0
 	}
 
@@ -90,12 +105,8 @@ public:
 	}
 };
 
-
 int main(int argc, char** argv)
 {
-	{
-		auto win1 = TestWindow("Resources/images/Image4.png", "wnd 1");
-
-		AppWindow::Init({ &win1 });
-	}
+	auto win1 = new TestWindow("Resources/images/Image4.png", "wnd 1");
+	AppWindow::Init({ win1 });
 }

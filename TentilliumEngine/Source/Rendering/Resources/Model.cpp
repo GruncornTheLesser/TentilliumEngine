@@ -16,34 +16,34 @@ Model::Model(std::vector<std::shared_ptr<Mesh>> meshes)
 		
 		glGenVertexArrays(1, &mesh_instance.VAO);
 		glBindVertexArray(mesh_instance.VAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->index_buffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->m_vbo.index);
 
 		unsigned int attrib_no = 0;
 
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->vertex_buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.vertex);
 		glVertexAttribPointer(attrib_no, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(attrib_no);
 		attrib_no++;
 
-		if (mesh->tCoord_buffer)
+		if (mesh->m_vbo.tCoord)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, mesh->tCoord_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.tCoord);
 			glVertexAttribPointer(attrib_no, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 			glEnableVertexAttribArray(attrib_no);
 			attrib_no++;
 		}
 
-		if (mesh->normal_buffer)
+		if (mesh->m_vbo.normal)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, mesh->normal_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.normal);
 			glVertexAttribPointer(attrib_no, 3, GL_FLOAT, GL_FALSE, 0, NULL); 
 			glEnableVertexAttribArray(attrib_no);
 			attrib_no++;
 		}
 
-		if (mesh->colour_buffer)
+		if (mesh->m_vbo.colour)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, mesh->colour_buffer);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh->m_vbo.colour);
 			glVertexAttribPointer(attrib_no, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 			glEnableVertexAttribArray(attrib_no);
 			attrib_no++;

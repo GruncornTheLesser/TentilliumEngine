@@ -20,53 +20,24 @@ struct Mesh : Resource<Mesh>
 	friend class Resource;
 	friend class Model;
 private:
-	/* 
-	* a container of all the vertex attribute buffers
-	* if Mesh doesnt have attribute, the pointer handle == 0.
-	* This way its easy to check if an attribute is used in
-	* this mesh. This can then be matched to the shader so all
-	* attributes are sent to the GPU transferred efficiently.
-	*/
-	unsigned int index_buffer = 0;
-	unsigned int vertex_buffer = 0;
-	unsigned int tCoord_buffer = 0;
-	unsigned int normal_buffer = 0;
-	unsigned int colour_buffer = 0;
-	//unsigned int boneID_buffer = 0;
-	//unsigned int boneWT_buffer = 0;
-
+	struct VBO { unsigned int index = 0, vertex = 0, tCoord = 0, normal = 0, colour = 0; };
 	std::shared_ptr<Material> m_mat;	// a material is stored along side the mesh
+	VBO m_vbo;							// a struct containing all the mesh data
 
+private:
+	Mesh(void* aiMsh, std::shared_ptr<Material> material);
 public:
-	Mesh(std::shared_ptr<Material> material,
-		size_t				index_size,
-		size_t				vertex_size,
-		const unsigned int*	index_data,
-		const float*		vertex_data,
-		const float*		tCoord_data = nullptr,
-		const float*		normal_data = nullptr,
-		const float*		colour_data = nullptr
-		//std::vector<glm::ivec4>*	boneID_data = nullptr,
-		//std::vector<glm::vec4>*	boneWT_data = nullptr
-		);
-
-	Mesh(std::shared_ptr<Material> material, 
-		std::vector<unsigned int>&	index_data,
-		std::vector<float>&			vertex_data,
-		std::vector<float>*			tCoord_data = nullptr,
-		std::vector<float>*			normal_data = nullptr,
-		std::vector<float>*			colour_data = nullptr
-	) : Mesh(material, 
-		index_data.size() * 4,
-		vertex_data.size() * 4, 
-		&index_data[0],
-		&vertex_data[0], 
-		tCoord_data ? &(*tCoord_data)[0] : nullptr, 
-		normal_data ? &(*normal_data)[0] : nullptr,
-		colour_data ? &(*colour_data)[0] : nullptr) { }
+	Mesh(const std::shared_ptr<Material> material,
+		const std::vector<unsigned int>& index_data,
+		const std::vector<float>& vertex_data,
+		const std::vector<float>* tCoord_data = nullptr, // optional
+		const std::vector<float>* normal_data = nullptr, // optional
+		const std::vector<float>* colour_data = nullptr  // optional
+	);
 	~Mesh();
 
 	// 
 };
+
 
 

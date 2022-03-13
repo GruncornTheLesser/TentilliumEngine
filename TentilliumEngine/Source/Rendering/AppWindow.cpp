@@ -4,7 +4,7 @@
 #include <glfw3.h>	// GL framework
 #include <iostream>
 #include <vector>
-
+#include "../Components/FlagManager.h"
 
 AppWindow* getAppWindow(void* wnd)
 {
@@ -179,5 +179,7 @@ void AppWindow::Init(std::vector<AppWindow*> windows)
 		double temp = glfwGetTime();
 		delta = temp - time;
 		time = temp;
+
+		FlagManager::clear();
 	}
 }

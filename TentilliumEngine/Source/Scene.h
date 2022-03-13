@@ -7,11 +7,18 @@
 #include "Rendering/Resources/Shader.h"
 #include "Rendering/Resources/Camera.h"
 
+// for testing
+#include "Rendering/Resources/Texture.h"
+#include "Rendering/Resources/Model.h"
+
 using entt::literals::operator""_hs;
 
 
+// important to remember these are just for syntax and wont be enforced in the correct order
+// It will always be OWN, GET, EXC
+// Only group implements OWN
 #define OWN(...) __VA_ARGS__
-#define GET(...) __VA_ARGS__
+#define GET(...) __VA_ARGS__ 
 #define EXC(...) __VA_ARGS__
 
 #define TAG(TAG) using TAG = entt::tag<operator""_hs(#TAG, sizeof(#TAG))>;
@@ -20,30 +27,23 @@ using entt::literals::operator""_hs;
 
 class Scene : private entt::basic_registry<entt::entity>
 {
+public: // public selective inheritance of functions
 	using entt::basic_registry<entt::entity>::try_get;
+	using entt::basic_registry<entt::entity>::create;
+	using entt::basic_registry<entt::entity>::emplace;
+	using entt::basic_registry<entt::entity>::erase;
+	using entt::basic_registry<entt::entity>::destroy;
+	using entt::basic_registry<entt::entity>::all_of;
+	using entt::basic_registry<entt::entity>::any_of;
 
-public:
+private:
 	Camera camera;
+
 
 public:
 	Scene();
 
-
-	entt::entity Load(std::string filepath);
-
-	template<class ... Components>
-	entt::entity CreateEntity(Components ... components)
-	{
-		auto e = create();
-		((void)emplace<Components>(e, components), ...);
-		return e;
-	}
-	
-	template<class ... Components>
-	void AddComponents(entt::entity e, Components ... components)
-	{
-		((void)emplace<Components>(e, components), ...);
-	}
+	entt::entity load(std::string filepath);
 
 	void Testing(float time);
 
@@ -53,6 +53,8 @@ private:
 	VIEW(viewTransform, GET(Transform), EXC())
 	VIEW(viewHierarchy, GET(Hierarchy), EXC())
 	VIEW(viewRootTransform, GET(Transform), EXC(Hierarchy))
+
+
 public:
 	void HierarchyUpdate();
 	void TransformUpdate();
@@ -60,12 +62,16 @@ public:
 private:
 	VIEW(viewCamera, GET(Camera), EXC())
 public:
-	void updateCameraMatrix();
+	void UpdateCameraMatrix();
 
 private:
-	VIEW(viewRenderer, GET(Model, Transform), EXC())
+	VIEW(viewRender, GET(Model), EXC(Transform /*, Skin*/))
+	VIEW(viewRenderTransform, GET(Model, Transform), EXC())
+	//VIEW(viewRenderCustom. GET(), EXC())
+	std::shared_ptr<Shader> shader;
+
+
 public:
-	void UpdateUniforms();
 	void Render(const Shader& shader);
 };
 

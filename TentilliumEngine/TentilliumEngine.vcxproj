@@ -172,11 +172,12 @@
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
-    <ClCompile Include="Source\Scene.cpp" />
+    <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\Rendering\AppWindow.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
+    <ClCompile Include="Source\Scene\Systems.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\Default.shader" />

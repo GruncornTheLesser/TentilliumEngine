@@ -47,7 +47,7 @@
     <ClCompile Include="Source\Components\Transform.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene.cpp">
+    <ClCompile Include="Source\Scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Components\FlagManager.h">
@@ -67,6 +67,9 @@
     </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\Systems.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

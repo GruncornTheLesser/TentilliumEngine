@@ -33,7 +33,7 @@ public:
         }
         */
     }
-    Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shine)
+    Material()
         : GLbuffer(GL_UNIFORM_BUFFER, 0)
     { 
 

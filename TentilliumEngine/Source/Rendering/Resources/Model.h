@@ -4,7 +4,7 @@
 #include "Material.h"
 
 
-struct Model
+class Model
 {
 private:
 	struct RenderInfo
