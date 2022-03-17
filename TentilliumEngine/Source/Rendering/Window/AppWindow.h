@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Keyboard.h"
+#include "Mouse.h"
+
 class AppWindow
 {
 private:
@@ -20,13 +23,18 @@ public:
 	void refresh();
 
 	virtual void onDraw(float delta) = 0;
-	//virtual void onProcess(float delta) = 0;
-	//virtual void onKeyDown() = 0;
-	//virtual void onResize() = 0;
-	
-public:
-	static void Init(std::vector<AppWindow*> windows);
 
+	virtual void onKey(Key key, bool pressed);
+
+	virtual void onMouse(Button button, int pressed);
+
+	virtual void onMouseMove(int posX, int posY, int deltaX, int deltaY);
+
+	virtual void onResize(int width, int height);
+
+
+public:
+	static void Main(std::vector<AppWindow*> windows);
 };
 
 

@@ -1,5 +1,6 @@
 #include "Transform.h""
 #include <gtc/matrix_transform.hpp>
+#include <gtc/quaternion.hpp>
 #include <algorithm>
 
 Transform::Transform(glm::mat4 matrix) : 
@@ -24,22 +25,22 @@ Transform::Transform(glm::vec3 position, glm::vec3 scale, glm::quat rotation) :
 	localUpdateFlag.Raise();
 }
 
-glm::vec3 Transform::getPosition()
+const glm::vec3& Transform::getPosition()
 {
 	return position;
 }
 
-glm::vec3 Transform::getScale()
+const glm::vec3& Transform::getScale()
 {
 	return scale;
 }
 
-glm::quat Transform::getRotation()
+const glm::quat& Transform::getRotation()
 {
 	return rotation;
 }
 
-glm::mat4 Transform::getLocalMatrix()
+const glm::mat4& Transform::getLocalMatrix()
 {
 	return localMatrix;
 }
@@ -48,7 +49,12 @@ void Transform::setPosition(glm::vec3 pos)
 {
 	position = pos;
 	localUpdateFlag.Raise();
+}
 
+void Transform::setPosition(float x, float y, float z)
+{
+	position = glm::vec3(x, y, z);
+	localUpdateFlag.Raise();
 }
 
 void Transform::setScale(glm::vec3 scl)
@@ -57,9 +63,64 @@ void Transform::setScale(glm::vec3 scl)
 	localUpdateFlag.Raise();
 }
 
+void Transform::setScale(float x, float y, float z)
+{
+	scale = glm::vec3(x, y, z);
+	localUpdateFlag.Raise();
+}
+
 void Transform::setRotation(glm::quat rot)
 {
 	rotation = rot;
+	localUpdateFlag.Raise();
+}
+
+void Transform::setRotation(glm::vec3 rot)
+{
+	rotation = glm::quat(rot);
+	localUpdateFlag.Raise();
+}
+
+void Transform::setRotation(float x, float y, float z)
+{
+	rotation = glm::quat(glm::vec3(x, y, z));
+	localUpdateFlag.Raise();
+}
+
+void Transform::deltaPosition(glm::vec3 pos)
+{
+	position += pos;
+	localUpdateFlag.Raise();
+
+}
+
+void Transform::deltaPosition(float x, float y, float z)
+{
+	position += glm::vec3(x, y, z);
+	localUpdateFlag.Raise();
+}
+
+void Transform::deltaScale(glm::vec3 scl)
+{
+	scale += scl;
+	localUpdateFlag.Raise();
+}
+
+void Transform::deltaScale(float x, float y, float z)
+{
+	scale += glm::vec3(x, y, z);
+	localUpdateFlag.Raise();
+}
+
+void Transform::deltaRotation(glm::vec3 rot)
+{
+	rotation = glm::quat(rot) * rotation;
+	localUpdateFlag.Raise();
+}
+
+void Transform::deltaRotation(float x, float y, float z)
+{
+	rotation = glm::quat(glm::vec3(x, y, z)) * rotation;
 	localUpdateFlag.Raise();
 }
 

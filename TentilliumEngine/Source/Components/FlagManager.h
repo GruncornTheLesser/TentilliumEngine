@@ -1,7 +1,7 @@
 #include "Flag.h"
 
 
-struct FlagManager
+class FlagManager
 {
 public:
 	/*

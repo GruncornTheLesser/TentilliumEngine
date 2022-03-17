@@ -167,13 +167,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Components\Camera.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Model.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Mesh.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
-    <ClCompile Include="Source\Rendering\AppWindow.cpp" />
+    <ClCompile Include="Source\Rendering\Window\AppWindow.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
@@ -193,16 +194,18 @@
     <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Rendering\Window\Keyboard.h" />
     <ClInclude Include="Source\Scene.h" />
-    <ClInclude Include="Source\Rendering\Resources\Camera.h" />
+    <ClInclude Include="Source\Components\Camera.h" />
     <ClInclude Include="Source\Components\Hierarchy.h" />
     <ClInclude Include="Source\Components\Transform.h" />
     <ClInclude Include="Source\Rendering\Resources\Texture.h" />
     <ClInclude Include="Source\Rendering\Resources\Material.h" />
     <ClInclude Include="Source\Rendering\Resources\Resource.h" />
-    <ClInclude Include="Source\Rendering\AppWindow.h" />
+    <ClInclude Include="Source\Rendering\Window\AppWindow.h" />
     <ClInclude Include="Source\Components\Components.h" />
     <ClInclude Include="Source\Rendering\Resources\Shader.h" />
+    <ClInclude Include="Source\Rendering\Window\Mouse.h" />
     <ClInclude Include="Source\Tentil.h" />
   </ItemGroup>
   <ItemGroup>

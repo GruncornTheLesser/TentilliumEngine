@@ -150,3 +150,9 @@ void Texture::bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
+
+void Texture::bind(int slot) const
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+}

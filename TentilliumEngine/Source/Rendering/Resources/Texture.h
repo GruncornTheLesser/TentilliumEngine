@@ -23,4 +23,5 @@ public:
 	int getHeight();
 
 	void bind() const;
+	void bind(int slot) const;
 };

@@ -7,7 +7,7 @@
 // shared pointer is exactly what i want
 // when destructed, invalidating pointers???
 template<class t>
-struct Resource
+class Resource
 {
 private:
 	inline static std::map<const char*, std::weak_ptr<t>> cache;

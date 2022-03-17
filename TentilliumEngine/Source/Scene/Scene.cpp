@@ -1,7 +1,7 @@
 #include "../Scene.h"
 #include "../Scene.h"
 
-#include <stack>
+#include <queue>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -9,7 +9,6 @@
 #include "../Rendering/Resources/Mesh.h"
 #include "../Rendering/Resources/Texture.h"
 
-Scene::Scene() : camera(2.0f, 4.0f / 3.0f, 0.1f, 100.0f) { }
 
 #define EMBEDDEDFILE(dir, res, ptr) (dir + "/" + #res + "/" + std::to_string((size_t)(ptr))).c_str()
 entt::entity Scene::load(std::string filepath)
@@ -31,26 +30,31 @@ entt::entity Scene::load(std::string filepath)
 	else
 		outTexture = Texture::load("Resources/images/Image4.png");
 		*/
+	
 	std::map<aiNode*, entt::entity> entt_lookup;
-	std::stack<aiNode*> sceneStack;
+	std::queue<aiNode*> sceneStack;
 	sceneStack.push(scene->mRootNode);
-	do {
+	
+	do 
+	{
 		// get next node
-		aiNode* node = sceneStack.top();
+		aiNode* node = sceneStack.front();
 		sceneStack.pop();
 
 		// create entity
 		entt::entity e;
 		entt_lookup.emplace(node, e = create());
+
+		if (node->mParent)
+		{
+			auto x = entt_lookup[node->mParent];
+			emplace<Hierarchy>(e, x);
+		}
+			
+		//aiMatrix4x4t<float> x = (aiMatrix4x4t<float>)(node->mTransformation);
+		auto transform = (aiMatrix4x4t<float>)(node->mTransformation);
+		emplace<Transform>(e, *(glm::mat4*)&transform);
 		
-		
-
-		//if (node->mParent)
-		//	emplace<Hierarchy>(e, entt_lookup[node->mParent]);
-
-		//emplace<Transform>(e, *(glm::mat4*)(&(node->mTransformation)));	// may need swizzling but i think its fine
-		emplace<Transform>(e, glm::vec3(0, 0, -2));
-
 		if (node->mNumMeshes > 0)
 		{
 			std::vector<std::shared_ptr<Mesh>> meshes;
@@ -58,8 +62,8 @@ entt::entity Scene::load(std::string filepath)
 			{
 				auto aiMsh = scene->mMeshes[node->mMeshes[i]];
 				auto aiMat = scene->mMaterials[aiMsh->mMaterialIndex];
-				meshes.push_back(Mesh::get_or_default(EMBEDDEDFILE(dir, texture, aiMsh), aiMsh, 
-					Material::get_or_default(EMBEDDEDFILE(dir, material, aiMat), aiMat)));
+				auto mat = Material::get_or_default(EMBEDDEDFILE(dir, material, aiMat), aiMat);
+				meshes.push_back(Mesh::get_or_default(EMBEDDEDFILE(dir, texture, aiMsh), aiMsh, mat));
 			}
 			emplace<Model>(e, meshes);
 		}
@@ -76,6 +80,16 @@ entt::entity Scene::load(std::string filepath)
 	if (scene->HasAnimations())
 		emplace<AnimationHandler>(entt_lookup[scene->mRootNode], scene->mAnimations, scene->mNumAnimations);
 	*/
+
+	HierarchyUpdate();
 	return entt_lookup[scene->mRootNode]; // return scene root
 }
 
+void Scene::setCamera(entt::entity entity) {
+	if (!valid(cam_entity) || !any_of(cam_entity)) return;
+	cam_entity = entity;
+}
+
+entt::entity Scene::getCamera() {
+	return cam_entity;
+}

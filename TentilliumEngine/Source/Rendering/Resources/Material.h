@@ -11,7 +11,8 @@ struct Material : GLbuffer, public Resource<Material>
 
 public:
     Material(void* aiPtr) : GLbuffer(GL_UNIFORM_BUFFER, 0) 
-    { 
+    {
+
        /*
 
         auto aiMat = static_cast<aiMaterial*>(aiPtr);
@@ -35,16 +36,5 @@ public:
     }
     Material()
         : GLbuffer(GL_UNIFORM_BUFFER, 0)
-    { 
-
-    }
-
-    void setAmbient(glm::vec3 value) { }
-
-    void setDiffuse(glm::vec3 value) { }
-
-    void setSpecular(glm::vec3 value) { }
-
-    void setShine(float value) { }
-
+    { }
 };

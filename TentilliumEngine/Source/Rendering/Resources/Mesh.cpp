@@ -21,7 +21,7 @@ Mesh::Mesh(const std::shared_ptr<Material> material,
 	const std::vector<float>* colour_data)
 	: m_mat(material)
 { 
-	m_vbo.index = genBuffer(GL_ELEMENT_ARRAY_BUFFER, index_data.size(), &index_data[0]);
+	m_vbo.index = genBuffer(GL_ELEMENT_ARRAY_BUFFER, index_data.size(), &index_data);
 	m_vbo.vertex = genBuffer(GL_ARRAY_BUFFER, vertex_data.size(), &vertex_data[0]);
 	if (tCoord_data) m_vbo.tCoord = genBuffer(GL_ARRAY_BUFFER, vertex_data.size(), &(*tCoord_data)[0]);
 	if (normal_data) m_vbo.normal = genBuffer(GL_ARRAY_BUFFER, vertex_data.size(), &(*normal_data)[0]);
@@ -51,27 +51,29 @@ Mesh::Mesh(void* ai_mesh, std::shared_ptr<Material> material)
 
 	{
 		unsigned int* index_data = new unsigned int[mesh->mNumFaces * 3u];
-		for (int i = 0; i < mesh->mNumFaces; i++)
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			index_data[i * 3] = mesh->mFaces[i].mIndices[0];
 			index_data[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
 			index_data[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
 		}
 		m_vbo.index = genBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mNumFaces * 3, index_data);
+		delete[] index_data;
 	}
 
 	m_vbo.vertex = genBuffer(GL_ARRAY_BUFFER, mesh->mNumVertices * 3, mesh->mVertices);
 
-	// could support n TexCoords
+	// could support n TexCoords -> may become more necessary for bones and blend weights
 	if (mesh->HasTextureCoords(0))
 	{
 		float* tCoord_data = new float[mesh->mNumVertices * 2u];
-		for (int i = 0; i < mesh->mNumVertices; i++)
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			tCoord_data[i * 2] = mesh->mTextureCoords[0][i].x;
 			tCoord_data[i * 2 + 1] = mesh->mTextureCoords[0][i].y;
 		}
 		m_vbo.tCoord = genBuffer(GL_ARRAY_BUFFER, mesh->mNumVertices * 2, tCoord_data);
+		delete[] tCoord_data;
 	}
 
 	if (mesh->HasNormals())
@@ -98,9 +100,9 @@ Mesh::Mesh(void* ai_mesh, std::shared_ptr<Material> material)
 
 Mesh::~Mesh()
 {
-	glDeleteBuffers(1, &m_vbo.index);
-	glDeleteBuffers(1, &m_vbo.vertex);
-	glDeleteBuffers(1, &m_vbo.tCoord);
-	glDeleteBuffers(1, &m_vbo.normal);
-	glDeleteBuffers(1, &m_vbo.colour);
+	glDeleteVertexArrays(1, &m_vbo.index);
+	glDeleteVertexArrays(1, &m_vbo.vertex);
+	glDeleteVertexArrays(1, &m_vbo.tCoord);
+	glDeleteVertexArrays(1, &m_vbo.normal);
+	glDeleteVertexArrays(1, &m_vbo.colour);
 }

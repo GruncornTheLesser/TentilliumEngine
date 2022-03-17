@@ -1,14 +1,15 @@
 #include "AppWindow.h"
-#include "Resources/Resource.h"
+#include "../Resources/Resource.h"
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 #include <iostream>
 #include <vector>
-#include "../Components/FlagManager.h"
+#include "../../Components/FlagManager.h"
 
-AppWindow* getAppWindow(void* wnd)
+AppWindow* getWindow(void* glfwWindow)
 {
-	return (AppWindow*)glfwGetWindowUserPointer(static_cast<GLFWwindow*>(wnd));
+	return (AppWindow*)glfwGetWindowUserPointer(static_cast<GLFWwindow*>(glfwWindow));
+
 }
 
 static void error_callback(int code, const char* text)
@@ -18,33 +19,38 @@ static void error_callback(int code, const char* text)
 
 static void key_callback(GLFWwindow* wnd, int key, int scancode, int action, int mods)
 {
-	auto appWnd = getAppWindow(wnd);
-	
+	auto appWnd = getWindow(wnd);
+	appWnd->onKey((Key)key, action == GLFW_PRESS);
 }
 
-static void mouse_callback(GLFWwindow* wnd, int er, int idk, int wtf)
+static void mouse_callback(GLFWwindow* wnd, int button, int action, int mod)
 {
-	auto appWnd = getAppWindow(wnd);
+	auto appWnd = getWindow(wnd);
+	appWnd->onMouse((Button)button, action == GLFW_PRESS);
+}
+
+static void mousewheel_callback(GLFWwindow* wnd, double xoffset, double yoffset)
+{
+	auto appWnd = getWindow(wnd);
+	appWnd->onMouse(Button::SCROLL, (int)yoffset);
 }
 
 static void movecursor_callback(GLFWwindow* wnd, double posX, double posY)
 {
-	//getAppWindow(wnd)->onMoveCursor(posX, posY);
+	auto appWnd = getWindow(wnd);
+	appWnd->onMouseMove(posX, posY, Mouse::getPosX() - posX, Mouse::getPosY() - posY);
 }
 
 static void enter_callback(GLFWwindow* wnd, int entered)
 {
-	//getAppWindow(wnd)->onEnter(entered);
+	//getWindow(wnd)->onEnter(entered);
 }
 
 static void resize_callback(GLFWwindow* wnd, int width, int height)
 {
-	std::cout << "resizing " << getAppWindow(wnd)->getTitle() << " : " << width << ", " << height << '\n';
 	glViewport(0, 0, width, height);
+	getWindow(wnd)->onResize(width, height);
 }
-
-
-
 
 GLFWwindow* glfwContext;
 
@@ -85,13 +91,15 @@ AppWindow::AppWindow(int width, int height, std::string title)
 	}
 
 	glfwSetWindowUserPointer(static_cast<GLFWwindow*>(m_window), this);
-	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_window), key_callback);						// key event
-	glfwSetMouseButtonCallback(static_cast<GLFWwindow*>(m_window), mouse_callback);				// mouse button event
-	glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);			// cursor move event
-	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);				// cursor enters window event
-	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);		// resize event
+	glfwSetKeyCallback(static_cast<GLFWwindow*>(m_window), key_callback);
+	glfwSetMouseButtonCallback(static_cast<GLFWwindow*>(m_window), mouse_callback);
+	glfwSetScrollCallback(static_cast<GLFWwindow*>(m_window), mousewheel_callback);
+	glfwSetCursorPosCallback(static_cast<GLFWwindow*>(m_window), movecursor_callback);
+	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), enter_callback);
+	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), resize_callback);
+
 	
-	//  per frame buffer (i think)
+
 	//glClearColor(0, 0, 0, 1); 
 	//glClearDepth(1);
 	glEnable(GL_DEPTH_TEST);
@@ -104,6 +112,7 @@ AppWindow::~AppWindow()
 {
 	if (m_window) // if window not already destroyed -> destroy it
 		glfwDestroyWindow(static_cast<GLFWwindow*>(m_window));
+		
 }
 
 void AppWindow::close()
@@ -128,7 +137,30 @@ void AppWindow::refresh()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void AppWindow::Init(std::vector<AppWindow*> windows)
+void AppWindow::onKey(Key key, bool pressed) 
+{
+	Keyboard::setKey(key, pressed);
+}
+
+void AppWindow::onMouse(Button button, int pressed) 
+{
+	Mouse::setButton(button, pressed);
+}
+
+void AppWindow::onMouseMove(int posX, int posY, int deltaX, int deltaY)
+{
+	Mouse::setPosition(posX, posY);
+}
+
+void AppWindow::onResize(int width, int height) 
+{
+	m_width = width;
+	m_height = height;
+}
+
+
+
+void AppWindow::Main(std::vector<AppWindow*> windows)
 {
 	// check input
 	for (auto it = windows.begin(); it != windows.end(); )
@@ -149,7 +181,7 @@ void AppWindow::Init(std::vector<AppWindow*> windows)
 
 	// time setup
 	glfwSetTime(0);
-	double delta = 0, time = 0;
+	float delta = 0, time = 0;
 	for (;;)
 	{
 		for (auto it = windows.begin(); it != windows.end(); ) // iterate over all windows
@@ -176,10 +208,11 @@ void AppWindow::Init(std::vector<AppWindow*> windows)
 		}
 
 		// calculate delta time from last frame
-		double temp = glfwGetTime();
+		float temp = glfwGetTime();
 		delta = temp - time;
 		time = temp;
 
 		FlagManager::clear();
 	}
 }
+

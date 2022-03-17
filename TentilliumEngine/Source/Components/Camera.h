@@ -21,6 +21,6 @@ public:
 		proj = glm::perspective(fovY, ratio, zNear, zFar);
 	}
 
-	operator const glm::mat4& () { return proj; }
+	operator glm::mat4() { return proj; }
 };
 
