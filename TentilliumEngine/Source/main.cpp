@@ -12,9 +12,6 @@
 #include "Components/Transform.h"
 
 
-
-using namespace glm;
-
 /*
 std::vector<float> vertices = {
 	-0.5f, -0.5f, -0.5f, 
@@ -73,7 +70,7 @@ public:
 		
 		// load object
 		root = scene.load("Resources/meshes/crate/glTF/crate.glb");
-		scene.get<Transform>(root).setPosition(0, 0, -1);
+		scene.get<Transform>(root).position = glm::vec3(0, 0, -1);
 
 		texture = Texture::load("Resources/meshes/animals/texture/wild_animals_map.png");
 
@@ -98,41 +95,17 @@ public:
 	void onKey(Key key, bool pressed) 
 	{
 		AppWindow::onKey(key, pressed);
-		std::cout << "KEY: " << (int)key << (pressed ? " pressed" : " released") << std::endl;
-
+		//std::cout << "KEY: " << (int)key << (pressed ? " pressed" : " released") << std::endl;
+		auto& camera = scene.get<Transform>(scene.getCamera());
 		switch (key) {
-			case Key::W:
-				scene.get<Transform>(scene.getCamera()).deltaPosition(glm::vec3(0, 0, -0.1f));
-				break;
-
-			case Key::A:
-				scene.get<Transform>(scene.getCamera()).deltaPosition(glm::vec3(-0.1f, 0, 0));
-				
-				break;
-
-			case Key::S: 
-				scene.get<Transform>(scene.getCamera()).deltaPosition(glm::vec3(0, 0, 0.1f));
-				break;
-
-			case Key::D:
-				scene.get<Transform>(scene.getCamera()).deltaPosition(glm::vec3(0.1f, 0, 0));
-				break;
-
-			case Key::R:
-				scene.get<Transform>(scene.getCamera()).deltaPosition(glm::vec3(0, 0.1f, 0));
-				break;
-
-			case Key::F:
-				scene.get<Transform>(scene.getCamera()).deltaPosition(glm::vec3(0, -0.1f, 0));
-				break;
-
-			case Key::Q:
-				scene.get<Transform>(scene.getCamera()).deltaRotation(glm::vec3(0, 0.05f, 0));
-				break;
-
-			case Key::E:
-				scene.get<Transform>(scene.getCamera()).deltaRotation(glm::vec3(0, -0.05f, 0));
-				break;
+			case Key::W: camera.position -= camera.rotation * glm::vec3(0, 0, 1) * 0.1f; break;
+			case Key::S: camera.position += camera.rotation * glm::vec3(0, 0, 1) * 0.1f; break;
+			case Key::A: camera.position -= camera.rotation * glm::vec3(1, 0, 0) * 0.1f; break;
+			case Key::D: camera.position += camera.rotation * glm::vec3(1, 0, 0) * 0.1f; break;
+			case Key::F: camera.position -= camera.rotation * glm::vec3(0, 1, 0) * 0.1f; break;
+			case Key::R: camera.position += camera.rotation * glm::vec3(0, 1, 0) * 0.1f; break;
+			case Key::Q: camera.rotation *= glm::quat(glm::vec3(0, 0.05f, 0)); break;
+			case Key::E: camera.rotation *= glm::quat(glm::vec3(0,-0.05f, 0)); break;
 		}
 	}
 

@@ -38,14 +38,14 @@ void Scene::TransformUpdate()
 	for (auto [entity, transform] : viewRootTransform.each()) // no hierarchy dependancy
 	{
 		// if entity's local transform changed, update local and world transform
-		if (transform.localUpdateFlag) {
-			transform.localMatrix =
+		if (transform.m_localUpdateFlag) {
+			transform.m_localMatrix =
 				glm::translate(transform.position) *
-				glm::mat4(transform.rotation) *
-				glm::scale(transform.scale);
+				glm::mat4(transform.m_rotation) *
+				glm::scale(transform.m_scale);
 
-			transform.worldMatrix = transform.localMatrix;
-			transform.worldUpdateFlag.Raise();
+			transform.m_worldMatrix = transform.m_localMatrix;
+			transform.m_worldUpdateFlag.Raise();
 		}
 	}
 
@@ -55,23 +55,23 @@ void Scene::TransformUpdate()
 		auto parentTransform = try_get<Transform>(hierarchy.getParent());
 
 		// if entity's local transform changed, update world and local transform
-		if (transform.localUpdateFlag) {
-			transform.localMatrix = 
+		if (transform.m_localUpdateFlag) {
+			transform.m_localMatrix =
 				glm::translate(transform.position) * 
-				glm::mat4(transform.rotation) * 
-				glm::scale(transform.scale);
+				glm::mat4(transform.m_rotation) *
+				glm::scale(transform.m_scale);
 			
-			if (parentTransform) transform.worldMatrix = parentTransform->worldMatrix * transform.localMatrix;
-			else				 transform.worldMatrix = transform.localMatrix;
+			if (parentTransform) transform.m_worldMatrix = parentTransform->m_worldMatrix * transform.m_localMatrix;
+			else				 transform.m_worldMatrix = transform.m_localMatrix;
 
-			transform.worldUpdateFlag.Raise();
+			transform.m_worldUpdateFlag.Raise();
 			continue;
 		}
 		// if parent's world transform updated, update entity's world
-		else if (parentTransform && parentTransform->worldUpdateFlag)
+		else if (parentTransform && parentTransform->m_worldUpdateFlag)
 		{
-			transform.worldMatrix = parentTransform->worldMatrix * transform.localMatrix;
-			transform.worldUpdateFlag.Raise();
+			transform.m_worldMatrix = parentTransform->m_worldMatrix * transform.m_localMatrix;
+			transform.m_worldUpdateFlag.Raise();
 		}
 	}
 }
@@ -83,7 +83,7 @@ void Scene::Render(const Shader& shader)
 
 	for (auto [entity, render, transform] : viewRenderTransform.each()) {
 		auto model = transform;
-		glm::mat4 mvp = view * transform.worldMatrix;
+		glm::mat4 mvp = view * transform.m_worldMatrix;
 		mvp = proj * mvp;
 		shader.setUniformMatrix4f("MVP", mvp);
 		shader.bind();

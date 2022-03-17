@@ -1,25 +1,15 @@
 #pragma once
-#include <gtc/matrix_transform.hpp>
-
+#include <glm.hpp>
 struct Camera
 {
 private:
 	glm::mat4 proj;
-	float fovY;
-	float ratio;
-	float zNear;
-	float zFar;
+	float fovY, ratio, zNear, zFar;
 
 public:
-	Camera(float fovY, float ratio, float zNear, float zFar)
-		: proj(glm::perspective(fovY, ratio, zNear, zFar)), fovY(fovY), ratio(ratio), zNear(zNear), zFar(zFar)
-	{ }
+	Camera(float fovY, float ratio, float zNear, float zFar);
 
-	void resize(int width, int height)
-	{
-		ratio = ((float)width) / height;
-		proj = glm::perspective(fovY, ratio, zNear, zFar);
-	}
+	void resize(int width, int height);
 
 	operator glm::mat4() { return proj; }
 };
