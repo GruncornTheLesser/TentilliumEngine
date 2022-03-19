@@ -128,9 +128,8 @@ public:
 			action == Action::REPEATED ? " REPEATED" : " UNKNOWN") << std::endl;
 	}
 
-	void onMouseMove(int posX, int posY, int deltaX, int deltaY) 
+	void onMouseMove(int posX, int posY) 
 	{
-		AppWindow::onMouseMove(posX, posY, deltaX, deltaY);
 	}
 };
 

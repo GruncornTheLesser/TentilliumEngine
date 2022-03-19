@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "inputs.h"
 
 class AppWindow
 {
