@@ -9,8 +9,7 @@
 #include "../Rendering/Resources/Mesh.h"
 #include "../Rendering/Resources/Texture.h"
 
-
-#define EMBEDDEDFILE(dir, res, ptr) (dir + "/" + #res + "/" + std::to_string((size_t)(ptr))).c_str()
+#define EMBEDDEDFILE(dir, res, name) (dir + "/" + #res + "/" + name).c_str()
 entt::entity Scene::load(std::string filepath)
 {
 	std::string dir = filepath.substr(0, filepath.find_first_of('.'));
@@ -62,8 +61,8 @@ entt::entity Scene::load(std::string filepath)
 			{
 				auto aiMsh = scene->mMeshes[node->mMeshes[i]];
 				auto aiMat = scene->mMaterials[aiMsh->mMaterialIndex];
-				auto mat = Material::get_or_default(EMBEDDEDFILE(dir, material, aiMat), aiMat);
-				meshes.push_back(Mesh::get_or_default(EMBEDDEDFILE(dir, texture, aiMsh), aiMsh, mat));
+				auto mat = Material::get_or_default(EMBEDDEDFILE(dir, material, aiMat->GetName().C_Str()), aiMat);
+				meshes.push_back(Mesh::get_or_default(EMBEDDEDFILE(dir, mesh, node->mName.C_Str()), aiMsh, mat));
 			}
 			emplace<Model>(e, meshes);
 		}

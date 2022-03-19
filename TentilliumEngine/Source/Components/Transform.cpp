@@ -1,5 +1,6 @@
 #include "Transform.h""
 #include <gtc/matrix_transform.hpp>
+#include <gtx/transform.hpp>
 #include <gtc/quaternion.hpp>
 #include <algorithm>
 
@@ -67,6 +68,15 @@ void Transform::setRotation(const glm::vec3& rot)
 {
 	m_rotation = glm::quat(rot);
 	m_localUpdateFlag.Raise();
+}
+
+void Transform::updateLocal()
+{
+	m_localMatrix =
+		glm::translate(m_position) *
+		glm::mat4(m_rotation) *
+		glm::scale(m_scale);
+
 }
 
 void Transform::Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot)

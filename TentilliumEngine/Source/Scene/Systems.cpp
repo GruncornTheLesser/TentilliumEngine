@@ -1,20 +1,19 @@
 #include "../Scene.h"
 #include <gtx/transform.hpp>
-
+#include <list>
 
 void Scene::HierarchyUpdate()
 {
-	// i can iterate backwards, but I cant remove anything when I do.
-	// this doesnt help me really because things are still added to the front of this
-	// roo needs to be opposite end of newly added to maintain behaviour
-	// 
+	// the Hierarchy system is sorted in order of depth in reverse. The reverse order ensures that
+	// new hierarchies are caclulated after the originals. In a standard array it wouldnt be a 
+	// reverse its just the way entt choose to do it to prevent invalidating iterators.
 	//root			        new added
 	//	v					    v
 	// [rbegin ..., ..., ..., rend]	
-	// iteration -->				// can iterate but cant remove components
+	// reverse iteration -->		// can iterate but cant remove components
 	//				  <-- iteration	// can iterate and remove components but wrong order for hierarchy
 
-	std::vector<entt::entity> deferredDestroy;
+	std::list<entt::entity> deferredDestroy;
 	for (auto it = viewHierarchy.rbegin(); it != viewHierarchy.rend(); it++) // hierarchy dependancy
 	{
 		auto hierarchy = &viewHierarchy.get<Hierarchy>(*it);
@@ -39,38 +38,33 @@ void Scene::TransformUpdate()
 	{
 		// if entity's local transform changed, update local and world transform
 		if (transform.m_localUpdateFlag) {
-			transform.m_localMatrix =
-				glm::translate(transform.position) *
-				glm::mat4(transform.m_rotation) *
-				glm::scale(transform.m_scale);
-
-			transform.m_worldMatrix = transform.m_localMatrix;
-			transform.m_worldUpdateFlag.Raise();
+			transform.updateLocal();							// update local matrix from position, rotation and scale
+			transform.m_worldMatrix = transform.m_localMatrix;	// update world matrix from local matrix
+			transform.m_worldUpdateFlag.Raise();				// flag transform as having updated world
 		}
 	}
 
 	for (auto it = groupSceneGraph.rbegin(); it != groupSceneGraph.rend(); it++) // hierarchy dependancy
 	{
-		auto [transform, hierarchy] = get<Transform, Hierarchy>(*it);
-		auto parentTransform = try_get<Transform>(hierarchy.getParent());
+		auto [transform, hierarchy] = get<Transform, Hierarchy>(*it);			 // get components
+		auto parent = try_get<Transform>(hierarchy.getParent());				// get parent in hierarchy component
 
 		// if entity's local transform changed, update world and local transform
 		if (transform.m_localUpdateFlag) {
-			transform.m_localMatrix =
-				glm::translate(transform.position) * 
-				glm::mat4(transform.m_rotation) *
-				glm::scale(transform.m_scale);
-			
-			if (parentTransform) transform.m_worldMatrix = parentTransform->m_worldMatrix * transform.m_localMatrix;
-			else				 transform.m_worldMatrix = transform.m_localMatrix;
+			transform.updateLocal();	// update local matrix from position rotation and scale
 
+			if (parent)
+				transform.m_worldMatrix = parent->m_worldMatrix * transform.m_localMatrix;
+			else				 
+				transform.m_worldMatrix = transform.m_localMatrix;
 			transform.m_worldUpdateFlag.Raise();
-			continue;
 		}
+			
+
 		// if parent's world transform updated, update entity's world
-		else if (parentTransform && parentTransform->m_worldUpdateFlag)
+		else if (parent && parent->m_worldUpdateFlag)
 		{
-			transform.m_worldMatrix = parentTransform->m_worldMatrix * transform.m_localMatrix;
+			transform.m_worldMatrix = parent->m_worldMatrix * transform.m_localMatrix;
 			transform.m_worldUpdateFlag.Raise();
 		}
 	}
@@ -82,18 +76,9 @@ void Scene::Render(const Shader& shader)
 	auto view = glm::inverse((glm::mat4)get<Transform>(cam_entity));
 
 	for (auto [entity, render, transform] : viewRenderTransform.each()) {
-		auto model = transform;
-		glm::mat4 mvp = view * transform.m_worldMatrix;
-		mvp = proj * mvp;
+		glm::mat4 mvp = proj * view * transform.m_worldMatrix;
 		shader.setUniformMatrix4f("MVP", mvp);
 		shader.bind();
 		render.draw();
 	}
-}
-
-void Scene::Testing(float delta, float time)
-{
-	//get<Transform>((entt::entity)1).setPosition(sin(time), 0, 0);
-	//get<Transform>((entt::entity)1).setRotation(sin(time), cos(time), 0);
-
 }

@@ -194,7 +194,7 @@
     <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
-    <ClInclude Include="Source\Rendering\Window\Keyboard.h" />
+    <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\Components\Camera.h" />
     <ClInclude Include="Source\Components\Hierarchy.h" />
@@ -205,7 +205,7 @@
     <ClInclude Include="Source\Rendering\Window\AppWindow.h" />
     <ClInclude Include="Source\Components\Components.h" />
     <ClInclude Include="Source\Rendering\Resources\Shader.h" />
-    <ClInclude Include="Source\Rendering\Window\Mouse.h" />
+    <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
     <ClInclude Include="Source\Tentil.h" />
   </ItemGroup>
   <ItemGroup>

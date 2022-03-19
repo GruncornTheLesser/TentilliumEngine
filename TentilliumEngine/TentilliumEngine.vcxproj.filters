@@ -129,8 +129,8 @@
     <ClInclude Include="Source\Rendering\Resources\Model.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\Window\Keyboard.h" />
-    <ClInclude Include="Source\Rendering\Window\Mouse.h" />
+    <ClInclude Include="Source\Rendering\Window\Inputs.h" />
+    <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

@@ -40,8 +40,6 @@ public: // public selective inheritance of functions
 public:
 	entt::entity load(std::string filepath);
 
-	void Testing(float delta, float time);
-
 private:
 	entt::entity cam_entity;
 public:

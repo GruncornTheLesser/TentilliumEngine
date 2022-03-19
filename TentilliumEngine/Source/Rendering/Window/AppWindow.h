@@ -1,34 +1,53 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "Keyboard.h"
-#include "Mouse.h"
 
 class AppWindow
 {
+	friend class callback_func;
 private:
-	void* m_window;
-	unsigned int m_width, m_height;
-	std::string title;
+	struct Keyboard {
+		static Key IntToKey(int key);
+		static int KeyToInt(Key key);
+	} m_keyboard;
+
+	struct Mouse { 
+		int cur_pos_x, cur_pos_y;
+		int next_pos_x, next_pos_y;
+	} m_mouse;
+
 
 public:
-	AppWindow(int width, int height, std::string title);
+	__declspec(property (get = getTitle, put = setTitle)) const char* title;
+private:
+	void* m_window;
+	int m_width, m_height;
+	const char* m_title;
+
+public:
+	AppWindow(int width, int height, const char* title);
+	
 	~AppWindow();
 
-	void close();
+	bool isPressed(Key key);
 
-	std::string getTitle();
-	void setTitle(std::string title);
+private:
+	const char* getTitle();
+
+	void setTitle(const char* title);
+
+public:
+	void close();	
 
 	void refresh();
 
 	virtual void onDraw(float delta) = 0;
 
-	virtual void onKey(Key key, bool pressed);
+	virtual void onKey(Key key, Action pressed, Mod mod);
 
-	virtual void onMouse(Button button, int pressed);
+	virtual void onMouse(Button button, Action action, Mod mod);
 
-	virtual void onMouseMove(int posX, int posY, int deltaX, int deltaY);
+	virtual void onMouseMove(int posX, int posY);
 
 	virtual void onResize(int width, int height);
 

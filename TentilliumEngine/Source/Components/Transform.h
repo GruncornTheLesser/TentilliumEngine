@@ -39,6 +39,9 @@ public:
 	void setRotation(const glm::quat& rot);
 	void setRotation(const glm::vec3& rot);
 
+	void updateLocal(Transform* parent);
+	void updateLocal();
+
 public:
 	static void Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot);
 	operator const glm::mat4& () { return m_worldMatrix; }

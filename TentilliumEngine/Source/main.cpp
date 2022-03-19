@@ -45,7 +45,7 @@ std::vector<unsigned int> indices = {	// mesh indices
 };
 */
 
-class TestWindow : public AppWindow
+class TestApp : public AppWindow
 {
 public:
 	// shared between windows (local to context which is currently shared between all windows) 
@@ -59,7 +59,7 @@ public:
 	entt::entity camera;
 	entt::entity root;
 
-	TestWindow(const char* imgpath, const char* title)
+	TestApp(const char* title)
 		: AppWindow(800, 600, title)
 	{
 		// create camera
@@ -69,7 +69,7 @@ public:
 		scene.setCamera(camera);
 		
 		// load object
-		root = scene.load("Resources/meshes/crate/glTF/crate.glb");
+		root = scene.load("Resources/meshes/animals/fbx/owl.fbx");
 		scene.get<Transform>(root).position = glm::vec3(0, 0, -1);
 
 		texture = Texture::load("Resources/meshes/animals/texture/wild_animals_map.png");
@@ -79,41 +79,53 @@ public:
 		texture->bind(0);
 	}
 
-	void onDraw(float delta)
-	{
-		scene.Testing(delta, glfwGetTime());
+	void onDraw(float delta) {
+		auto& camera = scene.get<Transform>(scene.getCamera());
+
+		glm::vec3 move_direction{0, 0, 0};
+		if (isPressed(Key::W)) move_direction.z -= 1;
+		if (isPressed(Key::S)) move_direction.z += 1;
+		if (isPressed(Key::A)) move_direction.x -= 1;
+		if (isPressed(Key::D)) move_direction.x += 1;
+		if (isPressed(Key::F)) move_direction.y -= 1;
+		if (isPressed(Key::R)) move_direction.y += 1;
+		
+
+		camera.position += camera.rotation * move_direction * delta;
+
+		float move_rotation = 0;
+		if (isPressed(Key::Q)) move_rotation += 1;
+		if (isPressed(Key::E)) move_rotation -= 1;
+		
+		camera.rotation *= glm::quat(glm::vec3(0, move_rotation, 0)  * delta);
+
+
 		scene.TransformUpdate();
 		scene.Render(*shader);
 		refresh();
 	}
 
-	void onResize(int width, int height) 
-	{
+	void onResize(int width, int height) {
 		scene.get<Camera>(scene.getCamera()).resize(width, height);
 	}
 
-	void onKey(Key key, bool pressed) 
+	void onKey(Key key, Action action, Mod mod) 
 	{
-		AppWindow::onKey(key, pressed);
-		//std::cout << "KEY: " << (int)key << (pressed ? " pressed" : " released") << std::endl;
-		auto& camera = scene.get<Transform>(scene.getCamera());
-		switch (key) {
-			case Key::W: camera.position -= camera.rotation * glm::vec3(0, 0, 1) * 0.1f; break;
-			case Key::S: camera.position += camera.rotation * glm::vec3(0, 0, 1) * 0.1f; break;
-			case Key::A: camera.position -= camera.rotation * glm::vec3(1, 0, 0) * 0.1f; break;
-			case Key::D: camera.position += camera.rotation * glm::vec3(1, 0, 0) * 0.1f; break;
-			case Key::F: camera.position -= camera.rotation * glm::vec3(0, 1, 0) * 0.1f; break;
-			case Key::R: camera.position += camera.rotation * glm::vec3(0, 1, 0) * 0.1f; break;
-			case Key::Q: camera.rotation *= glm::quat(glm::vec3(0, 0.05f, 0)); break;
-			case Key::E: camera.rotation *= glm::quat(glm::vec3(0,-0.05f, 0)); break;
-		}
+		std::cout << "KEY: " << (int)key << (
+			action == Action::PRESSED ? " PRESSED" : 
+			action == Action::RELEASED ? " RELEASED" : 
+			action == Action::REPEATED ? " REPEATED" : " UNKNOWN") << std::endl;
+
+		if (action == Action::RELEASED)
+			return;
 	}
 
-	void onMouse(Button button, int pressed) 
+	void onMouse(Button button, Action action, Mod mod)
 	{
-		AppWindow::onMouse(button, pressed);
-		if (button == Button::SCROLL) std::cout << "SCROLL: " << pressed << std::endl; // scroll is the offset
-		else std::cout << "BUTTON: " << (int)button << (pressed ? " pressed" : " released") << std::endl;	
+		std::cout << "BUTTON: " << (int)button << (
+			action == Action::PRESSED ? " PRESSED" :
+			action == Action::RELEASED ? " RELEASED" :
+			action == Action::REPEATED ? " REPEATED" : " UNKNOWN") << std::endl;
 	}
 
 	void onMouseMove(int posX, int posY, int deltaX, int deltaY) 
@@ -124,7 +136,7 @@ public:
 
 int main(int argc, char** argv)
 {
-	auto win1 = TestWindow("Resources/images/Image4.png", "wnd 1");
-	AppWindow::Main({ &win1 });
+	auto app1 = TestApp("app 1");
+	AppWindow::Main({ &app1 });
 	
 }
