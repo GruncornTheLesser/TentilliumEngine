@@ -1,24 +1,25 @@
 #pragma once
-#include <vector>
 #include "Mesh.h"
 #include "Material.h"
-
+#include <vector>
 
 class Model
 {
 private:
-	struct RenderInfo
+	struct MeshInstance
 	{
 		int size;
 		unsigned int VAO;
-		~RenderInfo();
+		std::shared_ptr<Mesh> m_mesh;
+		Material m_material;
+		// TODO: VAO destruction -> Handle class with crtp so the MeshInstance can be moved but not copied
+		MeshInstance(std::shared_ptr<Mesh> mesh, Material material);
 	};
 
-	std::shared_ptr<std::vector<RenderInfo>> m_renderInfo;
-	std::vector<std::shared_ptr<Mesh>> m_meshes;
-
+	std::vector<MeshInstance> m_meshes;
 
 public:
-	Model(std::vector<std::shared_ptr<Mesh>> p_meshes);
-	void draw();
+	Model(std::vector<std::shared_ptr<Mesh>> p_meshes, std::vector<Material> p_materials);
+
+	void draw() const;
 };

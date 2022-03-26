@@ -168,11 +168,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Components\Camera.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\Material.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Model.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Mesh.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
-    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\Rendering\Window\AppWindow.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -181,21 +182,25 @@
     <ClCompile Include="Source\Scene\Systems.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\shaders\Default.shader" />
+    <None Include="Resources\meshes\Fall.fbx" />
+    <None Include="Resources\meshes\Person.fbx" />
+    <None Include="Resources\meshes\owl.fbx" />
+    <None Include="Resources\shaders\default.frag" />
     <None Include="Resources\meshes\Hat.mtl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="Resources\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Model.h" />
     <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
     <ClInclude Include="Source\Components\Flag.h" />
-    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
-    <ClInclude Include="Source\Scene.h" />
+    <ClInclude Include="Source\Scene\Scene.h" />
     <ClInclude Include="Source\Components\Camera.h" />
     <ClInclude Include="Source\Components\Hierarchy.h" />
     <ClInclude Include="Source\Components\Transform.h" />
@@ -223,9 +228,15 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\images\Image1.png" />
-    <Image Include="Resources\images\Image2.png" />
-    <Image Include="Resources\images\Image3.png" />
+    <Image Include="Resources\meshes\textures\wild_animals_map.png" />
+    <Image Include="Resources\textures\Image1.png" />
+    <Image Include="Resources\textures\Image2.png" />
+    <Image Include="Resources\textures\Image3.png" />
+    <Image Include="Resources\meshes\textures\color.tga" />
+    <Image Include="Resources\meshes\textures\metal.tga" />
+    <Image Include="Resources\meshes\textures\normal.tga" />
+    <Image Include="Resources\meshes\textures\rough.tga" />
+    <Image Include="Resources\textures\Image4.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

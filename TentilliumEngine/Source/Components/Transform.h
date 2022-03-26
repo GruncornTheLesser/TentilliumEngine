@@ -7,11 +7,13 @@
 struct Transform
 {
 public:
-	__declspec(property (put = setPosition, get = getPosition)) glm::vec3& position;
-	__declspec(property (put = setRotation, get = getRotation)) glm::quat& rotation;
-	__declspec(property (put = setScale, get = getScale)) glm::vec3& scale;
-
 	friend class Scene;
+
+public:
+	__declspec(property (put = setPosition, get = getPosition)) const glm::vec3& position;
+	__declspec(property (put = setRotation, get = getRotation)) const glm::quat& rotation;
+	__declspec(property (put = setScale, get = getScale)) const glm::vec3& scale;
+
 private:
 	Flag m_localUpdateFlag;
 	Flag m_worldUpdateFlag;
@@ -37,9 +39,7 @@ public:
 	void setPosition(const glm::vec3& pos);
 	void setScale(const glm::vec3& scl);
 	void setRotation(const glm::quat& rot);
-	void setRotation(const glm::vec3& rot);
-
-	void updateLocal(Transform* parent);
+	
 	void updateLocal();
 
 public:

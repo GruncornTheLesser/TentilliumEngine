@@ -46,7 +46,7 @@ void callback_func::key(GLFWwindow* wnd, int key, int scancode, int action, int 
 void callback_func::mouse(GLFWwindow* wnd, int button, int action, int mod)
 {
 	auto appWnd = getWindow(wnd);
-	appWnd->onMouse(Button(button), Action(action), Mod(mod));
+	appWnd->onMouse(AppWindow::Mouse::IntToButton(button), Action(action), Mod(mod));
 }
 
 void callback_func::mousewheel(GLFWwindow* wnd, double xoffset, double yoffset)
@@ -70,15 +70,19 @@ void callback_func::enter(GLFWwindow* wnd, int entered)
 void callback_func::resize(GLFWwindow* wnd, int width, int height)
 {
 	glViewport(0, 0, width, height);
-	getWindow(wnd)->onResize(width, height);
+    auto* appWnd = getWindow(wnd);
+    appWnd->m_width = width;
+    appWnd->m_height = height;
+    appWnd->onResize(width, height);
 }
+
+
 
 GLFWwindow* glfwContext;
 
 AppWindow::AppWindow(int width, int height, const char* title)
 	: m_title(title), m_width(width), m_height(height), m_window(nullptr)
 {
-
 	if (!glfwContext)
 	{
 		if (!glfwInit())
@@ -139,6 +143,11 @@ bool AppWindow::isPressed(Key key)
     return glfwGetKey(static_cast<GLFWwindow*>(m_window), Keyboard::KeyToInt(key));
 }
 
+bool AppWindow::isPressed(Button key)
+{
+    return glfwGetMouseButton(static_cast<GLFWwindow*>(m_window), Mouse::ButtonToInt(key));
+}
+
 void AppWindow::close()
 {
 	glfwSetWindowShouldClose(static_cast<GLFWwindow*>(m_window), true);
@@ -153,6 +162,16 @@ void AppWindow::setTitle(const char* title)
 {
 	this->m_title = title;
 	glfwSetWindowTitle(static_cast<GLFWwindow*>(m_window), title);
+}
+
+int AppWindow::getWidth()
+{
+    return m_width;
+}
+
+int AppWindow::getHeight()
+{
+    return m_height;
 }
 
 Key AppWindow::Keyboard::IntToKey(int key)
@@ -411,6 +430,35 @@ int AppWindow::Keyboard::KeyToInt(Key key)
     }
 }
 
+int AppWindow::Mouse::ButtonToInt(Button button)
+{
+    switch (button) {
+    case Button::UNKNOWN:   return -1;
+    case Button::LEFT:      return GLFW_MOUSE_BUTTON_LEFT;
+    case Button::RIGHT:     return GLFW_MOUSE_BUTTON_RIGHT;
+    case Button::MIDDLE:    return GLFW_MOUSE_BUTTON_MIDDLE;
+    case Button::B5:        return GLFW_MOUSE_BUTTON_5;
+    case Button::B6:        return GLFW_MOUSE_BUTTON_6;
+    case Button::B7:        return GLFW_MOUSE_BUTTON_7;
+    case Button::B8:        return GLFW_MOUSE_BUTTON_8;
+    }
+}
+
+Button AppWindow::Mouse::IntToButton(int button)
+{
+    switch (button) {
+    case GLFW_MOUSE_BUTTON_LEFT:    return Button::LEFT;
+    case GLFW_MOUSE_BUTTON_RIGHT:   return Button::RIGHT;
+    case GLFW_MOUSE_BUTTON_MIDDLE:  return Button::MIDDLE;
+    case GLFW_MOUSE_BUTTON_5:       return Button::B5;
+    case GLFW_MOUSE_BUTTON_6:       return Button::B6;
+    case GLFW_MOUSE_BUTTON_7:       return Button::B7;
+    case GLFW_MOUSE_BUTTON_8:       return Button::B8;
+    default:                        return Button::UNKNOWN;
+    }
+}
+
+
 void AppWindow::refresh()
 {
     m_mouse.cur_pos_x = m_mouse.next_pos_x;
@@ -419,19 +467,6 @@ void AppWindow::refresh()
 	glfwSwapBuffers(static_cast<GLFWwindow*>(m_window));
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
-void AppWindow::onKey(Key key, Action pressed, Mod mod) { }
-
-void AppWindow::onMouse(Button button, Action pressed, Mod mod) { }
-
-void AppWindow::onMouseMove(int posX, int posY) { }
-
-void AppWindow::onResize(int width, int height) 
-{
-	m_width = width;
-	m_height = height;
-}
-
 
 
 void AppWindow::Main(std::vector<AppWindow*> windows)
@@ -476,8 +511,8 @@ void AppWindow::Main(std::vector<AppWindow*> windows)
 
 			glfwMakeContextCurrent(static_cast<GLFWwindow*>((*it)->m_window));	// render to this window
 			glfwPollEvents(); // -> goes to callbacks eg onkey, onMouse etc		// execute events
-            (*it)->onDraw(delta);												// draw to window
-			(*it)->onDraw(delta);												// draw to window
+            (*it)->onProcess(delta);										    // process window
+			(*it)->onDraw();												    // draw window
 			
 
 			it++;
@@ -491,4 +526,3 @@ void AppWindow::Main(std::vector<AppWindow*> windows)
 		FlagManager::clear();
 	}
 }
-

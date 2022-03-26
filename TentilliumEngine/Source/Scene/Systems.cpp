@@ -1,40 +1,35 @@
-#include "../Scene.h"
+#include "../Scene/Scene.h"
 #include <gtx/transform.hpp>
 #include <list>
 
-void Scene::HierarchyUpdate()
+// the Hierarchy is sorted in order of depth in reverse. The reverse order ensures that
+// new hierarchies are caclulated after the originals. In a standard array it wouldnt be a 
+// reverse its just the way entt choose to do it to prevent invalidating iterators.
+//root			        new added
+//	v					    v
+// [rbegin ..., ..., ..., rend]	
+// reverse iteration -->		// can iterate but cant remove components
+//				  <-- iteration	// can iterate and remove components but wrong order for hierarchy
+// the only system required for the hierarchy is to erase hierarchies with expired parents
+
+// the Transform hierarchy updates the local and world matrices first from the root to the leaves.
+// the roots are updated first using the viewRootTransform setting updating their world if the local 
+// transform has changed. The hierarchied Transform components update the local transform and the 
+// world transform from. This is done with 2 flags:
+//		localUpdateFlag - raises whenever a value of the transform has been changed
+//		worldUpdateFlag - raises whenever the world matrix has been changed
+// when iterating down the hierarchies, the parents are always updated first so the flags can determine
+// the behaviour of the system.
+// if localUpdateFlag -> update local and world transform 
+// if worldUpdateFlag -> update world transform only
+// if entity has parent -> world transform updates from the parent.
+// else					-> updates direclty from local transform
+// because the transform and hierarchy are completely decoupled(ie one can exist without the other)
+// the parent could exist without a transform. In this case the transform treats the component as a root.
+
+void Scene::SceneGraphUpdate()
 {
-	// the Hierarchy system is sorted in order of depth in reverse. The reverse order ensures that
-	// new hierarchies are caclulated after the originals. In a standard array it wouldnt be a 
-	// reverse its just the way entt choose to do it to prevent invalidating iterators.
-	//root			        new added
-	//	v					    v
-	// [rbegin ..., ..., ..., rend]	
-	// reverse iteration -->		// can iterate but cant remove components
-	//				  <-- iteration	// can iterate and remove components but wrong order for hierarchy
-
-	std::list<entt::entity> deferredDestroy;
-	for (auto it = viewHierarchy.rbegin(); it != viewHierarchy.rend(); it++) // hierarchy dependancy
-	{
-		auto hierarchy = &viewHierarchy.get<Hierarchy>(*it);
-
-		if (!valid(hierarchy->parent)) {
-			hierarchy->depth = 0;
-			deferredDestroy.push_back(*it);
-		}
-
-		hierarchy->depth = 1;
-		auto parent = try_get<Hierarchy>(hierarchy->parent);
-		if (parent) 
-			hierarchy->depth += parent->depth;
-	}
-	std::cout << deferredDestroy.size() << " hierarchies expired" << std::endl;
-	erase<Hierarchy>(deferredDestroy.begin(), deferredDestroy.end());
-}
-
-void Scene::TransformUpdate()
-{
-	for (auto [entity, transform] : viewRootTransform.each()) // no hierarchy dependancy
+	for (auto [entity, transform] : viewRootTransform.each()) 
 	{
 		// if entity's local transform changed, update local and world transform
 		if (transform.m_localUpdateFlag) {
@@ -44,41 +39,64 @@ void Scene::TransformUpdate()
 		}
 	}
 
-	for (auto it = groupSceneGraph.rbegin(); it != groupSceneGraph.rend(); it++) // hierarchy dependancy
+	std::list<entt::entity> deferredDestroy;
+	for (auto it = viewHierarchy.rbegin(); it != viewHierarchy.rend(); it++)
 	{
-		auto [transform, hierarchy] = get<Transform, Hierarchy>(*it);			 // get components
-		auto parent = try_get<Transform>(hierarchy.getParent());				// get parent in hierarchy component
+		Hierarchy& hierarchy = get<Hierarchy>(*it);					// get hierarchy
+		Transform* transform = try_get<Transform>(*it);				// get transform if exists
+		Transform* parent = nullptr;								// parent transform if exists
 
-		// if entity's local transform changed, update world and local transform
-		if (transform.m_localUpdateFlag) {
-			transform.updateLocal();	// update local matrix from position rotation and scale
-
-			if (parent)
-				transform.m_worldMatrix = parent->m_worldMatrix * transform.m_localMatrix;
-			else				 
-				transform.m_worldMatrix = transform.m_localMatrix;
-			transform.m_worldUpdateFlag.Raise();
+		if (valid(hierarchy.parent))								// if hierarchy valid
+		{								
+			if (transform)											// if entity has transform
+				parent = try_get<Transform>(hierarchy.getParent());	// get parent transform
+			else continue;											// skip the transform system
 		}
-			
-
-		// if parent's world transform updated, update entity's world
-		else if (parent && parent->m_worldUpdateFlag)
+		else 
 		{
-			transform.m_worldMatrix = parent->m_worldMatrix * transform.m_localMatrix;
-			transform.m_worldUpdateFlag.Raise();
+			deferredDestroy.push_back(*it);							// erase invalid hierarchy
+			if (!transform)											// if entity does not have transform
+				continue;											// skip the transform system
+		}
+
+		if (parent && transform->m_localUpdateFlag)					// if local transform changed
+		{															// update entity's local and world transform 
+			transform->updateLocal();
+			transform->m_worldMatrix = parent->m_worldMatrix * transform->m_localMatrix;
+			transform->m_worldUpdateFlag.Raise();
+		}
+		else if (parent && parent->m_worldUpdateFlag)				// if parent's world transform updated
+		{															// update entity's world transform only
+			transform->m_worldMatrix = parent->m_worldMatrix * transform->m_localMatrix;
+			transform->m_worldUpdateFlag.Raise();
+		}
+		else if (!parent && transform->m_localUpdateFlag)			// if parent has no transform and entity's local transform changed
+		{															// update entity's local transform then set world transform to local
+			transform->updateLocal();								
+			transform->m_worldMatrix = transform->m_localMatrix;	// this is necessary because transform and hierarchy are decoupled
+			transform->m_worldUpdateFlag.Raise();
 		}
 	}
+	erase<Hierarchy>(deferredDestroy.begin(), deferredDestroy.end());
 }
 
-void Scene::Render(const Shader& shader)
-{
-	auto proj = (glm::mat4)get<Camera>(cam_entity);
-	auto view = glm::inverse((glm::mat4)get<Transform>(cam_entity));
 
-	for (auto [entity, render, transform] : viewRenderTransform.each()) {
+
+
+
+
+void Scene::Render()
+{
+	if (!all_of<Transform, Camera>(camera))
+		return;
+	auto proj = (glm::mat4)get<Camera>(camera);
+	auto view = glm::inverse((glm::mat4)get<Transform>(camera));
+	
+	defaultProgram->bind();
+
+	for (auto [entity, model, transform] : viewRenderTransform.each()) {
 		glm::mat4 mvp = proj * view * transform.m_worldMatrix;
-		shader.setUniformMatrix4f("MVP", mvp);
-		shader.bind();
-		render.draw();
+		defaultProgram->setUniformMatrix4f("MVP", mvp);
+		model.draw();
 	}
 }

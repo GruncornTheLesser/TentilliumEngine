@@ -4,25 +4,16 @@
 #include "Hierarchy.h"
 #include "Camera.h"
 
-
-struct Render {
-private:
-	unsigned int shader;
-
-};
-
-
 struct LightEmitter { };
-struct LightOccluder { };
-struct CustomMaterial { };
+struct ShadowCaster { };
 
 /*
 https://www.3dgep.com/forward-plus/#Forward
+https://johanmedestrom.wordpress.com/2016/03/30/tiled-deferred-shading-in-opengl-using-compute-shaders/?msclkid=8b768e85a7c111ec87571141ed1eb739
 https://ubm-twvideo01.s3.amazonaws.com/o1/vault/gdc2015/presentations/Thomas_Gareth_Advancements_in_Tile-Based.pdf
 
 tiled deferred rendering pipeline:
 construct screenspace grid/tiles with fixed pixel size
-
 1. deferred pre pass - render normal, specular, albedo, roughness into GBuffers
 2. Find min and max depth of each tile
 3. create per tile frustum between min and max depth

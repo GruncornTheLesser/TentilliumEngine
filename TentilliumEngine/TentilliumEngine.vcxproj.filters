@@ -53,9 +53,6 @@
     <ClCompile Include="Source\Components\FlagManager.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
-      <Filter>Source Files\Rendering\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Mesh.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
@@ -74,14 +71,24 @@
     <ClCompile Include="Source\Components\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\shaders\Default.shader">
+    <None Include="Resources\shaders\default.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="Resources\meshes\Hat.mtl">
       <Filter>Resource Files\meshes</Filter>
     </None>
+    <None Include="Resources\shaders\default.vert" />
+    <None Include="Resources\meshes\Person.fbx" />
+    <None Include="Resources\meshes\owl.fbx" />
+    <None Include="Resources\meshes\Fall.fbx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Tentil.h">
@@ -111,16 +118,13 @@
     <ClInclude Include="Source\Rendering\Window\AppWindow.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scene.h">
+    <ClInclude Include="Source\Scene\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Flag.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Source\Rendering\Resources\Mesh.h">
-      <Filter>Header Files\Rendering\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Camera.h">
@@ -131,6 +135,7 @@
     </ClInclude>
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
+    <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
@@ -141,13 +146,23 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\images\Image1.png">
+    <Image Include="Resources\textures\Image1.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\images\Image2.png">
+    <Image Include="Resources\textures\Image2.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\images\Image3.png">
+    <Image Include="Resources\textures\Image3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\textures\color.tga" />
+    <Image Include="Resources\meshes\textures\metal.tga" />
+    <Image Include="Resources\meshes\textures\normal.tga" />
+    <Image Include="Resources\meshes\textures\rough.tga" />
+    <Image Include="Resources\textures\Image4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\textures\wild_animals_map.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -2,19 +2,15 @@
 #include <map>
 #include <string>
 #include <iostream>
-// special pointers???
-// resources never destructed until static map destroyed
-// shared pointer is exactly what i want
-// when destructed, invalidating pointers???
+
 template<class t>
 class Resource
 {
 private:
-	inline static std::map<const char*, std::weak_ptr<t>> cache;
+	inline static std::map<std::string, std::weak_ptr<t>> cache;
 
 public:
-
-	const static std::shared_ptr<t> get(const char* filepath) 
+	const static std::shared_ptr<t> get(std::string filepath) 
 	{ 
 		auto it = cache.find(filepath);
 		if (it != cache.end())
@@ -34,7 +30,7 @@ public:
 
 	/* gets value in filepath or if none exists - creates new value from args */
 	template<typename ... Ts>
-	const static std::shared_ptr<t> get_or_default(const char* filepath, Ts ... args)
+	const static std::shared_ptr<t> get_or_default(std::string filepath, Ts ... args)
 	{
 		auto it = cache.find(filepath);
 		if (it != cache.end() && !(it->second.expired()))
@@ -44,14 +40,14 @@ public:
 	}
 	/* creates new value from args in filepath */
 	template<typename ... Ts>
-	const static std::shared_ptr<t> stash(const char* filepath, Ts ... args)
+	const static std::shared_ptr<t> stash(std::string filepath, Ts ... args)
 	{
-		auto ptr = std::shared_ptr<t>(new t(args...));
+		std::shared_ptr<t> ptr(new t(args...));
 		cache.emplace(filepath, ptr);
 		return ptr;
 	}
 
-	const static std::shared_ptr<t> load(const char* filepath)
+	const static std::shared_ptr<t> load(std::string filepath)
 	{
 		return get_or_default(filepath, filepath);
 	}

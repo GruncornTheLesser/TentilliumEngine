@@ -64,12 +64,6 @@ void Transform::setRotation(const glm::quat& rot)
 	m_localUpdateFlag.Raise();
 }
 
-void Transform::setRotation(const glm::vec3& rot)
-{
-	m_rotation = glm::quat(rot);
-	m_localUpdateFlag.Raise();
-}
-
 void Transform::updateLocal()
 {
 	m_localMatrix =

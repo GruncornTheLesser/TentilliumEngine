@@ -2,224 +2,62 @@
 #include <glm.hpp>	// GL maths
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
-#include <iostream>
-#include <sstream>
 #include <fstream>
-#include <iostream>
 #include <exception>
-#include <gtc/type_ptr.hpp>
 
-GLuint CompileShader(const GLenum type, std::string source)
+internal::Shader::~Shader()
 {
-	//std::cout << source << std::endl;
-
-	GLuint shader = glCreateShader(type);
-	const char* src = &source[0];
-
-	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
-
-	int compiledSuccessfully;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiledSuccessfully);
-	if (!compiledSuccessfully)
-	{
-		int length;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)alloca(length * sizeof(char));
-		glGetShaderInfoLog(shader, length, &length, message);
-
-		glDeleteShader(shader);
-
-		std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex shader : " : "fragment shader : ") << message << std::endl;
-		throw std::exception();
-	}
-
-	return shader;
+	glDeleteShader(m_shader);
 }
 
-Shader::Shader(std::string filepath)
+internal::Shader::Shader(ShaderType type, std::string text, loadType method)
 {
-	std::ifstream stream(filepath);
-	std::stringstream source;
-	std::string line;
-	GLenum type;
 
-	m_program = glCreateProgram();
-
-	while (getline(stream, line))
-	{
-		if (line[0] == '#')
-		{
-			std::istringstream iss(line);
-			std::string command;
-			iss >> command;
-
-			if (command == "#SHADER")
-			{
-				if (line == "#SHADER VERTEX")		 type = GL_VERTEX_SHADER;
-				else if (line == "#SHADER FRAGMENT") type = GL_FRAGMENT_SHADER;
-				else if (line == "#SHADER GEOMETRY") type = GL_GEOMETRY_SHADER;
-				continue;
-			}
-			else if (command == "#ENDSHADER")
-			{
-				GLuint shader = CompileShader(type, source.str());
-				glAttachShader(m_program, shader);
-				source.str(""); // empty the source
-				continue;
-			}
-		}
-		source << line << std::endl;
-	}
-	glLinkProgram(m_program);
-
-	glValidateProgram(m_program);
-	GLint success;
-	glGetProgramiv(m_program, GL_VALIDATE_STATUS, &success);
-
-	if (!success)
-	{
-		int length;
-		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)alloca(length * sizeof(char));
-		glGetProgramInfoLog(m_program, length, &length, &message[0]);
-		std::cerr << "Failed to attach shaders. \n ErrorLog: '" << message << "'" << std::endl; // the error message is gobbldegoop
-		// its almost identical to the error processing above for compiling shaders
-		throw std::exception();
-	}
-}
-
-Shader::~Shader()
-{
-	glDeleteProgram(m_program);
-}
-
-void Shader::bind() const
-{
-	glUseProgram(m_program);
-}
-
-void Shader::setUniform1i(const std::string& uniform_name, int v) const
-{
-	glProgramUniform1i(m_program, getUniformLocation(uniform_name), v);
-}
-
-void Shader::setUniform1f(const std::string& uniform_name, float v) const
-{
-	glProgramUniform1f(m_program, getUniformLocation(uniform_name), v);
-}
-
-void Shader::setUniform2i(const std::string& uniform_name, int v1, int v2) const
-{
-	glProgramUniform2i(m_program, getUniformLocation(uniform_name), v1, v2);
-}
-
-void Shader::setUniform2i(const std::string& uniform_name, glm::ivec2& value) const
-{
-	glProgramUniform2iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void Shader::setUniform2f(const std::string& uniform_name, float v1, float v2) const
-{
-	glProgramUniform2f(m_program, getUniformLocation(uniform_name), v1, v2);
-}
-
-void Shader::setUniform2f(const std::string& uniform_name, glm::vec2& value) const
-{
-	glProgramUniform2fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void Shader::setUniform3i(const std::string& uniform_name, int v1, int v2, int v3) const
-{
-	glProgramUniform3i(m_program, getUniformLocation(uniform_name), v1, v2, v3);
-}
-
-void Shader::setUniform3i(const std::string& uniform_name, glm::ivec3& value) const
-{
-	glProgramUniform3iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void Shader::setUniform3f(const std::string& uniform_name, float v1, float v2, float v3) const
-{
-	glProgramUniform3f(m_program, getUniformLocation(uniform_name), v1, v2, v3);
-}
-
-void Shader::setUniform3f(const std::string& uniform_name, glm::vec3& value) const
-{
-	glProgramUniform3fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void Shader::setUniform4i(const std::string& uniform_name, int v1, int v2, int v3, int v4) const
-{
-	glProgramUniform4i(m_program, getUniformLocation(uniform_name), v1, v2, v3, v4);
-}
-
-void Shader::setUniform4i(const std::string& uniform_name, glm::ivec4& value) const
-{
-	glProgramUniform4iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void Shader::setUniform4f(const std::string& uniform_name, float v1, float v2, float v3, float v4) const
-{
-	glProgramUniform4f(m_program, getUniformLocation(uniform_name), v1, v2, v3, v4);
-}
-
-void Shader::setUniform4f(const std::string& uniform_name, glm::vec4& value) const
-{
-	glProgramUniform4fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void Shader::setUniformMatrix3f(const std::string& uniform_name, float value[9]) const
-{
-	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false,&value[0]);
-}
-
-void Shader::setUniformMatrix3f(const std::string& uniform_name, glm::mat3& value) const
-{
-	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false,glm::value_ptr(value));
-}
-
-void Shader::setUniformMatrix4f(const std::string& uniform_name, float value[16]) const
-{
-	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, &value[0]);
-}
-
-void Shader::setUniformMatrix4f(const std::string& uniform_name, glm::mat4& value) const
-{
-	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
-}
-
-void Shader::setUniformBlock(const std::string& block_name, unsigned int Binding) const
-{
-	glUniformBlockBinding(m_program, getUniformBlockLocation(block_name), Binding);
-}
-
-unsigned int Shader::getUniformLocation(const std::string& uniform_name) const
-{
-	GLint location;
-	if (uniform_cache.find(uniform_name) != uniform_cache.end())
-		return uniform_cache[uniform_name];
-
-	location = glGetUniformLocation(m_program, uniform_name.c_str());
-	if (location == -1)
-		std::cout << "Warning uniform '" << uniform_name << "' doesnt exist." << std::endl;
+	std::string data;
 	
-	uniform_cache[uniform_name] = location;
-	return location;
+	switch (method) {
+		case loadType::FROM_FILE: {
+			std::ifstream fs(text, std::ios::in | std::ios::binary | std::ios::ate);
+			int size = fs.tellg();	// get size
+			fs.seekg(0, std::ios::beg);	// put cursor to beginning
+
+			// get filedata
+			data = std::string(size, ' ');
+			fs.read(&data[0], size);
+			fs.close();
+		
+			break;
+		}
+
+		case loadType::FROM_TEXT: {
+			data = text;
+			break;
+		}
+	}
+
+	switch (type) {
+	case ShaderType::VERT: m_shader = glCreateShader(GL_VERTEX_SHADER); break;
+	case ShaderType::GEOM: m_shader = glCreateShader(GL_GEOMETRY_SHADER); break;
+	case ShaderType::FRAG: m_shader = glCreateShader(GL_FRAGMENT_SHADER); break;
+	case ShaderType::COMP: m_shader = glCreateShader(GL_COMPUTE_SHADER); break;
+	}
+
+	const int raw_size = data.size();
+	const GLchar* raw_data = (const GLchar*)data.c_str();
+
+	glShaderSource(m_shader, 1, &raw_data, &raw_size);
+	glCompileShader(m_shader);
+	
+	int status, infoLen;
+	glGetShaderiv(m_shader, GL_COMPILE_STATUS, &status);
+	if (!status)
+	{
+		glGetShaderiv(m_shader, GL_INFO_LOG_LENGTH, &infoLen);
+		char* message = (char*)alloca(infoLen * sizeof(char));
+		glGetShaderInfoLog(m_shader, infoLen, &infoLen, message);
+
+		std::cerr << "Failed to compile shader : " << message << std::endl;
+
+		throw std::exception();
+	}
 }
-
-unsigned int Shader::getUniformBlockLocation(const std::string& block_name) const
-{
-	GLint location;
-	if (block_cache.find(block_name) != block_cache.end())
-		return uniform_cache[block_name];
-
-	location = glGetUniformBlockIndex(m_program, block_name.c_str());
-	if (location == -1)
-		std::cout << "Warning uniform '" << block_name << "' doesnt exist." << std::endl;
-
-	uniform_cache[block_name] = location;
-	return location;
-}
-
-
