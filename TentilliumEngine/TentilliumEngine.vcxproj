@@ -90,13 +90,17 @@
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLM\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -115,7 +119,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLM\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -134,7 +138,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLM\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -153,7 +157,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\GLM\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -167,10 +171,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
     <ClCompile Include="Source\Components\Camera.cpp" />
-    <ClCompile Include="Source\Rendering\Resources\Material.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Model.cpp" />
-    <ClCompile Include="Source\Rendering\Resources\Mesh.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp" />
@@ -182,7 +185,6 @@
     <ClCompile Include="Source\Scene\Systems.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\meshes\Fall.fbx" />
     <None Include="Resources\meshes\Person.fbx" />
     <None Include="Resources\meshes\owl.fbx" />
     <None Include="Resources\shaders\default.frag" />
@@ -195,10 +197,12 @@
     <None Include="Resources\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
     <ClInclude Include="Source\Rendering\Resources\Model.h" />
     <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
+    <ClInclude Include="Source\Rendering\Resources\UniformBlock.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Scene\Scene.h" />
     <ClInclude Include="Source\Components\Camera.h" />
@@ -211,7 +215,6 @@
     <ClInclude Include="Source\Components\Components.h" />
     <ClInclude Include="Source\Rendering\Resources\Shader.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
-    <ClInclude Include="Source\Tentil.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\cube.obj">
@@ -228,7 +231,6 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\meshes\textures\wild_animals_map.png" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />

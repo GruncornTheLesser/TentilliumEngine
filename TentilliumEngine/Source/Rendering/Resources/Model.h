@@ -1,25 +1,47 @@
 #pragma once
 #include "Mesh.h"
 #include "Material.h"
+#include "ShaderProgram.h"
 #include <vector>
 
 class Model
 {
 private:
-	struct MeshInstance
+	class MeshInstance
 	{
-		int size;
-		unsigned int VAO;
+	public:
+		int m_size;
+		unsigned int m_VAO;
+		
 		std::shared_ptr<Mesh> m_mesh;
-		Material m_material;
-		// TODO: VAO destruction -> Handle class with crtp so the MeshInstance can be moved but not copied
-		MeshInstance(std::shared_ptr<Mesh> mesh, Material material);
+		std::shared_ptr<Material> m_material;
+
+		MeshInstance(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+		~MeshInstance();
+
+		MeshInstance(const MeshInstance&) = delete;
+		MeshInstance& operator=(const MeshInstance&) = delete;
+
+		MeshInstance(MeshInstance&&);
+		MeshInstance& operator=(MeshInstance&&);
+
+		void draw() const;
 	};
 
+public:
 	std::vector<MeshInstance> m_meshes;
 
 public:
-	Model(std::vector<std::shared_ptr<Mesh>> p_meshes, std::vector<Material> p_materials);
+	Model();
+	Model(std::vector<std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>>> meshes);
 
-	void draw() const;
+	Model(const Model&) = delete;
+	Model& operator=(const Model&) = delete;
+
+	Model(Model&&) = default;
+	Model& operator=(Model&&) = default;
+	
+	void add(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+
+	void draw(const ShaderProgram& shaderProgram) const;
 };

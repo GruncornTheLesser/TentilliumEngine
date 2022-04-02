@@ -7,8 +7,9 @@
 
 unsigned int ShaderProgram::createProgram(ShaderLink shaders) {
 
-	if (!shaders.valid()) {
+	if (!((shaders.vert && shaders.geom && shaders.frag) || (shaders.vert && shaders.frag))) {
 		std::cerr << "Failed to initiate program.\nErrorLog: invalid set of shaders attached to program." << std::endl;
+		throw std::exception();
 	}
 
 	m_program = glCreateProgram();
@@ -29,7 +30,7 @@ unsigned int ShaderProgram::createProgram(ShaderLink shaders) {
 	{
 		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetProgramInfoLog(m_program, infoLen, &infoLen, message);
+		glGetProgramInfoLog(m_program, infoLen, NULL, message);
 
 		std::cerr << "Failed to link program.\nErrorLog: '" << message << "'" << std::endl;
 		throw std::exception();
@@ -41,10 +42,10 @@ unsigned int ShaderProgram::createProgram(ShaderLink shaders) {
 	if (status == GL_FALSE)
 	{
 		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &infoLen);
-		GLchar* message = new GLchar[infoLen];
-		glGetProgramInfoLog(m_program, infoLen * sizeof(GLchar), NULL, message);
+		char* message = (char*)alloca(infoLen * sizeof(char));
+		glGetProgramInfoLog(m_program, infoLen, NULL, message);
 
-		std::cerr << "Failed to validate program.\nErrorLog: '" << std::string(message) << "'" << std::endl;
+		std::cerr << "Failed to validate program.\nErrorLog: '" << message << "'" << std::endl;
 		throw std::exception();
 	}
 
@@ -83,19 +84,12 @@ ShaderProgram::ShaderProgram(std::string filepath)
 				shaders.geom = Shader<ShaderType::GEOM>::load(file.path().string().c_str());
 			else if (fileExt == ".vert") 
 				shaders.vert = Shader<ShaderType::VERT>::load(file.path().string().c_str());
-			else if (fileExt == ".comp") 
+			else if (fileExt == ".comp")
 				shaders.comp = Shader<ShaderType::COMP>::load(file.path().string().c_str());
 		}
 	}
 
 	createProgram(shaders);
-
-	setUniform1i(MATERIAL_MAP_DIFF_NAME, MATERIAL_MAP_DIFF_SLOT);
-	setUniform1i(MATERIAL_MAP_NORM_NAME, MATERIAL_MAP_NORM_SLOT);
-	setUniform1i(MATERIAL_MAP_SPEC_NAME, MATERIAL_MAP_SPEC_SLOT);
-	setUniform1i(MATERIAL_MAP_SHIN_NAME, MATERIAL_MAP_SHIN_SLOT);
-
-
 }
 
 ShaderProgram::~ShaderProgram()
@@ -103,103 +97,109 @@ ShaderProgram::~ShaderProgram()
 	glDeleteProgram(m_program);
 }
 
-bool ShaderProgram::hasUniform(const std::string& uniform_name)
-{
-	int location = glGetUniformLocation(m_program, uniform_name.c_str());
-	return location == -1;
+ShaderProgram::ShaderProgram(const ShaderProgram&& other) {
+	this->m_program = other.m_program;
 }
 
-bool ShaderProgram::hasUniformBlock(const std::string& block_name)
-{
-	int location = glGetUniformBlockIndex(m_program, block_name.c_str());
-	return location == -1;
+ShaderProgram& ShaderProgram::operator=(const ShaderProgram&& other) {
+	glDeleteProgram(this->m_program);
+	this->m_program = other.m_program;
+	this->m_uniform_cache.clear();
+	return *this;
 }
 
-void ShaderProgram::bind() const
+void ShaderProgram::bind() const 
 {
 	glUseProgram(m_program);
 }
 
-void ShaderProgram::setUniform1i(const std::string& uniform_name, int v) const
+void ShaderProgram::setUniform1i(std::string uniform_name, int v) const
 {
 	glProgramUniform1i(m_program, getUniformLocation(uniform_name), v);
 }
 
-void ShaderProgram::setUniform1f(const std::string& uniform_name, float v) const
+void ShaderProgram::setUniform1f(std::string uniform_name, float v) const
 {
 	glProgramUniform1f(m_program, getUniformLocation(uniform_name), v);
 }
 
-void ShaderProgram::setUniform2i(const std::string& uniform_name, glm::ivec2& value) const
+void ShaderProgram::setUniform2i(std::string uniform_name, const glm::ivec2& value) const
 {
 	glProgramUniform2iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform2f(const std::string& uniform_name, glm::vec2& value) const
+void ShaderProgram::setUniform2f(std::string uniform_name, const glm::vec2& value) const
 {
 	glProgramUniform2fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform3i(const std::string& uniform_name, glm::ivec3& value) const
+void ShaderProgram::setUniform3i(std::string uniform_name, const glm::ivec3& value) const
 {
 	glProgramUniform3iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform3f(const std::string& uniform_name, glm::vec3& value) const
+void ShaderProgram::setUniform3f(std::string uniform_name, const glm::vec3& value) const
 {
 	glProgramUniform3fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform4i(const std::string& uniform_name, glm::ivec4& value) const
+void ShaderProgram::setUniform4i(std::string uniform_name, const glm::ivec4& value) const
 {
 	glProgramUniform4iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform4f(const std::string& uniform_name, glm::vec4& value) const
+void ShaderProgram::setUniform4f(std::string uniform_name, const glm::vec4& value) const
 {
 	glProgramUniform4fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniformMatrix3f(const std::string& uniform_name, glm::mat3& value) const
+
+
+void ShaderProgram::setUniformMat2(std::string uniform_name, const glm::mat2& value) const
+{
+	glProgramUniformMatrix2fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
+}
+
+void ShaderProgram::setUniformMat3(std::string uniform_name, const glm::mat3& value) const
 {
 	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniformMatrix4f(const std::string& uniform_name, glm::mat4& value) const
+void ShaderProgram::setUniformMat4(std::string uniform_name, const glm::mat4& value) const
 {
 	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniformBlock(const std::string& block_name, unsigned int Binding) const
+void ShaderProgram::setUniformBlock(std::string block_name, unsigned int Binding) const
 {
 	glUniformBlockBinding(m_program, getUniformBlockLocation(block_name), Binding);
 }
 
-unsigned int ShaderProgram::getUniformLocation(const std::string& uniform_name) const
+unsigned int ShaderProgram::getUniformLocation(std::string uniform_name) const
 {
 	GLint location;
-	if (uniform_cache.find(uniform_name) != uniform_cache.end())
-		return uniform_cache[uniform_name];
+	if (m_uniform_cache.find(uniform_name) != m_uniform_cache.end())
+		return m_uniform_cache[uniform_name];
 
 	location = glGetUniformLocation(m_program, uniform_name.c_str());
 	if (location == -1) 
-		std::cout << "Warning uniform '" << uniform_name << "' doesnt exist." << std::endl;
+		std::cerr << "Warning uniform '" << uniform_name << "' doesnt exist." << std::endl;
 
-	uniform_cache[uniform_name] = location;
+	m_uniform_cache[uniform_name] = location;
 	return location;
 }
 
-unsigned int ShaderProgram::getUniformBlockLocation(const std::string& block_name) const
+unsigned int ShaderProgram::getUniformBlockLocation(std::string block_name) const
 {
 	GLint location;
-	if (block_cache.find(block_name) != block_cache.end())
-		return uniform_cache[block_name];
+	if (m_block_cache.find(block_name) != m_block_cache.end())
+		return m_uniform_cache[block_name];
 
 	location = glGetUniformBlockIndex(m_program, block_name.c_str());
 	if (location == -1) 
-		std::cout << "Warning uniform block '" << block_name << "' doesnt exist." << std::endl;
+		std::cerr << "Warning uniform block '" << block_name << "' doesnt exist." << std::endl;
 
-	uniform_cache[block_name] = location;
+	m_block_cache[block_name] = location;
 	return location;
 }
 

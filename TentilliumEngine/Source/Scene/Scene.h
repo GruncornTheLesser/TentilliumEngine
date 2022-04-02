@@ -38,12 +38,6 @@ public: // public selective inheritance of functions
 
 public:
 	entt::entity load(std::string filepath);
-	Scene();
-
-	
-
-
-
 
 private:
 	VIEW(viewHierarchy, GET(Hierarchy), EXC())
@@ -60,12 +54,10 @@ public:
 	void UpdateCameraMatrix();
 
 private:
-	VIEW(viewRender, GET(Model), EXC(Transform /*, Skin*/))
-	VIEW(viewRenderTransform, GET(Model, Transform), EXC())
-	std::shared_ptr<ShaderProgram> defaultProgram; // 
+	VIEW(viewRender, GET(Model), EXC())
 
 public:
-	void Render();
+	void Render(const ShaderProgram& program);
 };
 
 #undef OWN

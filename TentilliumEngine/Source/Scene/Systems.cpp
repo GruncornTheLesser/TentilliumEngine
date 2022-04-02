@@ -1,6 +1,9 @@
 #include "../Scene/Scene.h"
+#include <glm.hpp>
 #include <gtx/transform.hpp>
 #include <list>
+#include <glew.h>
+#include <glfw3.h>
 
 // the Hierarchy is sorted in order of depth in reverse. The reverse order ensures that
 // new hierarchies are caclulated after the originals. In a standard array it wouldnt be a 
@@ -80,23 +83,43 @@ void Scene::SceneGraphUpdate()
 	erase<Hierarchy>(deferredDestroy.begin(), deferredDestroy.end());
 }
 
-
-
-
-
-
-void Scene::Render()
+void Scene::Render(const ShaderProgram& program)
 {
 	if (!all_of<Transform, Camera>(camera))
 		return;
-	auto proj = (glm::mat4)get<Camera>(camera);
-	auto view = glm::inverse((glm::mat4)get<Transform>(camera));
+	const auto& proj = get<Camera>(camera).m_proj;
+	const auto& view = glm::inverse(get<Transform>(camera).m_worldMatrix);
 	
-	defaultProgram->bind();
+	program.bind();
+	for (auto [entity, model] : viewRender.each()) 
+	{
+		if (auto transform = try_get<Transform>(entity)) {
+			glm::mat4 mvp = proj * view * transform->m_worldMatrix;
+			program.setUniformMat4("MVP", mvp);
+		}
 
-	for (auto [entity, model, transform] : viewRenderTransform.each()) {
-		glm::mat4 mvp = proj * view * transform.m_worldMatrix;
-		defaultProgram->setUniformMatrix4f("MVP", mvp);
-		model.draw();
+		for (const auto& instance : model.m_meshes)
+		{
+			program.setUniformBlock("material", 0);
+
+			auto h = instance.m_material->m_uniformBuffer.handle;
+			glBindBufferBase(GL_UNIFORM_BUFFER, 0, instance.m_material->m_uniformBuffer.handle);
+
+			program.setUniform1i("DIFF_map", 0);
+			if (instance.m_material->Diffuse_map) 
+				instance.m_material->Diffuse_map->bindSlot(0);
+
+			program.setUniform1i("SPEC_map", 1);
+			if (instance.m_material->Specular_map) 
+				instance.m_material->Specular_map->bindSlot(1);
+
+			program.setUniform1i("GLOS_map", 2);
+			if (instance.m_material->Gloss_map) 
+				instance.m_material->Gloss_map->bindSlot(2);
+
+			instance.draw();
+		}
+
+		model.draw(program);
 	}
 }

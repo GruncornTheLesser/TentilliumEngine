@@ -3,6 +3,7 @@
 
 struct Camera
 {
+	friend class Scene;
 private:
 	glm::mat4 m_proj;
 	float m_fovY, m_ratio, m_zNear, m_zFar;

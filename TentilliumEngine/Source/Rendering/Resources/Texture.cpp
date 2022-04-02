@@ -3,30 +3,28 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include <glm.hpp>	// GL maths
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
+#include <glm.hpp>	// GL maths
 
 #include <exception>
 #include <iostream>
 
-#include <assimp/scene.h>
-
-unsigned int generateTexture(int width, int height, int channels, void* data, Texture::FormatHint format_hint, Texture::TypeHint type_hint)
+unsigned int generateTexture(int width, int height, int channels, void* data, Texture::Format format_hint, Texture::TypeHint type_hint)
 {
 	unsigned int m_handle;
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
 	int format, internal_format;
-	if (format_hint != Texture::FormatHint::NONE) 
+	if (format_hint != Texture::Format::NONE)
 	{
 		switch (format_hint)
 		{
-			case Texture::FormatHint::R:  internal_format = GL_R8; format = GL_RED; break;
-			case Texture::FormatHint::RG:  internal_format = GL_RG8; format = GL_RG; break;
-			case Texture::FormatHint::RGB:  internal_format = GL_RGB8; format = GL_RGB; break;
-			case Texture::FormatHint::RGBA:  internal_format = GL_RGBA8; format = GL_RGBA; break;
+			case Texture::Format::R:  internal_format = GL_R8; format = GL_RED; break;
+			case Texture::Format::RG:  internal_format = GL_RG8; format = GL_RG; break;
+			case Texture::Format::RGB:  internal_format = GL_RGB8; format = GL_RGB; break;
+			case Texture::Format::RGBA:  internal_format = GL_RGBA8; format = GL_RGBA; break;
 		}
 	}
 	else
@@ -63,7 +61,7 @@ unsigned int generateTexture(int width, int height, int channels, void* data, Te
 Texture::Texture(std::string filepath)
 {
 	int width, height, channels;
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 	void* data = stbi_load(filepath.c_str(), &width, &height, &channels, 4);
 	
 	if (!data)
@@ -72,15 +70,15 @@ Texture::Texture(std::string filepath)
 		throw std::exception();
 	}
 
-	m_handle = generateTexture(width, height, channels, data, (FormatHint)channels, TypeHint::UNSIGNED_BYTE);
+	m_handle = generateTexture(width, height, channels, data, (Format)channels, TypeHint::UNSIGNED_BYTE);
 	stbi_image_free(data);
 }
 
-Texture::Texture(int width, int height, int channels, void* data, FormatHint format_hint, TypeHint type_hint)
+Texture::Texture(int width, int height, int channels, void* data, Format format_hint, TypeHint type_hint)
 {
 	if (data) 
 	{
-		stbi_set_flip_vertically_on_load(true);
+		stbi_set_flip_vertically_on_load(false);
 		data = stbi_load_from_memory((unsigned char*)data, width * (height == 0 ? 1 : height), &width, &height, &channels, 4);
 
 		if (!data)
@@ -89,7 +87,7 @@ Texture::Texture(int width, int height, int channels, void* data, FormatHint for
 			throw std::exception();
 		}
 
-		m_handle = generateTexture(width, height, channels, data, (format_hint == FormatHint::NONE ? (FormatHint)channels : format_hint), type_hint);
+		m_handle = generateTexture(width, height, channels, data, (format_hint == Format::NONE ? (Format)channels : format_hint), type_hint);
 
 		stbi_image_free(data);
 	}
@@ -100,19 +98,30 @@ Texture::Texture(int width, int height, int channels, void* data, FormatHint for
 		
 }
 
-Texture::Texture(int width, int height, int channels, std::vector<float> data, FormatHint format_hint)
+Texture::Texture(int width, int height, int channels, std::vector<float> data, Format format_hint)
 	: m_handle(generateTexture(width, height, channels, data.data(), format_hint, TypeHint::FLOAT))
 { }
 
-Texture::Texture(int width, int height, int channels, std::vector<unsigned int> data, FormatHint format_hint)
+Texture::Texture(int width, int height, int channels, std::vector<unsigned int> data, Format format_hint)
 	: m_handle(generateTexture(width, height, channels, data.data(), format_hint, TypeHint::UNSIGNED_INT))
 { }
 
 
 
+Texture::Texture(Texture&& other)
+{
+	this->m_handle = other.m_handle;
+}
+
+Texture& Texture::operator=(Texture&&)
+{
+	glDeleteTextures(1, &m_handle);
+	return *this;
+}
+
 Texture::~Texture()
 {
-	//glDeleteTextures(1, &m_handle);
+	glDeleteTextures(1, &m_handle);
 }
 
 void Texture::bind() const
@@ -120,13 +129,13 @@ void Texture::bind() const
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
-void Texture::bind(int slot) const
+void Texture::bindSlot(int slot) const
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
-int Texture::getWidth()
+int Texture::getWidth() const
 {
 	int width;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
@@ -134,7 +143,7 @@ int Texture::getWidth()
 	return width;
 }
 
-int Texture::getHeight()
+int Texture::getHeight() const
 {
 	int height;
 	glBindTexture(GL_TEXTURE_2D, m_handle);

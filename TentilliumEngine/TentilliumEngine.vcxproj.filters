@@ -53,9 +53,6 @@
     <ClCompile Include="Source\Components\FlagManager.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Mesh.cpp">
-      <Filter>Source Files\Rendering\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Model.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
@@ -71,10 +68,10 @@
     <ClCompile Include="Source\Components\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Material.cpp">
+    <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp">
+    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -88,12 +85,8 @@
     <None Include="Resources\shaders\default.vert" />
     <None Include="Resources\meshes\Person.fbx" />
     <None Include="Resources\meshes\owl.fbx" />
-    <None Include="Resources\meshes\Fall.fbx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Tentil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
@@ -136,6 +129,8 @@
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
+    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Rendering\Resources\UniformBlock.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
@@ -160,9 +155,6 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\meshes\textures\wild_animals_map.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -1,8 +1,6 @@
 #pragma once
-#include "Material.h"
 #include "Resource.h"
-#include <vector>
-
+#include "GLbuffer.h"
 // interleaved - attributes in the same buffer
 // seperated - attributes in seperate buffers
 // interleaved vs seperate buffers
@@ -19,24 +17,27 @@
 class Mesh final : public Resource<Mesh>
 {
 public:
-	friend class Resource;
 	friend class Model;
 private:
-	struct VBO { unsigned int index = 0, vertex = 0, tCoord = 0, normal = 0, colour = 0; } m_vbo;
-	// a struct containing all the mesh data
-
-private:
-	Mesh(void* aiMsh);
+	GLbuffer m_buffer_index, 
+			 m_buffer_vertex, 
+			 m_buffer_tCoord, 
+			 m_buffer_normal, 
+			 m_buffer_colour;
 public:
-	Mesh(const std::vector<unsigned int>& index_data,
-		const std::vector<float>& vertex_data,
-		const std::vector<float>* tCoord_data = nullptr, // optional
-		const std::vector<float>* normal_data = nullptr, // optional
-		const std::vector<float>* colour_data = nullptr  // optional
-	);
-	~Mesh();
-
-	// 
+	Mesh(size_t index_size, size_t vertex_size,
+		unsigned int* index_data,
+		float* vertex_data,
+		float* tCoord_data = nullptr,
+		float* normal_data = nullptr,
+		float* colour_data = nullptr) 
+	{
+		if (index_data)  m_buffer_index  = GLbuffer(index_data,	index_size);
+		if (vertex_data) m_buffer_vertex = GLbuffer(vertex_data, vertex_size * 3);
+		if (tCoord_data) m_buffer_tCoord = GLbuffer(tCoord_data,	vertex_size * 2);
+		if (normal_data) m_buffer_normal = GLbuffer(normal_data,	vertex_size * 3);
+		if (colour_data) m_buffer_colour = GLbuffer(colour_data,	vertex_size * 3);
+	}
 };
 
 
