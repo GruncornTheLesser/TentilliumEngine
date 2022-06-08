@@ -5,13 +5,12 @@ class GLbuffer
 public:
     __declspec(property(get = get_handle)) unsigned int handle;
 
-private:
-    unsigned int m_bo = 0;
+protected:
+    unsigned int m_handle;
 
 public:
-    GLbuffer() { }
     GLbuffer(void* data, size_t size);
-
+    
     ~GLbuffer();
 
     GLbuffer(const GLbuffer&) = delete;
@@ -20,22 +19,32 @@ public:
     GLbuffer(GLbuffer&&);
     GLbuffer& operator=(GLbuffer&&);
 
-    void set(size_t offset, void* data, size_t size) const;
-
-    void get(size_t offset, void* data, size_t size) const;
+    void setData(void* data, size_t size, size_t offset) const;
 
     template<typename t>
-    void set(t* data, size_t offset = 0) const {
-        return set(offset, data, sizeof(t)); 
+    void setData(t* data, size_t offset = 0) const {
+        return setData(data, sizeof(t), offset);
     }
 
     template<typename t>
-    void set(t data, size_t offset = 0) const {
-        return set(offset, &data, sizeof(t));
+    void setData(t data, size_t offset = 0) const {
+        return setData(&data, sizeof(t), offset);
     }
 
+    void getData(size_t offset, void* data, size_t size) const;
+
+    template<typename t>
+    void getData(t* data, size_t offset = 0) const {
+        return getData(offset, data, sizeof(t));
+    }
+
+    template<typename t>
+    void getData(t data, size_t offset = 0) const {
+        return getData(offset, &data, sizeof(t));
+    }
+    
     unsigned int get_handle() const { 
-        return m_bo; 
+        return m_handle;
     }
 };
 

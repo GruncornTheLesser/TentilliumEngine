@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -172,17 +172,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
-    <ClCompile Include="Source\Components\Camera.cpp" />
-    <ClCompile Include="Source\Rendering\Resources\Model.cpp" />
+    <ClCompile Include="Source\Components\Projection.cpp" />
+    <ClCompile Include="Source\Components\SpecularMaterial.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp" />
-    <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\Rendering\Window\AppWindow.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
-    <ClCompile Include="Source\Scene\Systems.cpp" />
+    <ClCompile Include="Source\Systems\SpecularSystem.cpp" />
+    <ClCompile Include="Source\Systems\TransformSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\meshes\Person.fbx" />
@@ -197,22 +197,23 @@
     <None Include="Resources\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
-    <ClInclude Include="Source\Rendering\Resources\Model.h" />
     <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
+    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Components\SpecularMaterial.h" />
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
-    <ClInclude Include="Source\Rendering\Resources\UniformBlock.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
-    <ClInclude Include="Source\Scene\Scene.h" />
-    <ClInclude Include="Source\Components\Camera.h" />
+    <ClInclude Include="Source\Systems\RenderSystem.h" />
+    <ClInclude Include="Source\Systems\TransformSystem.h" />
+    <ClInclude Include="Source\Systems\SpecularSystem.h" />
+    <ClInclude Include="Source\Systems\entt_macros.h" />
+    <ClInclude Include="Source\Scene.h" />
+    <ClInclude Include="Source\Components\Projection.h" />
     <ClInclude Include="Source\Components\Hierarchy.h" />
     <ClInclude Include="Source\Components\Transform.h" />
     <ClInclude Include="Source\Rendering\Resources\Texture.h" />
-    <ClInclude Include="Source\Rendering\Resources\Material.h" />
     <ClInclude Include="Source\Rendering\Resources\Resource.h" />
     <ClInclude Include="Source\Rendering\Window\AppWindow.h" />
-    <ClInclude Include="Source\Components\Components.h" />
     <ClInclude Include="Source\Rendering\Resources\Shader.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
   </ItemGroup>
@@ -239,6 +240,9 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Source\notes.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

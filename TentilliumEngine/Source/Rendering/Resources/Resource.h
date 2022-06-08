@@ -4,6 +4,12 @@
 #include <iostream>
 #include <concepts>
 
+// used for:
+// textures
+// models
+// 
+//
+
 template<class T>
 class Resource
 {

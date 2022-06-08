@@ -1,44 +1,56 @@
 #pragma once
-#include "Resource.h"
 #include "GLbuffer.h"
-// interleaved - attributes in the same buffer
-// seperated - attributes in seperate buffers
-// interleaved vs seperate buffers
+
+// MESH CLASS
+
+// INTERLEAVED - attributes in the same buffer
+// SEPERATED - attributes in seperate buffers
+
+// INTERLEAVED vs SEPERATED
 // seperate is better if single values of vertices change
 // too many buffers is bad, long buffers are also bad
 
-// direct - data is stored in an array and called upon as needed
-// indexed - unique data is stored in one buffer and a different buffer stores an index pointing to the first buffer
-// indexed vs direct
+// DIRECT - data is stored in an array and called upon as needed
+// INDEXED - unique data is stored in one buffer and a different buffer stores an index pointing to the first buffer
+
+// INDEXED vs DIRECT
 // indexed is better, uses less memory 
 // can sometimes use fast cache
 
 
-class Mesh final : public Resource<Mesh>
-{
+// Current structure:
+//			Model
+//			  |
+//	   MeshInstance(VAO)[N]
+//		  |		 |
+//Material(UBO)	 Mesh(VBO)
+//    | 
+// Textures
+// 
+// Issues
+//  > annoying to render entire mesh as all the vertex groups are seperate
+
+// VIEW(viewRender, GET(Mesh, Render), EXC())
+// Proposed structure:
+//    Mesh(VBOs)	Renderer(VAO)	Bones(UBO)
+//       |              |				|
+// VertGroup[N]   Material(UBO)[N]	 entities
+//	                    |
+//					Textures
+//
+// Advantages:
+//  > more functionality -> can draw wire mesh with no render material
+//	> can adjust mesh per program to include or exclude vertex data
+//	> more data oriented allowing easier repurposing of data
+
+enum class VertAttrib { Index, Position, TexCoord, Normal, BoneID, BoneWeight };
+
+template<VertAttrib>
+class VBO : public GLbuffer {
 public:
-	friend class Model;
-private:
-	GLbuffer m_buffer_index, 
-			 m_buffer_vertex, 
-			 m_buffer_tCoord, 
-			 m_buffer_normal, 
-			 m_buffer_colour;
-public:
-	Mesh(size_t index_size, size_t vertex_size,
-		unsigned int* index_data,
-		float* vertex_data,
-		float* tCoord_data = nullptr,
-		float* normal_data = nullptr,
-		float* colour_data = nullptr) 
-	{
-		if (index_data)  m_buffer_index  = GLbuffer(index_data,	index_size);
-		if (vertex_data) m_buffer_vertex = GLbuffer(vertex_data, vertex_size * 3);
-		if (tCoord_data) m_buffer_tCoord = GLbuffer(tCoord_data,	vertex_size * 2);
-		if (normal_data) m_buffer_normal = GLbuffer(normal_data,	vertex_size * 3);
-		if (colour_data) m_buffer_colour = GLbuffer(colour_data,	vertex_size * 3);
-	}
+	VBO(void* data, size_t size) : GLbuffer(data, size) { }
+	// TODO:
+	//template<typename T>
+	//VBO(std::vector<T>& data) : GLbuffer(&data[0], sizeof(data)) { }
 };
-
-
 

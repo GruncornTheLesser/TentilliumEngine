@@ -47,14 +47,8 @@
     <ClCompile Include="Source\Components\Transform.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Components\FlagManager.h">
       <Filter>Header Files\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Model.cpp">
-      <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
@@ -62,16 +56,22 @@
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\Systems.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Components\Camera.cpp">
+    <ClCompile Include="Source\Components\Projection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\SpecularMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Systems\SpecularSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Systems\TransformSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,9 +90,6 @@
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\Resources\Material.h">
-      <Filter>Header Files\Rendering\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Rendering\Resources\Resource.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
@@ -105,32 +102,30 @@
     <ClInclude Include="Source\Components\Transform.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Components.h">
-      <Filter>Header Files\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Rendering\Window\AppWindow.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scene\Scene.h">
+    <ClInclude Include="Source\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Flag.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Rendering\Resources\Mesh.h">
+    <ClInclude Include="Source\Components\SpecularMaterial.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Camera.h">
-      <Filter>Header Files\Rendering\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Rendering\Resources\Model.h">
+    <ClInclude Include="Source\Components\Projection.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
-    <ClInclude Include="Source\Rendering\Resources\UniformBlock.h" />
+    <ClInclude Include="Source\Systems\entt_macros.h" />
+    <ClInclude Include="Source\Systems\TransformSystem.h" />
+    <ClInclude Include="Source\Systems\SpecularSystem.h" />
+    <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
+    <ClInclude Include="Source\Systems\RenderSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
@@ -157,5 +152,8 @@
     <Image Include="Resources\textures\Image4.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Source\notes.txt" />
   </ItemGroup>
 </Project>

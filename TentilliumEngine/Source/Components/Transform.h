@@ -7,7 +7,7 @@
 struct Transform
 {
 public:
-	friend class Scene;
+	friend class TransformSystem;
 
 public:
 	__declspec(property (put = setPosition, get = getPosition)) const glm::vec3& position;
@@ -35,6 +35,7 @@ public:
 	const glm::vec3& getScale();
 	const glm::quat& getRotation();
 	const glm::mat4& getLocalMatrix();
+	const glm::mat4& getWorldMatrix();
 
 	void setPosition(const glm::vec3& pos);
 	void setScale(const glm::vec3& scl);

@@ -56,20 +56,18 @@ ShaderProgram::ShaderProgram(std::string filepath)
 {
 	std::string fp(filepath);
 
-	int p1 = fp.find_last_of("\\/");
-	int p2 = fp.find_last_of(".");
+	size_t p1 = fp.find_last_of("\\/");
+	size_t p2 = fp.find_last_of(".");
 
 	std::string dirPath = fp.substr(0, p1 == std::string::npos ? 0 : p1);
-	std::string dirName = fp.substr(
-		p1 == std::string::npos ? 0 : p1 + 1,
-		(p2 == std::string::npos ? fp.length() : (p2 - 1)) - p1);
+	std::string dirName = fp.substr(p1 == std::string::npos ? 0 : p1 + 1, (p2 == std::string::npos ? fp.length() : (p2 - 1)) - p1);
 
 	ShaderLink shaders;
 	for (const auto& file : std::filesystem::directory_iterator(dirPath)) {
 		std::string fp = file.path().string();
 
-		int p1 = fp.find_last_of("\\/");
-		int p2 = fp.find_last_of(".");
+		size_t p1 = fp.find_last_of("\\/");
+		size_t p2 = fp.find_last_of(".");
 
 		if (p1 == std::string::npos) p1 = 0; else p1 += 1;
 		if (p2 == std::string::npos) p2 = fp.length();

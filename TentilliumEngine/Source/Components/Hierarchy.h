@@ -4,7 +4,7 @@
 
 struct Hierarchy
 {
-friend class Scene;
+friend class TransformSystem;
 
 private:
 	entt::entity parent;

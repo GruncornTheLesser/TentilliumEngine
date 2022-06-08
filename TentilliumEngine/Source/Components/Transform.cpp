@@ -46,6 +46,11 @@ const glm::mat4& Transform::getLocalMatrix()
 	return m_localMatrix;
 }
 
+const glm::mat4& Transform::getWorldMatrix()
+{
+	return m_worldMatrix;
+}
+
 void Transform::setPosition(const glm::vec3& pos)
 {
 	m_position = pos;
