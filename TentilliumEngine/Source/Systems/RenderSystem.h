@@ -19,9 +19,9 @@ protected:
 
 	glm::mat4 get_cam_view() {
 		if (auto ptr = try_get<Projection>(m_camera))
-			return *ptr;
+			return ptr->get();
 		else 
-			return glm::mat4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+			return glm::mat4();
 	}
 
 	void resize(int width, int height) {

@@ -173,9 +173,9 @@
   <ItemGroup>
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
     <ClCompile Include="Source\Components\Projection.cpp" />
-    <ClCompile Include="Source\Components\SpecularMaterial.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
     <ClCompile Include="Source\Components\FlagManager.h" />
+    <ClCompile Include="Source\Components\Mesh.cpp" />
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp" />
     <ClCompile Include="Source\Rendering\Window\AppWindow.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -197,7 +197,7 @@
     <None Include="Resources\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
+    <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
     <ClInclude Include="Source\Components\SpecularMaterial.h" />
     <ClInclude Include="Source\Components\Flag.h" />

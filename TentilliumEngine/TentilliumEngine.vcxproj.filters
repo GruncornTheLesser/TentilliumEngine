@@ -65,13 +65,13 @@
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Components\SpecularMaterial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Systems\SpecularSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Systems\TransformSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -124,7 +124,7 @@
     <ClInclude Include="Source\Systems\entt_macros.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />
     <ClInclude Include="Source\Systems\SpecularSystem.h" />
-    <ClInclude Include="Source\Rendering\Resources\Mesh.h" />
+    <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
   </ItemGroup>
   <ItemGroup>

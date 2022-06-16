@@ -21,7 +21,6 @@ public:
 	//enum class TargetHint { TEXTURE2D, TEXTURE3D, } m_target; // ...
 
 public:
-	friend class Scene;
 	friend class Resource;
 
 	__declspec(property (get=getHandle)) unsigned int handle;
@@ -43,6 +42,7 @@ public:
 
 	Texture(Texture const&) = delete;
 	Texture& operator=(Texture const&) = delete;
+
 	Texture(Texture&&);
 	Texture& operator=(Texture&&);
 

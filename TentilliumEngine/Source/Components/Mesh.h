@@ -1,6 +1,6 @@
 #pragma once
-#include "GLbuffer.h"
-
+#include "../Rendering/Resources/GLbuffer.h"
+#include <vector>
 // MESH CLASS
 
 // INTERLEAVED - attributes in the same buffer
@@ -46,11 +46,57 @@
 enum class VertAttrib { Index, Position, TexCoord, Normal, BoneID, BoneWeight };
 
 template<VertAttrib>
-class VBO : public GLbuffer {
+class VBO final : public GLbuffer {
+	friend class VAO;
 public:
 	VBO(void* data, size_t size) : GLbuffer(data, size) { }
-	// TODO:
-	//template<typename T>
-	//VBO(std::vector<T>& data) : GLbuffer(&data[0], sizeof(data)) { }
+
+	template<typename T>
+	VBO(std::vector<T>& data) : GLbuffer(&data[0], sizeof(T) * data.size()) { }
+};
+
+
+
+class VAO final {
+	friend class RenderSystem;
+private:
+	unsigned int m_handle;
+	int m_size = 0;
+public:
+	template<VertAttrib ... attribs>
+	VAO(VBO<attribs>* ... buffers) 
+	{ 
+		genVAO();
+		(attach(buffers), ...);
+		finalize();
+	}
+	~VAO();
+
+	VAO(const VAO&) = delete;
+	VAO& operator=(const VAO&) = delete;
+
+	VAO(VAO&&);
+	VAO& operator=(VAO&&);
+
+
+
+	void draw();
+
+private:
+	void genVAO();
+
+	void finalize();
+
+	void attach(VBO<VertAttrib::Index>* buffer);
+
+	void attach(VBO<VertAttrib::Position>* buffer);
+
+	void attach(VBO<VertAttrib::TexCoord>* buffer);
+
+	void attach(VBO<VertAttrib::Normal>* buffer);
+
+	void attach(VBO<VertAttrib::BoneID>* buffer);
+
+	void attach(VBO<VertAttrib::BoneWeight>* buffer);
 };
 

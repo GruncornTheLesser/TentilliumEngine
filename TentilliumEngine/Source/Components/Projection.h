@@ -11,6 +11,8 @@ private:
 public:
 	Projection(float fovY, float ratio, float zNear, float zFar);
 
-	operator glm::mat4() { return m_proj; }
+	glm::mat4& get() {
+		return m_proj;
+	}
 };
 

@@ -1,13 +1,14 @@
 #pragma once
 #include "RenderSystem.h"
-#include "../Rendering/Resources/Mesh.h"
+#include "../Components/Mesh.h"
 #include "../Components/SpecularMaterial.h"
 #include "../Rendering/Resources/ShaderProgram.h"
 
 
 class SpecularSystem : virtual protected RenderSystem {
 private:
-	VIEW(specular_view, GET(SpecularMaterial), EXC());
+	GROUP(specular_view, OWN(SpecularMaterial), GET(VAO), EXC());
+
 	ShaderProgram m_program{ "Resources/shaders/default.shader" };
 
 public:
