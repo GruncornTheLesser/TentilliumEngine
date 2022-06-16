@@ -102,7 +102,7 @@ public:
 
 		
 		entt::entity copy = scene.create();
-		scene.emplace<Transform>(copy, glm::vec3(0,0, -1), glm::vec3(0.1));
+		scene.emplace<Transform>(copy, glm::vec3(0,0, -1), glm::vec3(0.1f));
 		// copy mesh
 		scene.emplace<VBO<VertAttrib::Index>>(copy, scene.get<VBO<VertAttrib::Index>>(root));
 		scene.emplace<VBO<VertAttrib::Position>>(copy, scene.get<VBO<VertAttrib::Position>>(root));

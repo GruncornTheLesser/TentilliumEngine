@@ -18,5 +18,17 @@ protected:
 	void render();
 
 private:
-	static void initVAO(entt::registry& reg, entt::entity e);
+	template<VertAttrib attrib>
+	static void attachVBO(entt::registry& reg, entt::entity e) {
+		auto& vao = reg.get_or_emplace<VAO>(e);
+		vao.attach(reg.try_get<VBO<attrib>>(e));
+	}
+
+	template<VertAttrib attrib>
+	static void detachVBO(entt::registry& reg, entt::entity e) {
+		auto& vao = reg.get_or_emplace<VAO>(e);
+		vao.detach<attrib>();
+	}
+
+
 };

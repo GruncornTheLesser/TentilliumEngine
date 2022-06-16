@@ -3,38 +3,23 @@
 #include <glew.h>
 #include <glfw3.h>
 
-void SpecularSystem::initVAO(entt::registry& reg, entt::entity e) {
-	reg.emplace_or_replace<VAO>(e, 
-		reg.try_get<VBO<VertAttrib::Index>>(e),
-		reg.try_get<VBO<VertAttrib::Position>>(e),
-		reg.try_get<VBO<VertAttrib::Normal>>(e),
-		reg.try_get<VBO<VertAttrib::TexCoord>>(e),
-		reg.try_get<VBO<VertAttrib::BoneWeight>>(e),
-		reg.try_get<VBO<VertAttrib::BoneID>>(e)		
-		);
-}
-
 SpecularSystem::SpecularSystem()
 {
 	m_program.setUniformBlock("material", 0); // material uniform buffer block set to 0
 
-	on_construct<VBO<VertAttrib::Index>>().connect<initVAO>();
-	on_destroy<VBO<VertAttrib::Index>>().connect<initVAO>();
+	on_construct<VBO<VertAttrib::Index>>().connect<attachVBO<VertAttrib::Index>>();
+	on_construct<VBO<VertAttrib::Position>>().connect<attachVBO<VertAttrib::Position>>();
+	on_construct<VBO<VertAttrib::TexCoord>>().connect<attachVBO<VertAttrib::TexCoord>>();
+	on_construct<VBO<VertAttrib::Normal>>().connect<attachVBO<VertAttrib::Normal>>();
+	on_construct<VBO<VertAttrib::BoneID>>().connect<attachVBO<VertAttrib::BoneID>>();
+	on_construct<VBO<VertAttrib::BoneWeight>>().connect<attachVBO<VertAttrib::BoneWeight>>();
 
-	on_construct<VBO<VertAttrib::Position>>().connect<initVAO>();
-	on_destroy<VBO<VertAttrib::Position>>().connect<initVAO>();
-
-	on_construct<VBO<VertAttrib::TexCoord>>().connect<initVAO>();
-	on_destroy<VBO<VertAttrib::TexCoord>>().connect<initVAO>();
-
-	on_construct<VBO<VertAttrib::Normal>>().connect<initVAO>();
-	on_destroy<VBO<VertAttrib::Normal>>().connect<initVAO>();
-	
-	on_construct<VBO<VertAttrib::BoneID>>().connect<initVAO>();
-	on_destroy<VBO<VertAttrib::BoneID>>().connect<initVAO>();
-
-	on_construct<VBO<VertAttrib::BoneWeight>>().connect<initVAO>();
-	on_destroy<VBO<VertAttrib::BoneWeight>>().connect<initVAO>();
+	on_destroy<VBO<VertAttrib::Index>>().connect<detachVBO<VertAttrib::Index>>();
+	on_destroy<VBO<VertAttrib::Position>>().connect<detachVBO<VertAttrib::Position>>();
+	on_destroy<VBO<VertAttrib::TexCoord>>().connect<detachVBO<VertAttrib::TexCoord>>();
+	on_destroy<VBO<VertAttrib::Normal>>().connect<detachVBO<VertAttrib::Normal>>();
+	on_destroy<VBO<VertAttrib::BoneID>>().connect<detachVBO<VertAttrib::BoneID>>();
+	on_destroy<VBO<VertAttrib::BoneWeight>>().connect<detachVBO<VertAttrib::BoneWeight>>();
 	
 	
 }
