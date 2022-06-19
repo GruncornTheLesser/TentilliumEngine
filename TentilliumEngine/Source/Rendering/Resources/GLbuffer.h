@@ -1,10 +1,9 @@
 #pragma once
-
+#include <unordered_map>
 class GLbuffer 
 {
 private:
-    struct RefCounter { unsigned int m_refCount; };
-    RefCounter* m_refData;
+    inline static std::unordered_map<unsigned int, unsigned int> refCount;
 
 public:
     __declspec(property(get = get_handle)) unsigned int handle;

@@ -2,36 +2,35 @@
 #include <glew.h>
 #include <glfw3.h>
 
-GLbuffer::GLbuffer(void* data, size_t size) : m_refData(new RefCounter{ 1 }) { 
+GLbuffer::GLbuffer(void* data, size_t size) {
 	glCreateBuffers(1, &m_handle);
-	glNamedBufferData(m_handle, size, data, GL_STATIC_DRAW);
+    glNamedBufferData(m_handle, size, data, GL_STATIC_DRAW);
+    refCount[m_handle] = 1;
 }
 
 GLbuffer::~GLbuffer() {
-    if (m_refData->m_refCount-- == 0) {
-        delete m_refData;
+    if (--refCount[m_handle] == 0) {
+        refCount.erase(m_handle);
         glDeleteBuffers(1, &m_handle);
     }
 }
 
 GLbuffer::GLbuffer(const GLbuffer& other) {
     m_handle = other.m_handle;
-    m_refData = other.m_refData;
-    m_refData->m_refCount++;
+    refCount[m_handle]++;
     
 }
 
 GLbuffer& GLbuffer::operator=(const GLbuffer& other) {
     if (this != &other)
     {
-        if (m_refData->m_refCount-- == 0) {
-            delete m_refData;
+        if (--refCount[m_handle] == 0) {
+            refCount.erase(m_handle);
             glDeleteBuffers(1, &m_handle);
         }
 
         m_handle = other.m_handle;
-        m_refData = other.m_refData;
-        m_refData->m_refCount++;
+        refCount[m_handle]++;
     }
 
     return *this;
@@ -39,20 +38,18 @@ GLbuffer& GLbuffer::operator=(const GLbuffer& other) {
 
 GLbuffer::GLbuffer(const GLbuffer&& other) {
     m_handle = other.m_handle;
-    m_refData = other.m_refData;
-    m_refData->m_refCount++;
+    refCount[m_handle]++;
 }
 GLbuffer& GLbuffer::operator=(const GLbuffer&& other) {
     if (this != &other)
     {
-        if (m_refData->m_refCount-- == 0) {
-            delete m_refData;
+        if (--refCount[m_handle] == 0) {
+            refCount.erase(m_handle);
             glDeleteBuffers(1, &m_handle);
         }
 
         m_handle = other.m_handle;
-        m_refData = other.m_refData;
-        m_refData->m_refCount++;
+        refCount[m_handle]++;
     }
 
     return *this;

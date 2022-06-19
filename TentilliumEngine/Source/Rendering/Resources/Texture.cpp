@@ -95,7 +95,7 @@ Texture::Texture(int width, int height, int channels, void* data, Format format_
 	{
 		m_handle = generateTexture(width, height, channels, nullptr, format_hint, type_hint);
 	}
-		
+	
 }
 
 Texture::Texture(int width, int height, int channels, std::vector<float> data, Format format_hint)
@@ -181,8 +181,9 @@ void Texture::setWrap(Texture::Wrap wrap)
 		glWrap = GL_REPEAT;
 		break;
 	}
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &glWrap);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &glWrap);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrap);
 }
 
 Texture::Filter Texture::getFilter()
@@ -210,6 +211,7 @@ void Texture::setFilter(Texture::Filter filter)
 		glFilter = GL_NEAREST;
 		break;
 	}
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &glFilter);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &glFilter);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilter);
 }

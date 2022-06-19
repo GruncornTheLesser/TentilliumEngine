@@ -41,7 +41,7 @@ void VAO::genVAO()
 }
 
 template<>
-void VAO::attach<VertAttrib::Index>(VBO<VertAttrib::Index>* buffer)
+void VAO::attach<Index>(VBO<Index>* buffer)
 {
 	if (!buffer) return;
 
@@ -56,7 +56,7 @@ void VAO::attach<VertAttrib::Index>(VBO<VertAttrib::Index>* buffer)
 }
 
 template<>
-void VAO::attach<VertAttrib::Position>(VBO<VertAttrib::Position>* buffer)
+void VAO::attach<Position>(VBO<Position>* buffer)
 {
 	if (!buffer) return;
 	
@@ -71,7 +71,7 @@ void VAO::attach<VertAttrib::Position>(VBO<VertAttrib::Position>* buffer)
 }
 
 template<>
-void VAO::attach<VertAttrib::Normal>(VBO<VertAttrib::Normal>* buffer)
+void VAO::attach<Normal>(VBO<Normal>* buffer)
 {
 	if (!buffer) return;
 
@@ -86,7 +86,7 @@ void VAO::attach<VertAttrib::Normal>(VBO<VertAttrib::Normal>* buffer)
 }
 
 template<>
-void VAO::attach<VertAttrib::TexCoord>(VBO<VertAttrib::TexCoord>* buffer)
+void VAO::attach<TexCoord>(VBO<TexCoord>* buffer)
 {
 	if (!buffer) return;
 
@@ -101,7 +101,7 @@ void VAO::attach<VertAttrib::TexCoord>(VBO<VertAttrib::TexCoord>* buffer)
 }
 
 template<>
-void VAO::attach<VertAttrib::BoneID>(VBO<VertAttrib::BoneID>* buffer)
+void VAO::attach<BoneID>(VBO<BoneID>* buffer)
 {
 	if (!buffer) return;
 
@@ -116,7 +116,7 @@ void VAO::attach<VertAttrib::BoneID>(VBO<VertAttrib::BoneID>* buffer)
 }
 
 template<>
-void VAO::attach<VertAttrib::BoneWeight>(VBO<VertAttrib::BoneWeight>* buffer)
+void VAO::attach<BoneWeight>(VBO<BoneWeight>* buffer)
 {
 	if (!buffer) return;
 
@@ -131,7 +131,7 @@ void VAO::attach<VertAttrib::BoneWeight>(VBO<VertAttrib::BoneWeight>* buffer)
 }
 
 template<>
-void VAO::detach<VertAttrib::Index>()
+void VAO::detach<Index>()
 {
 	m_size = 0;
 	glBindVertexArray(m_handle);
@@ -140,7 +140,7 @@ void VAO::detach<VertAttrib::Index>()
 }
 
 template<>
-void VAO::detach<VertAttrib::Position>()
+void VAO::detach<Position>()
 {
 	glBindVertexArray(m_handle);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
@@ -149,7 +149,7 @@ void VAO::detach<VertAttrib::Position>()
 }
 
 template<>
-void VAO::detach<VertAttrib::TexCoord>()
+void VAO::detach<TexCoord>()
 {
 	glBindVertexArray(m_handle);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
@@ -158,7 +158,7 @@ void VAO::detach<VertAttrib::TexCoord>()
 }
 
 template<>
-void VAO::detach<VertAttrib::Normal>()
+void VAO::detach<Normal>()
 {
 	glBindVertexArray(m_handle);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
@@ -168,7 +168,7 @@ void VAO::detach<VertAttrib::Normal>()
 }
 
 template<>
-void VAO::detach<VertAttrib::BoneID>()
+void VAO::detach<BoneID>()
 {
 	glBindVertexArray(m_handle);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
@@ -177,7 +177,7 @@ void VAO::detach<VertAttrib::BoneID>()
 }
 
 template<>
-void VAO::detach<VertAttrib::BoneWeight>()
+void VAO::detach<BoneWeight>()
 {
 	glBindVertexArray(m_handle);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);

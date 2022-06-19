@@ -10,7 +10,6 @@ private:
 	entt::entity parent;
 		
 public:
-	Hierarchy() : parent((entt::entity)0) { }
 	Hierarchy(entt::entity p) : parent(p) { }
 
 	inline entt::entity getParent()

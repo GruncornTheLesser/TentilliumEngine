@@ -74,6 +74,9 @@
     <ClCompile Include="Source\Components\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Systems\LoadSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\default.frag">
@@ -84,7 +87,8 @@
     </None>
     <None Include="Resources\shaders\default.vert" />
     <None Include="Resources\meshes\Person.fbx" />
-    <None Include="Resources\meshes\owl.fbx" />
+    <None Include="Resources\meshes\Owl.fbx" />
+    <None Include="Resources\meshes\Punk.fbx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
@@ -126,6 +130,7 @@
     <ClInclude Include="Source\Systems\SpecularSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
+    <ClInclude Include="Source\Systems\LoadSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

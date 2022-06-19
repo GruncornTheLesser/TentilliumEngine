@@ -2,11 +2,13 @@
 #include <entt/entity/registry.hpp>
 #include "Systems/TransformSystem.h"
 #include "Systems/SpecularSystem.h"
+#include "Systems/LoadSystem.h"
 
-class Scene : TransformSystem, SpecularSystem
+class Scene : TransformSystem, SpecularSystem, LoadSystem
 {
 public:
 	using entt::basic_registry<entt::entity>::get;
+	using entt::basic_registry<entt::entity>::get_or_emplace;
 	using entt::basic_registry<entt::entity>::try_get;
 	using entt::basic_registry<entt::entity>::create;
 	using entt::basic_registry<entt::entity>::emplace;
@@ -19,13 +21,15 @@ public:
 
 	using TransformSystem::update;
 	using SpecularSystem::render;
+
 	using RenderSystem::resize;
 	using RenderSystem::set_camera;
+	
+	using LoadSystem::load;
+	
 
 	void process() {
 		TransformSystem::update();
 		SpecularSystem::render();
 	}
-
-	void load(const std::string& filepath);
 };

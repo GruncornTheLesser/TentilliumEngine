@@ -72,9 +72,11 @@ class TestApp : public AppWindow
 public:
 	Scene scene;
 	glm::vec2 cam_dir;
-	entt::entity root;
+	entt::entity model;
+	entt::entity box;
 	entt::entity camera;
-	float time = 0;
+	float time;
+
 	TestApp(const char* title)
 		: AppWindow(800, 600, title)
 	{
@@ -87,41 +89,32 @@ public:
 		// TODO:
 		// load object
 		
-		//root = scene.load("Resources/meshes/Punk.fbx");
-		//scene.get<Transform>(root).position = glm::vec3(0, 0, -1);
-	
-		root = scene.create();
-		scene.emplace<Transform>(root).position = glm::vec3(0,0,-1);
-
-		scene.emplace<VBO<VertAttrib::Index>>(root, indices);
-		scene.emplace<VBO<VertAttrib::Position>>(root, positions);
-		scene.emplace<VBO<VertAttrib::Normal>>(root, normals);
-		scene.emplace<VBO<VertAttrib::TexCoord>>(root, texCoords);
-
-		scene.emplace<SpecularMaterial>(root, glm::vec3(0.5, 0.2, 0.5), 0.0f, 0.0f);
-
+		model = scene.load("Resources/meshes/Owl.fbx");
 		
-		entt::entity copy = scene.create();
-		scene.emplace<Transform>(copy, glm::vec3(0,0, -1), glm::vec3(0.1f));
-		// copy mesh
-		scene.emplace<VBO<VertAttrib::Index>>(copy, scene.get<VBO<VertAttrib::Index>>(root));
-		scene.emplace<VBO<VertAttrib::Position>>(copy, scene.get<VBO<VertAttrib::Position>>(root));
-		scene.emplace<VBO<VertAttrib::Normal>>(copy, scene.get<VBO<VertAttrib::Normal>>(root));
-		// copy material
-		scene.emplace<SpecularMaterial>(copy, glm::vec3(0.2, 0.7, 0.2), 0.0f, 0.0f); 
+		// create 
+		box = scene.create();
+		scene.emplace<Transform>(box, glm::vec3(0, 0, -1), glm::vec3(0.1f));
+
+		scene.emplace<VBO<Index>>(box, indices);
+		scene.emplace<VBO<Position>>(box, positions);
+		scene.emplace<VBO<Normal>>(box, normals);
+		scene.emplace<VBO<TexCoord>>(box, texCoords);
+		
+		scene.emplace<SpecularMaterial>(box, glm::vec3(0.2, 0.7, 0.2), 0.0f, 0.0f);
 	}
 
 	void onProcess(float delta) {
-		scene.get<Transform>(root).position = glm::vec3(cos(time), sin(time += delta), -1);
+		
+		scene.get<Transform>(model).position = glm::vec3(cos(time), sin(time += delta), -1);
 
 		auto& cam_trans = scene.get<Transform>(camera);
-
+		
 		if (isPressed(Button::LEFT)) {
 			cam_dir.x += (float)m_mouse.getDeltaY() / height;
 			cam_dir.y += (float)m_mouse.getDeltaX() / width;
 		}
 		cam_trans.rotation = glm::quat(glm::vec3(cam_dir, 0));
-
+		
 		glm::vec3 move_direction{ 0, 0, 0 };
 		if (isPressed(Key::W)) move_direction.z -= 1;
 		if (isPressed(Key::S)) move_direction.z += 1;
@@ -151,6 +144,7 @@ public:
 
 int main(int argc, char** argv)
 {
+	// when the program is closed from the X in the console there are memory leaks
 	auto app1 = TestApp("app 1");
 	AppWindow::Main({ &app1 });
 }

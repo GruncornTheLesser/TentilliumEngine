@@ -55,12 +55,12 @@ public:
 	VBO(std::vector<T>& data) : GLbuffer(&data[0], sizeof(T) * data.size()) { }
 };
 
-
-
 class VAO final {
 private:
 	unsigned int m_handle;
 	int m_size = 0;
+
+
 public:
 	template<VertAttrib ... attribs>
 	VAO(VBO<attribs>* ... buffers) 
@@ -76,12 +76,7 @@ public:
 	VAO(VAO&&);
 	VAO& operator=(VAO&&);
 
-
-
 	void draw();
-
-public:
-	void genVAO();
 
 	template<VertAttrib attrib>
 	void attach(VBO<attrib>* buffer);
@@ -89,7 +84,7 @@ public:
 	template<VertAttrib attrib>
 	void detach();
 
-
+private:
+	void genVAO();
 
 };
-

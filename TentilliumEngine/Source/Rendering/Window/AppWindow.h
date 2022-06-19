@@ -45,7 +45,6 @@ public:
 
 	int getHeight();
 
-private:
 	const char* getTitle();
 
 	void setTitle(const char* title);

@@ -171,6 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Systems\LoadSystem.cpp" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
     <ClCompile Include="Source\Components\Projection.cpp" />
     <ClCompile Include="Source\Components\Transform.cpp" />
@@ -186,7 +187,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\meshes\Person.fbx" />
-    <None Include="Resources\meshes\owl.fbx" />
+    <None Include="Resources\meshes\Owl.fbx" />
+    <None Include="Resources\meshes\Punk.fbx" />
     <None Include="Resources\shaders\default.frag" />
     <None Include="Resources\meshes\Hat.mtl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -197,6 +199,7 @@
     <None Include="Resources\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
     <ClInclude Include="Source\Components\SpecularMaterial.h" />
