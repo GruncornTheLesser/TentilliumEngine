@@ -9,6 +9,6 @@ using entt::literals::operator""_hs;
 #define GET(...) __VA_ARGS__ 
 #define EXC(...) __VA_ARGS__
 
-#define TAG(TAG) using TAG = entt::tag<#TAG##_hs)>
+#define TAG(NAME) using NAME = entt::tag<#NAME##_hs>
 #define VIEW(NAME, GET, EXC) entt::basic_view<entt::entity, entt::get_t<GET>, entt::exclude_t<EXC>, void> NAME = view<GET>(entt::exclude<EXC>)
 #define GROUP(NAME, OWN, GET, EXC) entt::basic_group<entt::entity, entt::owned_t<OWN>, entt::get_t<GET>, entt::exclude_t<EXC>> NAME = group<OWN>(entt::get<GET>, entt::exclude<EXC>)

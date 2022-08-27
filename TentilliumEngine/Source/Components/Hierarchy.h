@@ -1,19 +1,14 @@
 #pragma once
 #include <entt/entt.hpp>
-
+#include "Flag.h"
 
 struct Hierarchy
 {
 friend class TransformSystem;
 
-private:
-	entt::entity parent;
-		
 public:
-	Hierarchy(entt::entity p) : parent(p) { }
+	entt::entity m_parent;
 
-	inline entt::entity getParent()
-	{
-		return parent;
-	}
+public:
+	Hierarchy(entt::entity p) : m_parent(p) { }
 };

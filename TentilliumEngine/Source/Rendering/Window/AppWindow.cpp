@@ -1,4 +1,5 @@
 #include "AppWindow.h"
+#include<Windows.h>
 #include "../Resources/Resource.h"
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
@@ -34,7 +35,7 @@ AppWindow* callback_func::getWindow(void* glfwWindow)
 
 void callback_func::error(int code, const char* message)
 {
-	std::cout << "error code [" << code << "] : " << message << std::endl;
+	//std::cout << "error code [" << code << "] : " << message << std::endl;
 }
 
 void callback_func::key(GLFWwindow* wnd, int key, int scancode, int action, int mod)
@@ -112,7 +113,7 @@ AppWindow::AppWindow(int width, int height, const char* title)
 
 		//std::cout << renderer << std::endl;
 		//std::cout << vendor << std::endl;
-		std::cout << "OpenGL - " << version << std::endl;
+		//std::cout << "OpenGL - " << version << std::endl;
 	}
 
 	glfwSetWindowUserPointer(static_cast<GLFWwindow*>(m_window), this);
@@ -233,7 +234,7 @@ Key AppWindow::Keyboard::IntToKey(int key)
         case GLFW_KEY_TAB:          return Key::TAB;
         case GLFW_KEY_BACKSPACE:    return Key::BACKSPACE;
         case GLFW_KEY_INSERT:       return Key::INSERT;
-        case GLFW_KEY_DELETE:       return Key::DELETE;
+        case GLFW_KEY_DELETE:       return Key::DEL;
         case GLFW_KEY_RIGHT:        return Key::RIGHT;
         case GLFW_KEY_LEFT:         return Key::LEFT;
         case GLFW_KEY_DOWN:         return Key::DOWN;
@@ -361,7 +362,7 @@ int AppWindow::Keyboard::KeyToInt(Key key)
     case Key::TAB:          return GLFW_KEY_TAB;
     case Key::BACKSPACE:    return GLFW_KEY_BACKSPACE;
     case Key::INSERT:       return GLFW_KEY_INSERT;
-    case Key::DELETE:       return GLFW_KEY_DELETE;
+    case Key::DEL:          return GLFW_KEY_DELETE;
     case Key::RIGHT:        return GLFW_KEY_RIGHT;
     case Key::LEFT:         return GLFW_KEY_LEFT;
     case Key::DOWN:         return GLFW_KEY_DOWN;
@@ -471,6 +472,12 @@ void AppWindow::refresh()
 
 void AppWindow::Main(std::vector<AppWindow*> windows)
 {
+#ifdef _DEBUG
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
+#else
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif
+
 	// check input
 	for (auto it = windows.begin(); it != windows.end(); )
 	{

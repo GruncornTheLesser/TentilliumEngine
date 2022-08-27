@@ -2,10 +2,17 @@
 #include "Scene.h"
 #include "Rendering/Resources/ShaderProgram.h"
 #include "Components/Projection.h"
+
+/* RESEARCH:
+*	> Morton encoding for position in a quad tree -> chunking
+*/
+
 /* TASKS:
-*	> entt resource management/c++ embedded resource
-*	> Mesh vertex buffer decoupling
-*   > 
+*   > Hierarchy reparent()					*DONE*
+*   > lights
+*   > bones and animation
+*   > forward+ render pipeline
+*		-> preliminary light component
 */
 
 /*		 
@@ -72,40 +79,60 @@ class TestApp : public AppWindow
 public:
 	Scene scene;
 	glm::vec2 cam_dir;
-	entt::entity model;
-	entt::entity box;
+	entt::entity obj;
+	entt::entity box1;
+	entt::entity box2;
+	entt::entity root;
 	entt::entity camera;
 	float time;
 
 	TestApp(const char* title)
 		: AppWindow(800, 600, title)
 	{
+		root = scene.create();									// 0
+		box1 = scene.create();									// 1
+		box2 = scene.create();									// 2
+		obj = scene.load("Resources/meshes/Person.fbx");		// 3
+		camera = scene.create();								// 4
+		
+
+		// create obj
+		scene.emplace<Hierarchy>(obj, root);
+		scene.emplace<Transform>(obj, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+
+		// create box1
+		scene.emplace<Hierarchy>(box1, root);
+		scene.emplace<Transform>(box1, glm::vec3(-0.5, 0, -1), glm::vec3(0.5f));
+		scene.emplace<VBO<Index>>(box1, indices);
+		scene.emplace<VBO<Position>>(box1, positions);
+		scene.emplace<VBO<Normal>>(box1, normals);
+		scene.emplace<VBO<TexCoord>>(box1, texCoords);
+		scene.emplace<SpecularMaterial>(box1, glm::vec3(0.2, 0.7, 0.2), 0.0f, 0.0f);
+
+		// create box2
+		scene.emplace<Hierarchy>(box2, box1);
+		scene.emplace<Transform>(box2, glm::vec3(0.5, 0, -1), glm::vec3(0.5f));
+		scene.emplace<VBO<Index>>(box2, scene.get<VBO<Index>>(box1));
+		scene.emplace<VBO<Position>>(box2, scene.get<VBO<Position>>(box1));
+		scene.emplace<VBO<Normal>>(box2, scene.get<VBO<Normal>>(box1));
+		scene.emplace<VBO<TexCoord>>(box2, scene.get<VBO<TexCoord>>(box1));
+		scene.emplace<SpecularMaterial>(box2, glm::vec3(0.2, 0.7, 0.7), 0.0f, 0.0f);
+
+
 		// create camera
-		camera = scene.create();
 		scene.emplace<Projection>(camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);
 		scene.emplace<Transform>(camera, glm::vec3(0, 0, 1));
 		scene.set_camera(camera);
 
-		// TODO:
-		// load object
-		
-		model = scene.load("Resources/meshes/Owl.fbx");
-		
-		// create 
-		box = scene.create();
-		scene.emplace<Transform>(box, glm::vec3(0, 0, -1), glm::vec3(0.1f));
-
-		scene.emplace<VBO<Index>>(box, indices);
-		scene.emplace<VBO<Position>>(box, positions);
-		scene.emplace<VBO<Normal>>(box, normals);
-		scene.emplace<VBO<TexCoord>>(box, texCoords);
-		
-		scene.emplace<SpecularMaterial>(box, glm::vec3(0.2, 0.7, 0.2), 0.0f, 0.0f);
 	}
 
 	void onProcess(float delta) {
 		
-		scene.get<Transform>(model).position = glm::vec3(cos(time), sin(time += delta), -1);
+		title = std::to_string(1 / delta).c_str();
+
+		if (scene.valid(box1)) scene.get<Transform>(box1).position = glm::vec3(cos(time), sin(time += delta), -1);
+		if (scene.valid(box2)) scene.get<Transform>(box2).position = glm::vec3(-sin(time), -cos(time += delta), -1);
+
 
 		auto& cam_trans = scene.get<Transform>(camera);
 		
@@ -122,8 +149,18 @@ public:
 		if (isPressed(Key::D)) move_direction.x += 1;
 		if (isPressed(Key::F)) move_direction.y -= 1;
 		if (isPressed(Key::R)) move_direction.y += 1;
-
+		
 		cam_trans.position += cam_trans.rotation * move_direction * delta; // rotate direction by camera rotation
+	
+		if (isPressed(Key::LEFT_SHIFT)) {
+			if (scene.valid(box1)) scene.get_or_emplace<Hierarchy>(obj, box1).m_parent = box1;
+		}
+		if (isPressed(Key::LEFT_CONTROL)) {
+			if (scene.valid(box2)) scene.get_or_emplace<Hierarchy>(obj, box2).m_parent = box2;
+		}
+		if (isPressed(Key::Z)) {
+			if (scene.valid(box2)) scene.destroy(box2);
+		}
 	}
 
 	void onDraw() {

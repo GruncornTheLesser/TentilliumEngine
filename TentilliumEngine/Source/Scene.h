@@ -13,11 +13,14 @@ public:
 	using entt::basic_registry<entt::entity>::create;
 	using entt::basic_registry<entt::entity>::emplace;
 	using entt::basic_registry<entt::entity>::erase;
+	using entt::basic_registry<entt::entity>::valid;
 	using entt::basic_registry<entt::entity>::destroy;
 	using entt::basic_registry<entt::entity>::all_of;
 	using entt::basic_registry<entt::entity>::any_of;
 	using entt::basic_registry<entt::entity>::view;
 	using entt::basic_registry<entt::entity>::group;
+
+	
 
 	using TransformSystem::update;
 	using SpecularSystem::render;

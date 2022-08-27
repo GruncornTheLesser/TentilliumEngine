@@ -11,8 +11,8 @@ Transform::Transform(const glm::mat4& matrix) :
 	m_localMatrix = matrix;
 	Decompose(m_localMatrix, m_position, m_scale, m_rotation);
 
-	m_worldUpdateFlag.Raise();
-	m_localUpdateFlag.Lower();
+	m_worldUpdateFlag.raise();
+	m_localUpdateFlag.lower();
 }
 
 Transform::Transform(const glm::vec3& position, const glm::vec3& scale, const glm::quat& rotation) :
@@ -22,8 +22,8 @@ Transform::Transform(const glm::vec3& position, const glm::vec3& scale, const gl
 	m_worldMatrix(1),
 	m_localMatrix(1)
 {
-	m_worldUpdateFlag.Raise();
-	m_localUpdateFlag.Raise();
+	m_worldUpdateFlag.raise();
+	m_localUpdateFlag.raise();
 }
 
 const glm::vec3& Transform::getPosition()
@@ -54,19 +54,19 @@ const glm::mat4& Transform::getWorldMatrix()
 void Transform::setPosition(const glm::vec3& pos)
 {
 	m_position = pos;
-	m_localUpdateFlag.Raise();
+	m_localUpdateFlag.raise();
 }
 
 void Transform::setScale(const glm::vec3& scl)
 {
 	m_scale = scl;
-	m_localUpdateFlag.Raise();
+	m_localUpdateFlag.raise();
 }
 
 void Transform::setRotation(const glm::quat& rot)
 {
 	m_rotation = rot;
-	m_localUpdateFlag.Raise();
+	m_localUpdateFlag.raise();
 }
 
 void Transform::updateLocal()

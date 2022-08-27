@@ -8,7 +8,8 @@ private:
 	unsigned int version;							
 
 public:
-	void Lower() { version--; }					// 0 is garenteed to be invalid
-	void Raise() { version = currentVersion; }
+	void lower() { version--; }					// 0 is garenteed to be invalid
+	void raise() { version = currentVersion; }
 	operator bool() { return version == currentVersion; }
 };
+

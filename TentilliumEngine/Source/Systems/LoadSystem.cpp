@@ -13,11 +13,11 @@
 // hierarchy		*DONE*
 // transform		*DONE*
 // mesh				*DONE*
-// material			
+// material			*DONE* ish
 // animation
 // lightEmitter
 // shadowCastor
-// Bone
+// Bones
 // Skinning
 
 //#define MESH_FILENAME(filepath, node, mesh) filepath + "/" + node->mName.C_Str() + "/" + mesh->mName.C_Str()
@@ -28,8 +28,43 @@
 //		-> not impressed by assimp graph optimization. 
 //		-> automatically sort the useless nodes and attach them to parents to reduce the node spam
 //		-> its kinda ridiculous
-//		-> requires collection of parts
+//		-> requires collection of parts and delayed assigning of components???
+//		-> alternatively I could just assign the meshes to the parent entity
 
+// add bounding box to Transform vao combo for screen space culling optimizations
+//		-> Make Transform a requirement of Specular system???
+//		
+
+// how to solve multiple meshes per entity
+//		combine meshes in to single vaos and vbos 
+//			-> could adapt vao and material to distinguish meshes with indexes of the mesh
+//			-> probably best to keep them seperate tho
+//			-> requires manipulation of the raw data
+//			-> requires changes to material to identify the mesh groups
+//			changes to material:
+//				1:n relationship for entity to material
+//					-> complicated and not necessarily a performance improvement
+//					-> better syntax
+//				a vector in material to identify the seperations 
+//					-> simple
+//					-> nasty to set material properties
+// 
+//		make mesh a child entity with vbos, vao and components
+//			-> simple
+//			-> bad syntax
+//			-> not very data oriented
+//			-> doesnt have transform component so will get annoying 
+// 
+//		
+//		
+//			
+
+// blender's vertex count is wrong -> it does not identify unique vertices properly
+// if a 2 vertices have the same position but different normals it is incorrectly
+// marked as unique.
+
+// restructure to prioritise relevant nodes:
+// root node + Assimilated meshes + transform
 
 entt::entity LoadSystem::load(std::string filepath)
 {
@@ -39,7 +74,7 @@ entt::entity LoadSystem::load(std::string filepath)
 		aiProcess_Triangulate | 
 		aiProcess_FlipUVs | 
 		aiProcess_GlobalScale | 
-		aiProcess_EmbedTextures | 
+		aiProcess_EmbedTextures |
 		aiProcess_OptimizeGraph | // doesnt do enough
 		aiProcess_OptimizeMeshes |
 		aiProcess_JoinIdenticalVertices);
@@ -50,8 +85,7 @@ entt::entity LoadSystem::load(std::string filepath)
 		throw std::exception();
 	}
 
-	/*
-	// array of embedded textures
+	// array of textures
 	std::vector<std::shared_ptr<Texture>> textures;
 	if (scene->HasTextures()) {
 		auto texPtr = scene->mTextures;
@@ -60,8 +94,89 @@ entt::entity LoadSystem::load(std::string filepath)
 				texPtr[i]->mWidth, texPtr[i]->mHeight, NULL, texPtr[i]->pcData, Texture::Format::RGBA));
 		}
 	}
-	*/
+	
+	entt::entity e = create();
 
+	if (scene->HasMeshes()) 
+	{
+		// get size needed for buffers
+		unsigned int vertexCount = 0, faceCount = 0;
+		for (unsigned int mesh_i = 0; mesh_i < scene->mNumMeshes; mesh_i++) {
+			vertexCount += scene->mMeshes[mesh_i]->mNumVertices;
+			faceCount += scene->mMeshes[mesh_i]->mNumFaces;
+		}
+
+		unsigned int vertexOffset = 0, faceOffset = 0, boneOffset = 0;
+		for (unsigned int mesh_i = 0; mesh_i < scene->mNumMeshes; mesh_i++)
+		{
+			auto aiMeshPtr = scene->mMeshes[mesh_i];
+
+			if (aiMeshPtr->HasFaces()) 
+			{
+				std::vector<unsigned int> indices;
+				for (unsigned int face_i = 0; face_i < aiMeshPtr->mNumFaces; face_i++) 
+				{
+					auto& face = aiMeshPtr->mFaces[face_i];
+					for (unsigned int index_i = 0; index_i < face.mNumIndices; index_i++)
+						indices.push_back(face.mIndices[index_i] + vertexOffset);
+				}
+				get_or_emplace<VBO<Index>>(e, nullptr, sizeof(int) * faceCount * 3)
+					.set_data(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
+			}
+
+			if (aiMeshPtr->HasPositions()) {
+				get_or_emplace<VBO<Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+					.set_data(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
+			}
+
+			if (aiMeshPtr->HasNormals()) {
+				get_or_emplace<VBO<Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+					.set_data(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
+			}
+
+			if (aiMeshPtr->HasTextureCoords(0)) {
+				std::vector<float> texCoords;
+				for (unsigned int uv_i = 0; uv_i < aiMeshPtr->mNumVertices; uv_i++) {
+					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].x);
+					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].y);
+				}
+				get_or_emplace<VBO<TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
+					.set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
+			}
+
+			vertexOffset += aiMeshPtr->mNumVertices;
+			faceOffset += aiMeshPtr->mNumFaces;
+		}
+
+		// has bones
+	}
+
+	if (scene->HasMaterials()) {
+		auto aiMatPtr = scene->mMaterials[0];
+
+		auto& mat = emplace<SpecularMaterial>(e);
+
+		aiColor3D colour;
+		aiString texture;
+
+		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
+			mat.set_diff(Texture::get(texture.C_Str()));
+		else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
+			mat.set_diff(glm::vec3(colour.r, colour.g, colour.b));
+
+		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
+			mat.set_spec(Texture::get(texture.C_Str()));
+		else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
+			mat.set_spec(colour.r);
+
+		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
+			mat.set_glos(Texture::get(texture.C_Str()));
+		else if (aiMatPtr->Get(AI_MATKEY_SHININESS, colour) == AI_SUCCESS)
+			mat.set_glos(colour.r);
+
+	}
+
+	/*
 	std::map<aiNode*, entt::entity> entt_lookup;
 	std::queue<aiNode*> sceneStack;
 	sceneStack.push(scene->mRootNode);
@@ -70,63 +185,41 @@ entt::entity LoadSystem::load(std::string filepath)
 		aiNode* node = sceneStack.front();
 		sceneStack.pop();
 
-		std::cout << "node -> " << node->mName.C_Str() << std::endl;
+		std::cout << node->mName.C_Str() << " ";
 
 		// create entity
 		entt::entity e = create();
 		entt_lookup.emplace(node, e);
 
-		// queue children
+		// enqueue children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 			sceneStack.push(node->mChildren[i]);
 		
 		// hierarchy component
-		if (node->mParent)
+		if (node->mParent) {
 			emplace<Hierarchy>(e, entt_lookup[node->mParent]);
-		
+			std::cout << "hierarchy, ";
+		}
+
 		// transform component -> if it has no transform it can more than likely be used as a component container
 		auto transform = (aiMatrix4x4t<float>)(node->mTransformation);
 		emplace<Transform>(e, *(glm::mat4*)&transform);
 
 		// model mesh, material, texture components
-
+		// combine all meshes in this entity into 1 mesh
 		if (node->mNumMeshes > 0)
 		{
-			// how to solve???
-			// combine meshes in to single vaos and vbos 
-			//		-> could adapt vao and material to distinguish meshes with areas of the mesh
-			//		-> requires manipulation of the raw data
-			//		-> requires changes tp material to identify the mesh groups
-			//		
-			//		changes to material:
-			//			1:n relationship for entity to material
-			//				-> complicated and not necessarily a performance improvement
-			//				-> better syntax
-			//			a vector in material to identify the seperations 
-			//				-> simple
-			//				-> nasty syntax
-			// 
-			// make plain child of main with default transform
-			//		-> simple
-			//		-> inefficient - means the hierarchy/transform system will do unneccessary calculations
-			// 
-			// make composite component chain in hierarchy
-			//		-> allow a second entity to be used as an extention of the first and default 
-			//		   to its roots components when none are found -> funky polymorphism
-			//		-> requires deep understanding of entt library
-			//		-> complicated
-			
-			// blender's vertex count is wrong -> it does not identify unique vertices properly
-			// if a 2 vertices have the same position but different normals it is incorrectly
-			// marked as unique.
+			std::cout << "mesh, ";
 
+			// get size needed for buffers
 			unsigned int vertexCount = 0, faceCount = 0;
 			for (unsigned int mesh_i = 0; mesh_i < node->mNumMeshes; mesh_i++) {
 				vertexCount += scene->mMeshes[node->mMeshes[mesh_i]]->mNumVertices;
 				faceCount += scene->mMeshes[node->mMeshes[mesh_i]]->mNumFaces;
 			}
 
-			unsigned int vertexOffset = 0, faceOffset = 0;
+			// iterate through meshes and add to buffers
+			unsigned int vertexOffset = 0, faceOffset = 0, boneOffset = 0;
 			for (unsigned int mesh_i = 0; mesh_i < node->mNumMeshes; mesh_i++)
 			{
 				auto aiMeshPtr = scene->mMeshes[node->mMeshes[mesh_i]];
@@ -138,18 +231,18 @@ entt::entity LoadSystem::load(std::string filepath)
 						for (unsigned int index_i = 0; index_i < face.mNumIndices; index_i++)
 							indices.push_back(face.mIndices[index_i]);
 					}
-					get_or_emplace<VBO<Index>>(e, nullptr, sizeof(int) * faceCount * 3).set_data(&indices[0],
-						sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
+					get_or_emplace<VBO<Index>>(e, nullptr, sizeof(int) * faceCount * 3)
+						.set_data(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
 				}
 
 				if (aiMeshPtr->HasPositions()) {
-					get_or_emplace<VBO<Position>>(e, nullptr, sizeof(float) * 3 * vertexCount).set_data(aiMeshPtr->mVertices,
-						sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
+					get_or_emplace<VBO<Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+						.set_data(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 				}
 
 				if (aiMeshPtr->HasNormals()) {
-					get_or_emplace<VBO<Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount).set_data(aiMeshPtr->mNormals,
-						sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
+					get_or_emplace<VBO<Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+						.set_data(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 				}
 
 				if (aiMeshPtr->HasTextureCoords(0)) {
@@ -158,32 +251,59 @@ entt::entity LoadSystem::load(std::string filepath)
 							texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].x);
 							texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].y);
 					}
-					get_or_emplace<VBO<TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2).set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
+					get_or_emplace<VBO<TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
+						.set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
 				}
 				
 				// TODO: bones
-				if (aiMeshPtr->HasBones())
-				{
-					//get_or_emplace<VBO<BoneID>>(e, nullptr, sizeof(vertexCount * 4)).set_data(aiMeshPtr->m, aiMeshPtr->mNumVertices * 4, offset * 4);
-					//get_or_emplace<VBO<BoneWeight>>(e, nullptr, sizeof(vertexCount * 4)).set_data(aiMeshPtr->mNormals, aiMeshPtr->mNumVertices * 4, offset * 4);
-				}
-
-				// TODO material
-				//auto aiMatPtr = scene->mMaterials[aiMeshPtr->mMaterialIndex];
-				emplace<SpecularMaterial>(e, glm::vec3(0.5, 0.2, 0.5), 0.0f, 0.0f);
+				if (aiMeshPtr->HasBones()) { }
 
 				vertexOffset += aiMeshPtr->mNumVertices;
 				faceOffset += aiMeshPtr->mNumFaces;
 			}
+			
+			// TODO: materials???
+			// currently only does the first material and doesnt store it
+
+			auto aiMatPtr = scene->mMaterials[scene->mMeshes[node->mMeshes[0]]->mMaterialIndex];
+			
+			auto& mat = emplace<SpecularMaterial>(e);
+
+			aiColor3D colour;
+			aiString texture;
+
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
+				mat.set_diff(Texture::get(texture.C_Str()));
+			else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
+				mat.set_diff(glm::vec3(colour.r, colour.g, colour.b));
+
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
+				mat.set_spec(Texture::get(texture.C_Str()));
+			else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
+				mat.set_spec(colour.r);
+
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
+				mat.set_glos(Texture::get(texture.C_Str()));
+			else if (aiMatPtr->Get(AI_MATKEY_SHININESS, colour) == AI_SUCCESS)
+				mat.set_glos(colour.r);
 		}
+
+		std::cout << std::endl;
 
 	} while (!sceneStack.empty());
 
+	*/
+	
+	// removes the first node 
+	//destroy(entt_lookup[scene->mRootNode]);
+	//entt_lookup.erase(scene->mRootNode);
 
-	// if (scene->HasAnimations()) emplace<AnimationHandler>(entt_lookup[scene->mRootNode], scene->mAnimations, scene->mNumAnimations);
-
-	return entt_lookup[scene->mRootNode]; // return scene root
+	// select fist object
+	return e; // return scene root 
 }
+
+
+
 /*
 
 std::shared_ptr<Mesh> loadMesh(aiMesh* aiMeshPtr, std::string filename)
