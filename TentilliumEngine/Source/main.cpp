@@ -8,10 +8,14 @@
 */
 
 /* TASKS:
-*   > lights
-*   > forward+ render pipeline
-*		-> preliminary light component
-*   > bones and animation
+*   > forward+ render pipeline	
+*		-> depth pre pass
+*		-> light culling
+*		-> light accumulation
+* 
+*   > bones, skinning and animation
+* 
+*	> seperate Transform and Transform implementation
 */
 
 /*		 
@@ -82,7 +86,7 @@ public:
 	entt::entity box1;
 	entt::entity box2;
 	entt::entity root;
-	entt::entity camera;
+
 	float time;
 
 	TestApp(const char* title)
@@ -92,9 +96,8 @@ public:
 		box1 = scene.create();									// 1
 		box2 = scene.create();									// 2
 		obj = scene.load("Resources/meshes/Person.fbx");		// 3
-		camera = scene.create();								// 4
+		scene.camera = scene.create();							// 4
 		
-
 		// create obj
 		scene.emplace<Hierarchy>(obj, root);
 		scene.emplace<Transform>(obj);
@@ -116,7 +119,6 @@ public:
 		scene.emplace<VBO<Normal>>(box2, scene.get<VBO<Normal>>(box1));
 		scene.emplace<VBO<TexCoord>>(box2, scene.get<VBO<TexCoord>>(box1));
 		scene.emplace<SpecularMaterial>(box2, glm::vec3(0.2, 0.7, 0.7), 0.0f, 0.0f);
-
 
 		// create camera
 		scene.emplace<Projection>(camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);
@@ -153,10 +155,10 @@ public:
 		cam_trans.position += cam_trans.rotation * move_direction * delta; // rotate direction by camera rotation
 	
 		if (isPressed(Key::LEFT_SHIFT)) {
-			if (scene.valid(box1)) scene.get_or_emplace<Hierarchy>(obj, box1).m_parent = box1;
+			if (scene.valid(box1)) scene.get_or_emplace<Hierarchy>(obj, box1).parent = box1;
 		}
 		if (isPressed(Key::LEFT_CONTROL)) {
-			if (scene.valid(box2)) scene.get_or_emplace<Hierarchy>(obj, box2).m_parent = box2;
+			if (scene.valid(box2)) scene.get_or_emplace<Hierarchy>(obj, box2).parent = box2;
 		}
 		if (isPressed(Key::Z)) {
 			if (scene.valid(box2)) scene.destroy(box2);

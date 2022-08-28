@@ -7,20 +7,34 @@
 #include <gtc/matrix_transform.hpp>
 
 class RenderSystem : virtual protected entt::registry {
+public:
+	__declspec(property (put = set_camera, get = get_camera)) entt::entity camera;
+	void set_camera(entt::entity camera) {
+		if (!all_of<Transform, Projection>(camera))
+			return;
+
+		m_camera = camera;
+	}
+	entt::entity get_camera() {
+		return m_camera;
+	}
+
 protected:
 	entt::entity m_camera;
 
-	glm::mat4 get_cam_proj() {
-		if (auto ptr = try_get<Transform>(m_camera))
-			return glm::inverse(ptr->getWorldMatrix());
+	glm::mat4 get_cam_view() {
+		Transform* proj;
+		if (valid(m_camera) && (proj = try_get<Transform>(m_camera)))
+			return glm::inverse(proj->getWorldMatrix());
 		else
 			return glm::mat4();
 	}
 
-	glm::mat4 get_cam_view() {
-		if (auto ptr = try_get<Projection>(m_camera))
-			return ptr->get();
-		else 
+	glm::mat4 get_cam_proj() {
+		Projection* view;
+		if (valid(m_camera) && (view = try_get<Projection>(m_camera)))
+			return view->get();
+		else
 			return glm::mat4();
 	}
 
@@ -34,12 +48,8 @@ protected:
 		}
 	}
 
-	bool set_camera(entt::entity camera) {
-		if (!all_of<Transform, Projection>(camera))
-			return false;
 
-		m_camera = camera;
-		return true;
-	}
+
+	
 
 };

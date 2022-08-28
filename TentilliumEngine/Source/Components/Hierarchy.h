@@ -7,8 +7,8 @@ struct Hierarchy
 friend class TransformSystem;
 
 public:
-	entt::entity m_parent;
+	entt::entity parent;
 
 public:
-	Hierarchy(entt::entity p) : m_parent(p) { }
+	Hierarchy(entt::entity p) : parent(p) { }
 };

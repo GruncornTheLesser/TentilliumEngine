@@ -10,10 +10,10 @@ https://github.com/bcrusco/Forward-Plus-Renderer
 	> depth linearized so as not to weight toward close to camera
 
 2. light culling
-	> split screen into grid(16x16 pixels) using compute shaders (using gather technique)
+	> split screen into grid(16x16 pixels) using compute shaders (using gather technique???)
 	> a work group is created per tile within that work group there are 256 threads
 	> the min and max of the the depth is found using atomic operations
-	> one of the threads will calculate the frustum planes for that tile
+	> calculate the frustum planes for that tile
 
 	> parallelism of threads now used for per light in tile
 	> calculate if light is inside the tile for every tile in the scene

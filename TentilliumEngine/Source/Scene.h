@@ -27,7 +27,7 @@ public:
 	using SpecularSystem::render;
 	
 	using RenderSystem::resize;
-	using RenderSystem::set_camera;
+	using RenderSystem::camera;
 	
 	using LoadSystem::load;
 	
