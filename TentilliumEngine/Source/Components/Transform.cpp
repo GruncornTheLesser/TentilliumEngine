@@ -11,8 +11,7 @@ Transform::Transform(const glm::mat4& matrix) :
 	m_localMatrix = matrix;
 	Decompose(m_localMatrix, m_position, m_scale, m_rotation);
 
-	m_worldUpdateFlag.raise();
-	m_localUpdateFlag.lower();
+	m_updateFlag.raise();
 }
 
 Transform::Transform(const glm::vec3& position, const glm::vec3& scale, const glm::quat& rotation) :
@@ -22,8 +21,7 @@ Transform::Transform(const glm::vec3& position, const glm::vec3& scale, const gl
 	m_worldMatrix(1),
 	m_localMatrix(1)
 {
-	m_worldUpdateFlag.raise();
-	m_localUpdateFlag.raise();
+	m_updateFlag.raise();
 }
 
 const glm::vec3& Transform::getPosition()
@@ -54,19 +52,19 @@ const glm::mat4& Transform::getWorldMatrix()
 void Transform::setPosition(const glm::vec3& pos)
 {
 	m_position = pos;
-	m_localUpdateFlag.raise();
+	m_updateFlag.raise();
 }
 
 void Transform::setScale(const glm::vec3& scl)
 {
 	m_scale = scl;
-	m_localUpdateFlag.raise();
+	m_updateFlag.raise();
 }
 
 void Transform::setRotation(const glm::quat& rot)
 {
 	m_rotation = rot;
-	m_localUpdateFlag.raise();
+	m_updateFlag.raise();
 }
 
 void Transform::updateLocal()
@@ -76,6 +74,7 @@ void Transform::updateLocal()
 		glm::mat4(m_rotation) *
 		glm::scale(m_scale);
 
+	m_updateFlag.raise();
 }
 
 void Transform::Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot)

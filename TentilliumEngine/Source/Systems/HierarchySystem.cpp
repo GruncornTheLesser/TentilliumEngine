@@ -13,7 +13,6 @@
 // when an entity is erased from the hierarchy, entt fills that with a swap and pop policy:
 // [begin, ..., erased, ..., end1, end2]
 // [begin, ..., end2, ...,end1]
-// 
 // this ruins the order on components already sorted by this system.
 // [unsorted, ..., erased, ..., sorted1, sorted2]
 // [unsorted, ..., sorted2, ..., sorted1]
@@ -21,30 +20,29 @@
 // to prevent this, I sort in reverse:
 // [sorted, ... erased, ..., end1, end2]
 // [sorted, ..., end2, ..., end1]
-// 
 // after a parent and a child have been swapped:
 // [begin, ..., child, ..., parent, ..., end]
-//							   ^
-// there is still a chance that this parents parent is 
+// there is still a chance that this parent's parent is in the wrong order. There are a couple of options:
+//		> ignore the swapped parent, skip and let it update in the next iteration
+//		> update the parent until it doesnt need swapping
+//		> update the parent a fixed number of times until either it doesnt need swapping or the fixed number is up
 
 void HierarchySystem::update()
 {
-	for (auto it = viewHierarchy.rbegin(); it != viewHierarchy.rend();)
-	{
-		Hierarchy& hierarchy = get<Hierarchy>(*it);
+	for (auto it = viewHierarchy.rbegin(); it != viewHierarchy.rend();) {	// iterate over Hierarchies in reverse
+		Hierarchy& hierarchy = get<Hierarchy>(*it);							// get Hierarchy
 
-		if (!valid(hierarchy.parent) || hierarchy.parent == *it)
-		{
-			erase<Hierarchy>(*it);
-			continue;
+		if (!valid(hierarchy.parent) || hierarchy.parent == *it) {	// if parent invalid or parent of itself
+			erase<Hierarchy>(*it);									// this is does not capture all edge cases 
+			continue;												// eg if a graph contains a loop the system will break			
 		}
 
-		Hierarchy* hierachyParent = try_get<Hierarchy>(hierarchy.parent);
-
-		if (hierachyParent && &hierarchy > hierachyParent) {
+		Hierarchy* hierachyParent = try_get<Hierarchy>(hierarchy.parent);	// if hierarchy child(current) is being processed before
+		if (hierachyParent && &hierarchy > hierachyParent) {				// it's parent; swap their positions
 			viewHierarchy.storage<Hierarchy>().swap_elements(*it, hierarchy.parent);
-			continue;
+			continue;														// by continuing it skips the iteration
 		}
+
 		it++;
 	}
 }

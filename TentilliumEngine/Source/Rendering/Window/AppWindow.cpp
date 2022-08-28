@@ -124,11 +124,10 @@ AppWindow::AppWindow(int width, int height, const char* title)
 	glfwSetCursorEnterCallback(static_cast<GLFWwindow*>(m_window), callback_func::enter);
 	glfwSetFramebufferSizeCallback(static_cast<GLFWwindow*>(m_window), callback_func::resize);
 
-	//glClearColor(0, 0, 0, 1); 
-	//glClearDepth(1);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
 
 }
 

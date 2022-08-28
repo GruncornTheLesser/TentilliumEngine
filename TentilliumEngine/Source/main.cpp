@@ -121,9 +121,8 @@ public:
 		scene.emplace<SpecularMaterial>(box2, glm::vec3(0.2, 0.7, 0.7), 0.0f, 0.0f);
 
 		// create camera
-		scene.emplace<Projection>(camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);
-		scene.emplace<Transform>(camera, glm::vec3(0, 0, 1));
-		scene.set_camera(camera);
+		scene.emplace<Projection>(scene.camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);
+		scene.emplace<Transform>(scene.camera, glm::vec3(0, 0, 1));
 
 	}
 
@@ -136,7 +135,7 @@ public:
 
 		time += delta;
 
-		auto& cam_trans = scene.get<Transform>(camera);
+		auto& cam_trans = scene.get<Transform>(scene.camera);
 		
 		if (isPressed(Button::LEFT)) {
 			cam_dir.x += (float)m_mouse.getDeltaY() / height;
@@ -162,6 +161,9 @@ public:
 		}
 		if (isPressed(Key::Z)) {
 			if (scene.valid(box2)) scene.destroy(box2);
+		}
+		if (isPressed(Key::X)) {
+			if (scene.valid(box1)) scene.get_or_emplace<Hierarchy>(box2, obj).parent = obj;
 		}
 	}
 

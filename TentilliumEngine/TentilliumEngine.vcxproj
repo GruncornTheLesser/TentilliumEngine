@@ -183,7 +183,7 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
-    <ClCompile Include="Source\Systems\SpecularSystem.cpp" />
+    <ClCompile Include="Source\Systems\RenderSystem.cpp" />
     <ClCompile Include="Source\Systems\TransformSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -210,7 +210,6 @@
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />
-    <ClInclude Include="Source\Systems\SpecularSystem.h" />
     <ClInclude Include="Source\Systems\entt_macros.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\Components\Projection.h" />

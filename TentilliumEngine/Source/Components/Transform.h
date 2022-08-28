@@ -15,8 +15,7 @@ public:
 	__declspec(property (put = setScale, get = getScale)) const glm::vec3& scale;
 
 private:
-	Flag m_localUpdateFlag;
-	Flag m_worldUpdateFlag;
+	Flag m_updateFlag;
 
 	glm::vec3 m_scale;
 	glm::vec3 m_position;
@@ -25,7 +24,9 @@ private:
 	glm::mat4 m_worldMatrix;
 
 public:
+	/*constructs new transform by setting local matrix and decomposing local matrix into position, scale and rotation*/
 	Transform(const glm::mat4& localMatrix);
+	/*constructs new transform by calculating new local matrix and setting position, scale and rotation*/
 	Transform(const glm::vec3& position = glm::vec3(0, 0, 0), 
 			  const glm::vec3& scale = glm::vec3(1),
 			  const glm::quat& rotation = glm::quat(glm::vec3(0, 0, 0)));
@@ -41,6 +42,7 @@ public:
 	void setScale(const glm::vec3& scl);
 	void setRotation(const glm::quat& rot);
 	
+	// updates local matrix 
 	void updateLocal();
 
 public:
