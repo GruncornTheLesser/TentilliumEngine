@@ -2,9 +2,10 @@
 #include <entt/entity/registry.hpp>
 #include "Systems/TransformSystem.h"
 #include "Systems/SpecularSystem.h"
+#include "Systems/HierarchySystem.h"
 #include "Systems/LoadSystem.h"
 
-class Scene : TransformSystem, SpecularSystem, LoadSystem
+class Scene : HierarchySystem, TransformSystem, SpecularSystem, LoadSystem
 {
 public:
 	using entt::basic_registry<entt::entity>::get;
@@ -21,10 +22,10 @@ public:
 	using entt::basic_registry<entt::entity>::group;
 
 	
-
+	using HierarchySystem::update;
 	using TransformSystem::update;
 	using SpecularSystem::render;
-
+	
 	using RenderSystem::resize;
 	using RenderSystem::set_camera;
 	
@@ -32,6 +33,7 @@ public:
 	
 
 	void process() {
+		HierarchySystem::update();
 		TransformSystem::update();
 		SpecularSystem::render();
 	}

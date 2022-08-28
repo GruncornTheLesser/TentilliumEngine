@@ -171,6 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Systems\HierarchySystem.cpp" />
     <ClCompile Include="Source\Systems\LoadSystem.cpp" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
     <ClCompile Include="Source\Components\Projection.cpp" />
@@ -199,6 +200,7 @@
     <None Include="Resources\shaders\default.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />

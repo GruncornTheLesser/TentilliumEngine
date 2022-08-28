@@ -6,10 +6,9 @@
 class TransformSystem : virtual protected entt::registry {
 private:
 	
-	VIEW(viewHierarchy, GET(Hierarchy), EXC());
-	VIEW(viewTransform, GET(Transform), EXC());
 	VIEW(viewRootTransform, GET(Transform), EXC(Hierarchy));
-	
+	VIEW(viewTransform, GET(Hierarchy, Transform), EXC());
+
 public:
 	TransformSystem() { }
 

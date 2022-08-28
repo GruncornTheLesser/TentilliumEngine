@@ -4,15 +4,14 @@
 #include "Components/Projection.h"
 
 /* RESEARCH:
-*	> Morton encoding for position in a quad tree -> chunking
+*	> Morton encoding for position in a quad tree -> chunking???
 */
 
 /* TASKS:
-*   > Hierarchy reparent()					*DONE*
 *   > lights
-*   > bones and animation
 *   > forward+ render pipeline
 *		-> preliminary light component
+*   > bones and animation
 */
 
 /*		 
@@ -98,7 +97,7 @@ public:
 
 		// create obj
 		scene.emplace<Hierarchy>(obj, root);
-		scene.emplace<Transform>(obj, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+		scene.emplace<Transform>(obj);
 
 		// create box1
 		scene.emplace<Hierarchy>(box1, root);
@@ -130,9 +129,10 @@ public:
 		
 		title = std::to_string(1 / delta).c_str();
 
-		if (scene.valid(box1)) scene.get<Transform>(box1).position = glm::vec3(cos(time), sin(time += delta), -1);
-		if (scene.valid(box2)) scene.get<Transform>(box2).position = glm::vec3(-sin(time), -cos(time += delta), -1);
+		if (scene.valid(box1)) scene.get<Transform>(box1).position = glm::vec3(cos(time), sin(time), -1);
+		if (scene.valid(box2)) scene.get<Transform>(box2).position = glm::vec3(-sin(time), -cos(time), -1);
 
+		time += delta;
 
 		auto& cam_trans = scene.get<Transform>(camera);
 		

@@ -20,8 +20,8 @@ SpecularSystem::SpecularSystem()
 	on_destroy<VBO<Normal>>().connect<detachVBO<Normal>>();
 	on_destroy<VBO<BoneID>>().connect<detachVBO<BoneID>>();
 	on_destroy<VBO<BoneWeight>>().connect<detachVBO<BoneWeight>>();
-	
-	
+
+
 }
 
 void SpecularSystem::render()
