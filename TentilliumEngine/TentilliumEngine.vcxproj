@@ -187,6 +187,11 @@
     <ClCompile Include="Source\Systems\TransformSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\shaders\light_accumul.frag" />
+    <None Include="Resources\shaders\light_culling.comp" />
+    <None Include="Resources\shaders\light_accumul.vert" />
+    <None Include="Resources\shaders\depth_prepass.frag" />
+    <None Include="Resources\shaders\depth_prepass.vert" />
     <None Include="Resources\meshes\Person.fbx" />
     <None Include="Resources\meshes\Owl.fbx" />
     <None Include="Resources\meshes\Punk.fbx" />
@@ -236,6 +241,7 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\R.jpg" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />
@@ -244,6 +250,7 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png" />
+    <Image Include="Resources\textures\pigeon.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Source\notes.txt" />

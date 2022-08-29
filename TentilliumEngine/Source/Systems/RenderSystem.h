@@ -20,6 +20,9 @@ private:
 	GROUP(specular_view, OWN(SpecularMaterial), GET(VAO), EXC());
 	ShaderProgram m_program{ "Resources/shaders/default.shader" };
 
+	ShaderProgram m_depth_prepass{ "Resources/shaders/depth_prepass.shader" };
+	ShaderProgram m_light_culling{ "Resources/shaders/light_culling.comp" };
+	ShaderProgram m_light_accumul{ "Resources/shaders/light_accumul.shader" };
 public:
 	RenderSystem();
 

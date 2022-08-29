@@ -18,7 +18,7 @@ private:
 	unsigned int m_program;
 
 	mutable std::unordered_map<std::string, unsigned int> m_uniform_cache;	// uniform locations
-	mutable std::unordered_map<std::string, unsigned int> m_block_cache;		// uniform block locations
+	mutable std::unordered_map<std::string, unsigned int> m_block_cache;	// uniform block locations
 
 	unsigned int createProgram(ShaderLink shaders);
 
@@ -27,6 +27,9 @@ public:
 		: m_program(createProgram(ShaderLink{ vertex, geometry, fragment })) { }
 	ShaderProgram(std::shared_ptr<VertexShader> vertex, std::shared_ptr<FragmentShader> fragment)
 		: m_program(createProgram(ShaderLink{ vertex, nullptr, fragment })) { }
+	ShaderProgram(std::shared_ptr<ComputeShader> compute)
+		: m_program(createProgram(ShaderLink{ nullptr, nullptr, nullptr, compute }))
+	{ }
 
 	ShaderProgram(std::string filepath);
 	~ShaderProgram();

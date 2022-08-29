@@ -24,11 +24,11 @@ internal::Shader& internal::Shader::operator=(const Shader&& other)
 	return *this;
 }
 
-internal::Shader::Shader(ShaderType type, std::string text)
+internal::Shader::Shader(ShaderType type, std::string filepath)
 {
 	std::string data;
 	
-	std::ifstream fs(text, std::ios::in | std::ios::binary | std::ios::ate);
+	std::ifstream fs(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 	const int m_size = fs.tellg();	// get size
 	fs.seekg(0, std::ios::beg);		// put cursor to beginning
 
@@ -46,7 +46,7 @@ internal::Shader::Shader(ShaderType type, std::string text)
 	}
 
 	// add data to opengl object
-	const GLchar* raw_data = (const GLchar*)data.c_str();
+	const char* raw_data = (const char*)data.c_str();
 	glShaderSource(m_shader, 1, &raw_data, &m_size);
 
 	// compile shader
@@ -61,8 +61,7 @@ internal::Shader::Shader(ShaderType type, std::string text)
 		char* message = (char*)alloca(infoLen * sizeof(char));
 		glGetShaderInfoLog(m_shader, infoLen, &infoLen, message);
 
-		std::cerr << "Failed to compile shader : " << message << std::endl;
-
+		std::cerr << "[Shader Error] - Shader '" << filepath <<"' failed to compile: " << message << std::endl;
 		throw std::exception();
 	}
 }

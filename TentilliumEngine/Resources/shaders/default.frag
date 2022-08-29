@@ -25,5 +25,5 @@ void main() {
 	float spec = has_spec_map ? texture(spec_map, v_uv).x   : spec_colour;
 	float glos = has_glos_map ? texture(glos_map, v_uv).x   : glos_colour;
 	
-	f_colour = vec3(v_uv, 0) + diff;
+	f_colour = diff;
 };

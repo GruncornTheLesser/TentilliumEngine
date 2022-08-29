@@ -5,8 +5,6 @@
 enum class ShaderType : int { FRAG, GEOM, VERT, COMP, TCON, TEVA };
 
 namespace internal {
-	enum class loadType { FROM_FILE, FROM_TEXT };
-
 	class Shader {
 	public:
 		unsigned int m_shader;
@@ -28,6 +26,12 @@ class Shader final : private internal::Shader, public Resource<Shader<type>>
 public:
 	Shader(std::string text) : internal::Shader(type, text) { }
 };
+
+
+
+
+
+
 
 using FragmentShader =	Shader<ShaderType::FRAG>;
 using GeometryShader =	Shader<ShaderType::GEOM>;

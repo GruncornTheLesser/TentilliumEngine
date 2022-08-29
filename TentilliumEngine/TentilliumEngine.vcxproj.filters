@@ -92,6 +92,11 @@
     <None Include="Resources\meshes\Person.fbx" />
     <None Include="Resources\meshes\Owl.fbx" />
     <None Include="Resources\meshes\Punk.fbx" />
+    <None Include="Resources\shaders\depth_prepass.frag" />
+    <None Include="Resources\shaders\depth_prepass.vert" />
+    <None Include="Resources\shaders\light_accumul.vert" />
+    <None Include="Resources\shaders\light_culling.comp" />
+    <None Include="Resources\shaders\light_accumul.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
@@ -158,6 +163,12 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Downloads\R.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\textures\pigeon.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

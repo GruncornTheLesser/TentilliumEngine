@@ -16,33 +16,25 @@ unsigned int generateTexture(int width, int height, int channels, void* data, Te
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
-	int format, internal_format;
-	if (format_hint != Texture::Format::NONE)
-	{
-		switch (format_hint)
-		{
-			case Texture::Format::R:  internal_format = GL_R8; format = GL_RED; break;
-			case Texture::Format::RG:  internal_format = GL_RG8; format = GL_RG; break;
-			case Texture::Format::RGB:  internal_format = GL_RGB8; format = GL_RGB; break;
-			case Texture::Format::RGBA:  internal_format = GL_RGBA8; format = GL_RGBA; break;
-		}
+	
+	int internal_format, format, type;
+	switch (channels) {
+		case 1:  format = GL_RED; break;
+		case 2:  format = GL_RG; break;
+		case 3:  format = GL_RGB; break;
+		case 4:  format = GL_RGBA; break;
 	}
-	else
-	{
-		switch (channels)
-		{
-		case 1:  internal_format = GL_R8; format = GL_RED; break;
-		case 2:  internal_format = GL_RG8; format = GL_RG; break;
-		case 3:  internal_format = GL_RGB8; format = GL_RGB; break;
-		case 4:  internal_format = GL_RGBA8; format = GL_RGBA; break;
-		}
+	switch (format_hint) {
+		case Texture::Format::R:  internal_format = GL_R8; break;
+		case Texture::Format::RG:  internal_format = GL_RG8; break;
+		case Texture::Format::RGB:  internal_format = GL_RGB8; break;
+		case Texture::Format::RGBA:  internal_format = GL_RGBA8; break;
+		case Texture::Format::NONE:  internal_format = format; break;
 	}
-
-	int type;
 	switch (type_hint) {
-	case Texture::TypeHint::UNSIGNED_BYTE:	type = GL_UNSIGNED_BYTE; break;
-	case Texture::TypeHint::UNSIGNED_INT:	type = GL_UNSIGNED_INT; break;
-	case Texture::TypeHint::FLOAT:			type = GL_FLOAT; break;
+		case Texture::TypeHint::UNSIGNED_BYTE:	type = GL_UNSIGNED_BYTE; break;
+		case Texture::TypeHint::UNSIGNED_INT:	type = GL_UNSIGNED_INT; break;
+		case Texture::TypeHint::FLOAT:			type = GL_FLOAT; break;
 	}
 
 
@@ -61,29 +53,34 @@ unsigned int generateTexture(int width, int height, int channels, void* data, Te
 Texture::Texture(std::string filepath)
 {
 	int width, height, channels;
-	stbi_set_flip_vertically_on_load(false);
-	void* data = stbi_load(filepath.c_str(), &width, &height, &channels, 4);
 	
-	if (!data)
-	{
-		std::cerr << "[Loading Error] - Failed to load texture from: '" << filepath << "'" << std::endl;
+	// stbi and opengl disagree on uv practices, so flip necessary
+	stbi_set_flip_vertically_on_load(true);
+
+	// load image from file and decode into bitmap, req_comp = 0 means req_comp == channels
+	void* data = stbi_load(filepath.c_str(), &width, &height, &channels, 0);
+
+	// if load failed
+	if (!data) {
+		std::cerr << "[Loading Error] - Failed to load texture from: '" << filepath << "': " << stbi_failure_reason() << std::endl;
 		throw std::exception();
 	}
-
-	m_handle = generateTexture(width, height, channels, data, (Format)channels, TypeHint::UNSIGNED_BYTE);
+	// generate opengl texture from bitmap, stbi uses bytes, format = none means format = channels
+	m_handle = generateTexture(width, height, channels, data, Format::NONE, TypeHint::UNSIGNED_BYTE);
+	// release stbi image
 	stbi_image_free(data);
 }
 
-Texture::Texture(int width, int height, int channels, void* data, Format format_hint, TypeHint type_hint)
+Texture::Texture(int width, int height, int channels, void* data = nullptr, Format format_hint, TypeHint type_hint)
 {
 	if (data) 
 	{
 		stbi_set_flip_vertically_on_load(false);
-		data = stbi_load_from_memory((unsigned char*)data, width * (height == 0 ? 1 : height), &width, &height, &channels, 4);
+		data = stbi_load_from_memory((unsigned char*)data, width * (height == 0 ? 1 : height), &width, &height, &channels, 0);
 
 		if (!data)
 		{
-			std::cerr << "[Loading Error] - Failed to load texture from data" << std::endl;
+			std::cerr << "[Loading Error] - Failed to load image: "<< stbi_failure_reason() << std::endl;
 			throw std::exception();
 		}
 
@@ -97,15 +94,6 @@ Texture::Texture(int width, int height, int channels, void* data, Format format_
 	}
 	
 }
-
-Texture::Texture(int width, int height, int channels, std::vector<float> data, Format format_hint)
-	: m_handle(generateTexture(width, height, channels, data.data(), format_hint, TypeHint::FLOAT))
-{ }
-
-Texture::Texture(int width, int height, int channels, std::vector<unsigned int> data, Format format_hint)
-	: m_handle(generateTexture(width, height, channels, data.data(), format_hint, TypeHint::UNSIGNED_INT))
-{ }
-
 
 
 Texture::Texture(Texture&& other)

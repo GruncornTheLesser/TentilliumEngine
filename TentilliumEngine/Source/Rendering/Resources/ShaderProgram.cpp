@@ -7,11 +7,6 @@
 
 unsigned int ShaderProgram::createProgram(ShaderLink shaders) {
 
-	if (!((shaders.vert && shaders.geom && shaders.frag) || (shaders.vert && shaders.frag))) {
-		std::cerr << "Failed to initiate program.\nErrorLog: invalid set of shaders attached to program." << std::endl;
-		throw std::exception();
-	}
-
 	m_program = glCreateProgram();
 
 	// if shader in program, attach it

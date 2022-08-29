@@ -24,8 +24,8 @@ public:
 
 public:
 	__declspec(property (get = getTitle, put = setTitle)) const char* title;
-	__declspec(property (get = getWidth)) int width;
-	__declspec(property (get = getHeight)) int height;
+	__declspec(property (get = get_width)) int width;
+	__declspec(property (get = get_height)) int height;
 
 private:
 	void* m_window;
@@ -41,13 +41,13 @@ public:
 
 	bool isPressed(Button key);
 
-	int getWidth();
+	int get_width();
 
-	int getHeight();
+	int get_height();
 
-	const char* getTitle();
+	const char* get_title();
 
-	void setTitle(const char* title);
+	void set_title(const char* title);
 
 public:
 	void close();	
@@ -68,7 +68,7 @@ public:
 
 
 public:
-	static void Main(std::vector<AppWindow*> windows);
+	static void main(std::vector<AppWindow*> windows);
 };
 
 

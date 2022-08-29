@@ -7,18 +7,13 @@
 #define MISSING_TEXTURE Texture::get_or_default("__missing__", 2, 2, 3, std::vector<float>{0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1})
 
 
-
-
 class Texture : public Resource<Texture>
 {
 public:
 	enum class Filter { NEAREST, LINEAR };
 	enum class Wrap { CLAMP_EDGE, REPEAT, MIRRORED_REPEAT };
 	enum class Format { NONE, R, RG, RGB, RGBA };
-
 	enum class TypeHint { UNSIGNED_INT, UNSIGNED_BYTE, FLOAT };
-
-	//enum class TargetHint { TEXTURE2D, TEXTURE3D, } m_target; // ...
 
 public:
 	friend class Resource;
@@ -34,8 +29,6 @@ private:
 
 public:
 	Texture(std::string filepath);
-	Texture(int width, int height, int channels, std::vector<float> data, Format format_hint = Format::NONE);
-	Texture(int width, int height, int channels, std::vector<unsigned int> data, Format format_hint = Format::NONE);
 	Texture(int width, int height, int channels, void* data, Format format_hint = Format::NONE, TypeHint type_hint = TypeHint::UNSIGNED_BYTE); // defaults to unsigned int
 
 	~Texture();
@@ -60,6 +53,4 @@ public:
 
 	Filter getFilter();
 	void setFilter(Filter filter);
-
-	
 };
