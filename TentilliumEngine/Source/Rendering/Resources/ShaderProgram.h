@@ -4,32 +4,21 @@
 #include <glm.hpp>
 #include <unordered_map>
 
-class ShaderProgram final : public Resource<ShaderProgram> {
+class ShaderProgram final {
 private:
-	struct ShaderLink { // stores the shared pointers to keep the resource from being destroyed
-		std::shared_ptr<VertexShader>	vert = nullptr;
-		std::shared_ptr<GeometryShader> geom = nullptr;
-		std::shared_ptr<FragmentShader> frag = nullptr;
-		std::shared_ptr<ComputeShader>	comp = nullptr;
-		//std::shared_ptr<TesselationShader> frag = nullptr;
-		//std::shared_ptr<TesselationShader2> frag = nullptr;
-	} m_shaders;
-
 	unsigned int m_program;
-
+	Shader<ShaderType::COMP> m_compute{0};
+	Shader<ShaderType::VERT> m_vertex{0};
+	Shader<ShaderType::GEOM> m_geometry{0};
+	Shader<ShaderType::FRAG> m_fragment{0};
+	
 	mutable std::unordered_map<std::string, unsigned int> m_uniform_cache;	// uniform locations
 	mutable std::unordered_map<std::string, unsigned int> m_block_cache;	// uniform block locations
 
-	unsigned int createProgram(ShaderLink shaders);
+	unsigned int createProgram(unsigned int compute, unsigned int vertex, unsigned int geometry, unsigned int fragment);
 
 public:
-	ShaderProgram(std::shared_ptr<VertexShader> vertex, std::shared_ptr<GeometryShader> geometry, std::shared_ptr<FragmentShader> fragment)
-		: m_program(createProgram(ShaderLink{ vertex, geometry, fragment })) { }
-	ShaderProgram(std::shared_ptr<VertexShader> vertex, std::shared_ptr<FragmentShader> fragment)
-		: m_program(createProgram(ShaderLink{ vertex, nullptr, fragment })) { }
-	ShaderProgram(std::shared_ptr<ComputeShader> compute)
-		: m_program(createProgram(ShaderLink{ nullptr, nullptr, nullptr, compute }))
-	{ }
+	ShaderProgram(std::string vertex, std::string geometry, std::string fragment, std::string compute);
 
 	ShaderProgram(std::string filepath);
 	~ShaderProgram();

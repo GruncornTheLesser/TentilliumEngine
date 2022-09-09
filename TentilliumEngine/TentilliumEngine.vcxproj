@@ -171,6 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Components\Material.cpp" />
     <ClCompile Include="Source\Systems\HierarchySystem.cpp" />
     <ClCompile Include="Source\Systems\LoadSystem.cpp" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
@@ -209,7 +210,7 @@
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
-    <ClInclude Include="Source\Components\SpecularMaterial.h" />
+    <ClInclude Include="Source\Components\Material.h" />
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
@@ -241,7 +242,6 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\R.jpg" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />

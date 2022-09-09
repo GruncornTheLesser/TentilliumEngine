@@ -2,42 +2,37 @@
 #include "Resource.h"
 #include <string>
 
-enum class ShaderType : int { FRAG, GEOM, VERT, COMP, TCON, TEVA };
 
-namespace internal {
-	class Shader {
-	public:
-		unsigned int m_shader;
-		Shader(ShaderType type, std::string text);
-		~Shader();
-
-		Shader(const Shader&) = delete;
-		Shader& operator=(const Shader&) = delete;
-
-		Shader(const Shader&&);
-		Shader& operator=(const Shader&&);
-	};
-}
-
-template<ShaderType type>
-class Shader final : private internal::Shader, public Resource<Shader<type>>
-{
-	friend class ShaderProgram;
-public:
-	Shader(std::string text) : internal::Shader(type, text) { }
+// this shouldnt be public it should be completely internal
+enum class ShaderType : int {
+	FRAG = 0x8b31,
+	GEOM = 0x8dd9,
+	VERT = 0x8b30,
+	COMP = 0x91b9,
 };
 
+template<ShaderType type>
+class Shader : public Resource<Shader<type>> {
+	friend class ShaderProgram;
+	friend class Resource<Shader<type>>;
+	using Resource<Shader<type>>::create;
+	using Resource<Shader<type>>::destroy;
 
+public:
+	
 
+	Shader(unsigned int handle);
+	Shader(std::string filepath);
+	~Shader();
 
+	Shader(const Shader&);
+	Shader& operator=(const Shader&);
 
+protected:
+	unsigned int m_handle;
+};
 
-
-using FragmentShader =	Shader<ShaderType::FRAG>;
-using GeometryShader =	Shader<ShaderType::GEOM>;
-using VertexShader =	Shader<ShaderType::VERT>;
-using ComputeShader =	Shader<ShaderType::COMP>;
-using TessContShader =	Shader<ShaderType::TCON>;
-using TessEvalShader =	Shader<ShaderType::TEVA>;
-
-
+using FragmentShader = Shader<ShaderType::FRAG>;
+using GeometryShader = Shader<ShaderType::GEOM>;
+using VertexShader = Shader<ShaderType::VERT>;
+using ComputeShader = Shader<ShaderType::COMP>;

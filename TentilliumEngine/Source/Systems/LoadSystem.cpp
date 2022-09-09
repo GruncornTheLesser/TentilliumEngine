@@ -2,7 +2,7 @@
 #include "../Components/Mesh.h"
 #include "../Components/Hierarchy.h"
 #include "../Components/Transform.h"
-#include "../Components/SpecularMaterial.h"
+#include "../Components/Material.h"
 #include "../Rendering/Resources/Texture.h"
 #include <queue>
 #include <assimp/Importer.hpp>
@@ -86,7 +86,7 @@ entt::entity LoadSystem::load(std::string filepath)
 	}
 
 	// array of textures
-	std::vector<std::shared_ptr<Texture>> textures;
+	std::vector<Texture> textures;
 	if (scene->HasTextures()) {
 		auto texPtr = scene->mTextures;
 		for (unsigned int i = 0; i < scene->mNumTextures; i++) {
@@ -154,7 +154,7 @@ entt::entity LoadSystem::load(std::string filepath)
 	if (scene->HasMaterials()) {
 		auto aiMatPtr = scene->mMaterials[0];
 
-		auto& mat = emplace<SpecularMaterial>(e);
+		auto& mat = emplace<Material>(e);
 
 		aiColor3D colour;
 		aiString texture;

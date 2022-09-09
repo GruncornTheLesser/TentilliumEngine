@@ -50,6 +50,11 @@ unsigned int generateTexture(int width, int height, int channels, void* data, Te
 	return m_handle;
 }
 
+Texture::Texture(unsigned int handle) : m_handle(handle) 
+{ 
+	create(m_handle);
+}
+
 Texture::Texture(std::string filepath)
 {
 	int width, height, channels;
@@ -69,61 +74,76 @@ Texture::Texture(std::string filepath)
 	m_handle = generateTexture(width, height, channels, data, Format::NONE, TypeHint::UNSIGNED_BYTE);
 	// release stbi image
 	stbi_image_free(data);
+
+	create(m_handle);
 }
 
 Texture::Texture(int width, int height, int channels, void* data = nullptr, Format format_hint, TypeHint type_hint)
 {
-	if (data) 
-	{
-		stbi_set_flip_vertically_on_load(false);
-		data = stbi_load_from_memory((unsigned char*)data, width * (height == 0 ? 1 : height), &width, &height, &channels, 0);
-
-		if (!data)
-		{
-			std::cerr << "[Loading Error] - Failed to load image: "<< stbi_failure_reason() << std::endl;
-			throw std::exception();
-		}
-
-		m_handle = generateTexture(width, height, channels, data, (format_hint == Format::NONE ? (Format)channels : format_hint), type_hint);
-
-		stbi_image_free(data);
-	}
-	else
-	{
+	if (!data) {
 		m_handle = generateTexture(width, height, channels, nullptr, format_hint, type_hint);
+		return;
 	}
-	
+
+	stbi_set_flip_vertically_on_load(true);
+	data = stbi_load_from_memory((unsigned char*)data, std::max(1, width) * std::max(1, height), &width, &height, &channels, 0);
+
+	if (!data)
+	{
+		std::cerr << "[Loading Error] - Failed to load image: "<< stbi_failure_reason() << std::endl;
+		throw std::exception();
+	}
+
+	m_handle = generateTexture(width, height, channels, data, format_hint, type_hint);
+
+	stbi_image_free(data);
+
+	create(m_handle);
 }
 
-
-Texture::Texture(Texture&& other)
+Texture::~Texture() 
 {
-	this->m_handle = other.m_handle;
+	if (destroy(m_handle))
+		glDeleteTextures(1, &m_handle);
 }
 
-Texture& Texture::operator=(Texture&&)
+Texture::Texture(Texture const& other) 
 {
-	glDeleteTextures(1, &m_handle);
+	create(other.m_handle);
+
+	if (destroy(m_handle)) 
+		glDeleteTextures(1, &m_handle);
+
+	m_handle = other.m_handle;
+}
+
+Texture& Texture::operator=(Texture const& other) 
+{
+	if (this == &other)
+		return *this; // calls copy constructor
+
+	create(other.m_handle);
+
+	if (destroy(m_handle)) 
+		glDeleteTextures(1, &m_handle);
+
+	m_handle = other.m_handle;
 	return *this;
 }
 
-Texture::~Texture()
-{
-	glDeleteTextures(1, &m_handle);
-}
-
+/*
 void Texture::bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
-void Texture::bindSlot(int slot) const
+void Texture::bindSlot(int slot) const 
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
-
-int Texture::getWidth() const
+*/
+int Texture::getWidth() const 
 {
 	int width;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
@@ -131,7 +151,7 @@ int Texture::getWidth() const
 	return width;
 }
 
-int Texture::getHeight() const
+int Texture::getHeight() const 
 {
 	int height;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
@@ -139,33 +159,34 @@ int Texture::getHeight() const
 	return height;
 }
 
-Texture::Wrap Texture::getWrap()
+Texture::Wrap Texture::getWrap() const
 {
 	int wrap;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wrap);
 	switch (wrap) {
-	case GL_CLAMP_TO_EDGE: 
+	case GL_CLAMP_TO_EDGE:
 		return Texture::Wrap::CLAMP_EDGE;
-	case GL_MIRRORED_REPEAT: 
+	case GL_MIRRORED_REPEAT:
 		return Texture::Wrap::MIRRORED_REPEAT;
-	case GL_REPEAT: 
+	case GL_REPEAT:
 		return Texture::Wrap::REPEAT;
 	}
+	return (Texture::Wrap)wrap;
 }
 
-void Texture::setWrap(Texture::Wrap wrap)
+void Texture::setWrap(Texture::Wrap wrap) const
 {
 	int glWrap;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 	switch (wrap) {
-	case Texture::Wrap::CLAMP_EDGE: 
+	case Texture::Wrap::CLAMP_EDGE:
 		glWrap = GL_CLAMP_TO_EDGE;
 		break;
-	case Texture::Wrap::MIRRORED_REPEAT: 
+	case Texture::Wrap::MIRRORED_REPEAT:
 		glWrap = GL_MIRRORED_REPEAT;
 		break;
-	case Texture::Wrap::REPEAT: 
+	case Texture::Wrap::REPEAT:
 		glWrap = GL_REPEAT;
 		break;
 	}
@@ -174,7 +195,7 @@ void Texture::setWrap(Texture::Wrap wrap)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrap);
 }
 
-Texture::Filter Texture::getFilter()
+Texture::Filter Texture::getFilter() const
 {
 	int filter;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
@@ -185,15 +206,16 @@ Texture::Filter Texture::getFilter()
 	case GL_NEAREST:
 		return Texture::Filter::NEAREST;
 	}
+	return (Texture::Filter)wrap;
 }
 
-void Texture::setFilter(Texture::Filter filter)
+void Texture::setFilter(Texture::Filter filter) const
 {
 	int glFilter;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 	switch (filter) {
-	case Texture::Filter::LINEAR: 
-		glFilter = GL_LINEAR; 
+	case Texture::Filter::LINEAR:
+		glFilter = GL_LINEAR;
 		break;
 	case Texture::Filter::NEAREST:
 		glFilter = GL_NEAREST;

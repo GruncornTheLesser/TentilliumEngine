@@ -2,55 +2,47 @@
 #include "Resource.h"
 #include <iostream>
 #include <string>
-#include <vector>
-
-#define MISSING_TEXTURE Texture::get_or_default("__missing__", 2, 2, 3, std::vector<float>{0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1})
-
+#include <unordered_map>
 
 class Texture : public Resource<Texture>
 {
+	friend class Material;
+	friend class Resource<Texture>;
 public:
 	enum class Filter { NEAREST, LINEAR };
 	enum class Wrap { CLAMP_EDGE, REPEAT, MIRRORED_REPEAT };
 	enum class Format { NONE, R, RG, RGB, RGBA };
 	enum class TypeHint { UNSIGNED_INT, UNSIGNED_BYTE, FLOAT };
 
-public:
-	friend class Resource;
-
 	__declspec(property (get=getHandle)) unsigned int handle;
 	__declspec(property (get=getWidth)) int width;
 	__declspec(property (get=getHeight)) int height;
-	__declspec(property (put=setWrap, get = getWrap)) Wrap wrap;
-	__declspec(property (put=setFilter, get = getFilter)) Filter filter;
+	__declspec(property (put=setWrap, get=getWrap)) Wrap wrap;
+	__declspec(property (put=setFilter, get=getFilter)) Filter filter;
 
 private:
 	unsigned int m_handle;
 
+	Texture(unsigned int handle);
 public:
 	Texture(std::string filepath);
-	Texture(int width, int height, int channels, void* data, Format format_hint = Format::NONE, TypeHint type_hint = TypeHint::UNSIGNED_BYTE); // defaults to unsigned int
+	Texture(int width, int height, int channels, void* data, Format format_hint = Format::NONE, TypeHint type_hint = TypeHint::UNSIGNED_BYTE); // defaults to unsigned byte
 
 	~Texture();
 
-	Texture(Texture const&) = delete;
-	Texture& operator=(Texture const&) = delete;
+	Texture(Texture const& other);
+	Texture& operator=(Texture const& other);
 
-	Texture(Texture&&);
-	Texture& operator=(Texture&&);
-
-	void bind() const;
-	void bindSlot(int slot) const;
-
-public:
 	int getWidth() const;
 	int getHeight() const;
 
-	unsigned int getHandle() { return m_handle; }
+	unsigned int getHandle() const { return m_handle; }
 
-	Wrap getWrap();
-	void setWrap(Wrap wrap);
+	Wrap getWrap() const;
+	void setWrap(Wrap wrap) const;
 
-	Filter getFilter();
-	void setFilter(Filter filter);
+	Filter getFilter() const;
+	void setFilter(Filter filter) const;
 };
+
+

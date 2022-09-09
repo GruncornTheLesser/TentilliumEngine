@@ -3,7 +3,7 @@
 #include "../Components/Projection.h"
 #include "../Components/Transform.h"
 #include "../Components/Mesh.h"
-#include "../Components/SpecularMaterial.h"
+#include "../Components/Material.h"
 #include "../Rendering/Resources/ShaderProgram.h"
 #include <glm.hpp>
 
@@ -17,7 +17,7 @@ public:
 	void resize(int width, int height);
 
 private:
-	GROUP(specular_view, OWN(SpecularMaterial), GET(VAO), EXC());
+	GROUP(render_view, OWN(Material), GET(VAO), EXC());
 	ShaderProgram m_program{ "Resources/shaders/default.shader" };
 
 	ShaderProgram m_depth_prepass{ "Resources/shaders/depth_prepass.shader" };

@@ -6,25 +6,40 @@
 #include <exception>
 #include <iostream>
 
-
-internal::Shader::~Shader()
+template<ShaderType type>
+Shader<type>::~Shader()
 {
-	glDeleteShader(m_shader);
+	if (destroy(m_handle))
+		glDeleteShader(m_handle);
 }
-
-internal::Shader::Shader(const Shader&& other)
+template<ShaderType type>
+Shader<type>::Shader(unsigned int handle) : m_handle(handle)
+{ }
+template<ShaderType type>
+Shader<type>::Shader(const Shader<type>& other)
 {
-	this->m_shader = other.m_shader;
+	create(other.m_handle);
+	if (destroy(m_handle))
+		glDeleteShader(m_handle);
+	this->m_handle = other.m_handle;
 }
-
-internal::Shader& internal::Shader::operator=(const Shader&& other)
+template<ShaderType type>
+Shader<type>& Shader<type>::operator=(const Shader<type>& other)
 {
-	glDeleteShader(m_shader);
-	this->m_shader = other.m_shader;
+	if (this == &other)
+		return *this;
+
+	create(other.m_handle);
+	if (destroy(m_handle))
+		glDeleteShader(m_handle);
+
+	this->m_handle = other.m_handle;
+
 	return *this;
 }
 
-internal::Shader::Shader(ShaderType type, std::string filepath)
+template<ShaderType type>
+Shader<type>::Shader(std::string filepath)
 {
 	std::string data;
 	
@@ -39,29 +54,36 @@ internal::Shader::Shader(ShaderType type, std::string filepath)
 
 	// create opengl object shader
 	switch (type) {
-	case ShaderType::VERT: m_shader = glCreateShader(GL_VERTEX_SHADER);		break;
-	case ShaderType::GEOM: m_shader = glCreateShader(GL_GEOMETRY_SHADER);	break;
-	case ShaderType::FRAG: m_shader = glCreateShader(GL_FRAGMENT_SHADER);	break;
-	case ShaderType::COMP: m_shader = glCreateShader(GL_COMPUTE_SHADER);	break;
+	case ShaderType::VERT: m_handle = glCreateShader(GL_VERTEX_SHADER);		break;
+	case ShaderType::GEOM: m_handle = glCreateShader(GL_GEOMETRY_SHADER);	break;
+	case ShaderType::FRAG: m_handle = glCreateShader(GL_FRAGMENT_SHADER);	break;
+	case ShaderType::COMP: m_handle = glCreateShader(GL_COMPUTE_SHADER);	break;
 	}
 
 	// add data to opengl object
 	const char* raw_data = (const char*)data.c_str();
-	glShaderSource(m_shader, 1, &raw_data, &m_size);
+	glShaderSource(m_handle, 1, &raw_data, &m_size);
 
 	// compile shader
-	glCompileShader(m_shader);
+	glCompileShader(m_handle);
 	
 	// verify shader status
 	int status, infoLen;
-	glGetShaderiv(m_shader, GL_COMPILE_STATUS, &status);
+	glGetShaderiv(m_handle, GL_COMPILE_STATUS, &status);
 	if (!status)
 	{
-		glGetShaderiv(m_shader, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetShaderInfoLog(m_shader, infoLen, &infoLen, message);
+		glGetShaderInfoLog(m_handle, infoLen, &infoLen, message);
 
 		std::cerr << "[Shader Error] - Shader '" << filepath <<"' failed to compile: " << message << std::endl;
 		throw std::exception();
 	}
+
+	create(m_handle);
 }
+
+template class Shader<ShaderType::COMP>;
+template class Shader<ShaderType::VERT>;
+template class Shader<ShaderType::GEOM>;
+template class Shader<ShaderType::FRAG>;

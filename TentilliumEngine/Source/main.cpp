@@ -9,6 +9,7 @@
 */
 
 /* TASKS:
+*	> localize reference counting to Resource -> use handle or filepath as key
 *	> Tidy AppWindow functionality into something less ugly
 *	> Tidy Shader functionality into something less ugly
 * 
@@ -28,7 +29,6 @@
 	|/ 
 	O---X
 */
-
 
 std::vector<float> positions = {
 	-0.5f, -0.5f, -0.5f,
@@ -100,7 +100,7 @@ public:
 		box2 = scene.create();									// 2
 		obj = scene.load("Resources/meshes/Person.fbx");		// 3
 		scene.camera = scene.create();							// 4
-		
+
 		// create obj
 		scene.emplace<Hierarchy>(obj, root);
 		scene.emplace<Transform>(obj);
@@ -112,7 +112,7 @@ public:
 		scene.emplace<VBO<Position>>(box1, positions);
 		scene.emplace<VBO<Normal>>(box1, normals);
 		scene.emplace<VBO<TexCoord>>(box1, texCoords);
-		scene.emplace<SpecularMaterial>(box1, Texture::load("Resources/textures/pigeon.jpg"), 0.0f, 0.0f);
+		scene.emplace<Material>(box1, Texture("Resources/textures/pigeon.jpg"), 0.0f, 0.0f);
 
 		// create box2
 		scene.emplace<Hierarchy>(box2, box1);
@@ -121,7 +121,7 @@ public:
 		scene.emplace<VBO<Position>>(box2, scene.get<VBO<Position>>(box1));
 		scene.emplace<VBO<Normal>>(box2, scene.get<VBO<Normal>>(box1));
 		scene.emplace<VBO<TexCoord>>(box2, scene.get<VBO<TexCoord>>(box1));
-		scene.emplace<SpecularMaterial>(box2, Texture::load("Resources/textures/pigeon.jpg"), 0.0f, 0.0f);
+		scene.emplace<Material>(box2, scene.get<Material>(box1));
 
 		// create camera
 		scene.emplace<Projection>(scene.camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);
@@ -131,8 +131,8 @@ public:
 
 	void onProcess(float delta) {
 
-		//if (scene.valid(box1)) scene.get<Transform>(box1).position = glm::vec3(cos(time), sin(time), -1);
-		//if (scene.valid(box2)) scene.get<Transform>(box2).position = glm::vec3(-sin(time), -cos(time), -1);
+		if (scene.valid(box1)) scene.get<Transform>(box1).position = glm::vec3(cos(time), sin(time), -1);
+		if (scene.valid(box2)) scene.get<Transform>(box2).position = glm::vec3(-sin(time), -cos(time), -1);
 
 		time += delta;
 

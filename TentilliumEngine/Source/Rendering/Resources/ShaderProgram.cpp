@@ -5,15 +5,15 @@
 #include <gtc/type_ptr.hpp>
 #include <filesystem>
 
-unsigned int ShaderProgram::createProgram(ShaderLink shaders) {
+unsigned int ShaderProgram::createProgram(unsigned int vertex, unsigned int geometry, unsigned int fragment, unsigned int compute) {
 
 	m_program = glCreateProgram();
 
 	// if shader in program, attach it
-	if (shaders.vert.get()) glAttachShader(m_program, shaders.vert->m_shader);
-	if (shaders.geom.get()) glAttachShader(m_program, shaders.geom->m_shader);
-	if (shaders.frag.get()) glAttachShader(m_program, shaders.frag->m_shader);
-	if (shaders.comp.get()) glAttachShader(m_program, shaders.comp->m_shader);
+	if (compute)	glAttachShader(m_program, compute);
+	if (vertex)		glAttachShader(m_program, vertex);
+	if (geometry)	glAttachShader(m_program, geometry);
+	if (fragment)	glAttachShader(m_program, fragment);
 	
 	int infoLen;
 	int status;
@@ -44,6 +44,8 @@ unsigned int ShaderProgram::createProgram(ShaderLink shaders) {
 		throw std::exception();
 	}
 
+	Resource<Shader<ShaderType::COMP>>::create(compute);
+
 	return m_program;
 }
 
@@ -57,7 +59,6 @@ ShaderProgram::ShaderProgram(std::string filepath)
 	std::string dirPath = fp.substr(0, p1 == std::string::npos ? 0 : p1);
 	std::string dirName = fp.substr(p1 == std::string::npos ? 0 : p1 + 1, (p2 == std::string::npos ? fp.length() : (p2 - 1)) - p1);
 
-	ShaderLink shaders;
 	for (const auto& file : std::filesystem::directory_iterator(dirPath)) {
 		std::string fp = file.path().string();
 
@@ -71,18 +72,18 @@ ShaderProgram::ShaderProgram(std::string filepath)
 		std::string fileExt = fp.substr(p2, fp.length() - p2);
 
 		if (dirName == fileName) {
-			if		(fileExt == ".frag") 
-				shaders.frag = Shader<ShaderType::FRAG>::load(file.path().string().c_str());
-			else if (fileExt == ".geom") 
-				shaders.geom = Shader<ShaderType::GEOM>::load(file.path().string().c_str());
-			else if (fileExt == ".vert") 
-				shaders.vert = Shader<ShaderType::VERT>::load(file.path().string().c_str());
+			if		(fileExt == ".frag")
+				m_fragment =	FragmentShader::load(file.path().string().c_str());
+			else if (fileExt == ".geom")
+				m_geometry =	GeometryShader::load(file.path().string().c_str());
+			else if (fileExt == ".vert")
+				m_vertex =		VertexShader::load(file.path().string().c_str());
 			else if (fileExt == ".comp")
-				shaders.comp = Shader<ShaderType::COMP>::load(file.path().string().c_str());
+				m_compute =		ComputeShader::load(file.path().string().c_str());
 		}
 	}
 
-	createProgram(shaders);
+	createProgram(m_vertex.m_handle, m_geometry.m_handle, m_fragment.m_handle, m_compute.m_handle);
 }
 
 ShaderProgram::~ShaderProgram()
@@ -95,6 +96,9 @@ ShaderProgram::ShaderProgram(const ShaderProgram&& other) {
 }
 
 ShaderProgram& ShaderProgram::operator=(const ShaderProgram&& other) {
+	if (this == &other)
+		return *this; // call copy constructor
+
 	glDeleteProgram(this->m_program);
 	this->m_program = other.m_program;
 	this->m_uniform_cache.clear();
@@ -195,4 +199,3 @@ unsigned int ShaderProgram::getUniformBlockLocation(std::string block_name) cons
 	m_block_cache[block_name] = location;
 	return location;
 }
-

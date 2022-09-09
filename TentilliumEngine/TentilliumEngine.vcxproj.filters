@@ -80,6 +80,9 @@
     <ClCompile Include="Source\Systems\RenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Components\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\default.frag">
@@ -123,7 +126,7 @@
     <ClInclude Include="Source\Components\Flag.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\SpecularMaterial.h">
+    <ClInclude Include="Source\Components\Material.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Projection.h">
@@ -163,9 +166,6 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\..\Downloads\R.jpg">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\textures\pigeon.jpg">

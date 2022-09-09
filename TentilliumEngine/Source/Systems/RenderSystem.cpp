@@ -67,7 +67,7 @@ void RenderSystem::render()
 	glm::mat4 proj = get_cam_proj();
 
 	m_program.bind();
-	for (auto [entity, material, vao] : specular_view.each())
+	for (auto [entity, material, vao] : render_view.each())
 	{
 		if (auto transform = try_get<Transform>(entity))
 			m_program.setUniformMat4("MVP", proj * view * transform->getWorldMatrix());
