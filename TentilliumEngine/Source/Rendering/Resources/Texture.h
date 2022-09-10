@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 
+
 class Texture : public Resource<Texture>
 {
 	friend class Material;
@@ -11,8 +12,8 @@ class Texture : public Resource<Texture>
 public:
 	enum class Filter { NEAREST, LINEAR };
 	enum class Wrap { CLAMP_EDGE, REPEAT, MIRRORED_REPEAT };
-	enum class Format { NONE, R, RG, RGB, RGBA };
-	enum class TypeHint { UNSIGNED_INT, UNSIGNED_BYTE, FLOAT };
+	enum class Format { NONE, R, RG, RGB, RGBA, DEPTH };
+	enum class Type { NONE, UNSIGNED_INT, UNSIGNED_BYTE, FLOAT };
 
 	__declspec(property (get=getHandle)) unsigned int handle;
 	__declspec(property (get=getWidth)) int width;
@@ -26,7 +27,8 @@ private:
 	Texture(unsigned int handle);
 public:
 	Texture(std::string filepath);
-	Texture(int width, int height, int channels, void* data, Format format_hint = Format::NONE, TypeHint type_hint = TypeHint::UNSIGNED_BYTE); // defaults to unsigned byte
+	
+	Texture(void* data, int width, int height = 0, Format channels = Format::NONE, Format format_hint = Format::NONE, Type type_hint = Type::NONE); // defaults to unsigned byte
 
 	~Texture();
 
@@ -44,5 +46,7 @@ public:
 	Filter getFilter() const;
 	void setFilter(Filter filter) const;
 };
+
+
 
 

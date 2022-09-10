@@ -91,7 +91,7 @@ entt::entity LoadSystem::load(std::string filepath)
 		auto texPtr = scene->mTextures;
 		for (unsigned int i = 0; i < scene->mNumTextures; i++) {
 			textures.push_back(Texture::get_or_default(texPtr[i]->mFilename.C_Str(),
-				texPtr[i]->mWidth, texPtr[i]->mHeight, NULL, texPtr[i]->pcData, Texture::Format::RGBA));
+				texPtr[i]->pcData, texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA));
 		}
 	}
 	

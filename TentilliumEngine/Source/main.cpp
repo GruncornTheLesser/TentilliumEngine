@@ -3,24 +3,32 @@
 #include "Rendering/Resources/ShaderProgram.h"
 #include "Components/Projection.h"
 
-/* RESEARCH:
-*	> Morton encoding for position in a quad tree -> chunking???
-*	> ANGLE a library that compiles opengl calls into directx
+/* FINALIZE:
+* 
 */
 
-/* TASKS:
-*	> localize reference counting to Resource -> use handle or filepath as key
-*	> Tidy AppWindow functionality into something less ugly
+/* REVIEW:
+*	> localize reference counting to Resource
+*/
+
+/* TODO:
+*	> Tidy AppWindow functionality into something less ugly						
 *	> Tidy Shader functionality into something less ugly
 * 
 *   > forward+ render pipeline	
-*		-> depth pre pass
-*		-> light culling
-*		-> light accumulation
+*		-> depth pre pass		*DONE*
+*		-> light culling		*DONE*
+*		-> light accumulation	*DONE*
+*		-> FrameBuffer 
+*		-> c++ function 
 * 
 *   > bones, skinning and animation
-* 
 *	> seperate Transform and Transform implementation
+*/
+
+/* RESEARCH:
+*	> Morton encoding for position in a quad tree -> chunking???
+*	> ANGLE a library that compiles opengl calls into directx
 */
 
 /*		 
@@ -81,6 +89,36 @@ std::vector<unsigned int> indices = {	// mesh indices
 	2, 3, 11, 11, 3, 15		// e(3, 11)  = -+-,+++	// top
 };
 
+unsigned char Rtest[] = {
+	0xff, 
+	0x7f,
+	0x3f, 
+	0x1f, 
+};
+unsigned char RGtest[] = {
+	0xff, 0x00,
+	0x00, 0xff,
+	0x00, 0xff,
+	0xff, 0x00,
+};
+unsigned char RGBtest[] = {
+	0xff, 0x00, 0xff, 
+	//0x00, // padding
+	0x00, 0x00, 0xff, 
+	//0x00, // padding
+	0x00, 0x00, 0xff, 
+	//0x00, // padding
+	0xff, 0x00, 0xff, 
+	//0x00, // padding
+};
+unsigned char RGBAtest[] = {
+	0xff, 0x00, 0xff, 0xff,
+	0x00, 0x00, 0xff, 0xff,
+	0x00, 0x00, 0xff, 0xff,
+	0xff, 0x00, 0xff, 0xff,
+};
+
+
 class TestApp : public AppWindow
 {
 public:
@@ -121,7 +159,7 @@ public:
 		scene.emplace<VBO<Position>>(box2, scene.get<VBO<Position>>(box1));
 		scene.emplace<VBO<Normal>>(box2, scene.get<VBO<Normal>>(box1));
 		scene.emplace<VBO<TexCoord>>(box2, scene.get<VBO<TexCoord>>(box1));
-		scene.emplace<Material>(box2, scene.get<Material>(box1));
+		scene.emplace<Material>(box2, Texture(RGBtest, 2, 2, Texture::Format::RGB), 0.0f, 0.0f);
 
 		// create camera
 		scene.emplace<Projection>(scene.camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);

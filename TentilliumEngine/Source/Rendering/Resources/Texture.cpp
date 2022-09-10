@@ -10,35 +10,53 @@
 #include <exception>
 #include <iostream>
 
-unsigned int generateTexture(int width, int height, int channels, void* data, Texture::Format format_hint, Texture::TypeHint type_hint)
+unsigned int generateTexture(void* data, int width, int height, Texture::Format data_format_hint, Texture::Format internal_format_hint, Texture::Type type_hint)
 {
 	unsigned int m_handle;
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
-	
-	int internal_format, format, type;
-	switch (channels) {
-		case 1:  format = GL_RED; break;
-		case 2:  format = GL_RG; break;
-		case 3:  format = GL_RGB; break;
-		case 4:  format = GL_RGBA; break;
+	int internal_format, data_format, type;
+	switch (data_format_hint) {
+		case Texture::Format::R:  data_format = GL_RED; break;
+		case Texture::Format::RG:  data_format = GL_RG; break;
+		case Texture::Format::RGB:  data_format = GL_RGB; break;
+		case Texture::Format::RGBA:  data_format = GL_RGBA; break;
+		case Texture::Format::DEPTH:  data_format = GL_DEPTH_COMPONENT; break;
 	}
-	switch (format_hint) {
-		case Texture::Format::R:  internal_format = GL_R8; break;
-		case Texture::Format::RG:  internal_format = GL_RG8; break;
-		case Texture::Format::RGB:  internal_format = GL_RGB8; break;
-		case Texture::Format::RGBA:  internal_format = GL_RGBA8; break;
-		case Texture::Format::NONE:  internal_format = format; break;
+
+	switch (internal_format_hint) {
+		case Texture::Format::R:  internal_format = GL_RED; break;
+		case Texture::Format::RG:  internal_format = GL_RG; break;
+		case Texture::Format::RGB:  internal_format = GL_RGB; break;
+		case Texture::Format::RGBA:  internal_format = GL_RGBA; break;
+		case Texture::Format::DEPTH: internal_format = GL_DEPTH_COMPONENT; break;
 	}
+
+	int selection = 0;
+	if (internal_format_hint == Texture::Format::NONE)	selection |= 1;
+	if (data_format_hint == Texture::Format::NONE)		selection |= 2;
+
+	switch (selection) {
+	case (1):
+		internal_format = data_format;
+		break;
+	case (2):
+		data_format = internal_format;
+		break;
+	case (3):
+		std::cerr << "[Input Error] - cannot infer format" << std::endl;
+		throw std::exception();
+	}
+
 	switch (type_hint) {
-		case Texture::TypeHint::UNSIGNED_BYTE:	type = GL_UNSIGNED_BYTE; break;
-		case Texture::TypeHint::UNSIGNED_INT:	type = GL_UNSIGNED_INT; break;
-		case Texture::TypeHint::FLOAT:			type = GL_FLOAT; break;
+		case Texture::Type::UNSIGNED_BYTE:	type = GL_UNSIGNED_BYTE; break;
+		case Texture::Type::UNSIGNED_INT:	type = GL_UNSIGNED_INT; break;
+		case Texture::Type::FLOAT:			type = GL_FLOAT; break;
+		case Texture::Type::NONE:			type = GL_UNSIGNED_BYTE; break;
 	}
 
-
-	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, type, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, type, data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -57,46 +75,55 @@ Texture::Texture(unsigned int handle) : m_handle(handle)
 
 Texture::Texture(std::string filepath)
 {
-	int width, height, channels;
+	int width, height, data_format;
 	
 	// stbi and opengl disagree on uv practices, so flip necessary
 	stbi_set_flip_vertically_on_load(true);
 
 	// load image from file and decode into bitmap, req_comp = 0 means req_comp == channels
-	void* data = stbi_load(filepath.c_str(), &width, &height, &channels, 0);
+	void* data = stbi_load(filepath.c_str(), &width, &height, &data_format, 0);
 
 	// if load failed
 	if (!data) {
 		std::cerr << "[Loading Error] - Failed to load texture from: '" << filepath << "': " << stbi_failure_reason() << std::endl;
 		throw std::exception();
 	}
-	// generate opengl texture from bitmap, stbi uses bytes, format = none means format = channels
-	m_handle = generateTexture(width, height, channels, data, Format::NONE, TypeHint::UNSIGNED_BYTE);
+	
+	// generate opengl texture from bitmap, format = NONE => data_format = internal_format
+	m_handle = generateTexture(data, width, height, (Format)data_format, Format::NONE, Type::UNSIGNED_BYTE);
+	
 	// release stbi image
 	stbi_image_free(data);
 
 	create(m_handle);
 }
 
-Texture::Texture(int width, int height, int channels, void* data = nullptr, Format format_hint, TypeHint type_hint)
+Texture::Texture(void* data, int width, int height, Format internal_format_hint, Format data_format_hint, Type type_hint)
 {
+	// if data nullptr create empty texture
 	if (!data) {
-		m_handle = generateTexture(width, height, channels, nullptr, format_hint, type_hint);
+		m_handle = generateTexture(nullptr, width, height, data_format_hint, internal_format_hint, type_hint);
 		return;
 	}
 
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load_from_memory((unsigned char*)data, std::max(1, width) * std::max(1, height), &width, &height, &channels, 0);
+	// if data compressed image, decompress, get data, height, width, data format
+	if (height == 0 || width == 0) {
+		stbi_set_flip_vertically_on_load(true);
+		data = stbi_load_from_memory((unsigned char*)data, std::max(1, width) * std::max(1, height), &width, &height, (int*)(&data_format_hint), 0);
+	
+		if (!data) {
+			std::cerr << "[Loading Error] - Failed decompress image: " << stbi_failure_reason() << std::endl;
+			throw std::exception();
+		}
 
-	if (!data)
-	{
-		std::cerr << "[Loading Error] - Failed to load image: "<< stbi_failure_reason() << std::endl;
-		throw std::exception();
+		m_handle = generateTexture(data, width, height, data_format_hint, internal_format_hint, type_hint);
+
+		stbi_image_free(data);
 	}
-
-	m_handle = generateTexture(width, height, channels, data, format_hint, type_hint);
-
-	stbi_image_free(data);
+	else 
+	{
+		m_handle = generateTexture(data, width, height, data_format_hint, internal_format_hint, type_hint);
+	}
 
 	create(m_handle);
 }

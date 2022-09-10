@@ -106,7 +106,7 @@ AppWindow::AppWindow(int width, int height, const char* title)
 	m_window = glfwCreateWindow(width, height, title, nullptr, glfwContext);
 
     if (!m_window)
-        throw std::runtime_error("[Init Error] : failed to create GLFW window.");
+        throw std::runtime_error("[Window Error] : failed to create GLFW window.");
    
 	// makes context current AND window render target
 	glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_window));
@@ -138,6 +138,9 @@ AppWindow::AppWindow(int width, int height, const char* title)
     glDepthMask(GL_TRUE);
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
 }
 
 AppWindow::~AppWindow()
