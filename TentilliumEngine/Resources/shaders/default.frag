@@ -1,29 +1,30 @@
 #version 460 core
-in vec2 v_uv;
-in vec3 v_normal;
 
-layout (std140) uniform material {
-	vec3  diff_colour;					// align 16,	size 12,	offset 0
-	bool has_diff_map;					// align 4,		size 4,		offset 12
-	
-	float spec_colour;					// align 4,		size 4,		offset 16
-	bool has_spec_map;					// align 4,		size 4,		offset 20
+in VERTEX_OUT {
+	vec3 position;
+	vec2 texcoord;
+	vec3 normal;
+} fragment_in;
 
-	float glos_colour;					// align 4,		size 4,		offset 24
-	bool has_glos_map;					// align 4,		size 4,		offset 28
-};
+layout (std140) uniform Material {
+	vec4 diffuse;			// align 16,	size 16,	offset 0
+	vec4 specular;			// align 16,	size 16,	offset 16
+	bool hasDiffuseMap;		// align 4,		size 4,		offset 20
+	bool hasSpecularMap;	// align 4,		size 4,		offset 24
+	bool hasNormalMap;		// align 4,		size 4,		offset 28
+} material;
 
 
-uniform sampler2D diff_map;
-uniform sampler2D spec_map;
-uniform sampler2D glos_map;
+uniform sampler2D diffuseMap;
+uniform sampler2D specularMap;
+uniform sampler2D normalMap;
 
-out vec3 f_colour;
+out vec4 f_colour;
 
 void main() {
-	vec3  diff = has_diff_map ? texture(diff_map, v_uv).xyz : diff_colour;
-	float spec = has_spec_map ? texture(spec_map, v_uv).x   : spec_colour;
-	float glos = has_glos_map ? texture(glos_map, v_uv).x   : glos_colour;
+	vec4 diffuse = material.hasDiffuseMap ? texture(diffuseMap, fragment_in.texcoord) : material.diffuse;
+	vec4 specular = material.hasSpecularMap ? texture(specularMap, fragment_in.texcoord) : material.specular;
+	vec3 normal = material.hasNormalMap ? texture(normalMap, fragment_in.texcoord).rgb : vec3(0, 0, 1);
 	
-	f_colour = diff;
+	f_colour = diffuse;
 };

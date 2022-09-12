@@ -1,5 +1,7 @@
 #include "RenderSystem.h"
 #include "../Components/Mesh.h"
+#include <glew.h>
+#include <glfw3.h>
 
 template<VertAttrib attrib>
 static void attachVBO(entt::registry& reg, entt::entity e) {
@@ -72,7 +74,13 @@ void RenderSystem::render()
 		if (auto transform = try_get<Transform>(entity))
 			m_program.setUniformMat4("MVP", proj * view * transform->getWorldMatrix());
 
-		material.bind();
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, material.handle);
+		for (auto [slot, texture] : material.m_textures)
+		{
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, texture.handle);
+		}
+
 		vao.draw();
 	}
 }

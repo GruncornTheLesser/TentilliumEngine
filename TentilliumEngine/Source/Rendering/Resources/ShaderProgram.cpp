@@ -14,7 +14,7 @@ unsigned int ShaderProgram::createProgram(unsigned int vertex, unsigned int geom
 	if (vertex)		glAttachShader(m_program, vertex);
 	if (geometry)	glAttachShader(m_program, geometry);
 	if (fragment)	glAttachShader(m_program, fragment);
-	
+
 	int infoLen;
 	int status;
 
@@ -72,14 +72,14 @@ ShaderProgram::ShaderProgram(std::string filepath)
 		std::string fileExt = fp.substr(p2, fp.length() - p2);
 
 		if (dirName == fileName) {
-			if		(fileExt == ".frag")
-				m_fragment =	FragmentShader::load(file.path().string().c_str());
+			if (fileExt == ".frag")
+				m_fragment = FragmentShader::load(file.path().string().c_str());
 			else if (fileExt == ".geom")
-				m_geometry =	GeometryShader::load(file.path().string().c_str());
+				m_geometry = GeometryShader::load(file.path().string().c_str());
 			else if (fileExt == ".vert")
-				m_vertex =		VertexShader::load(file.path().string().c_str());
+				m_vertex = VertexShader::load(file.path().string().c_str());
 			else if (fileExt == ".comp")
-				m_compute =		ComputeShader::load(file.path().string().c_str());
+				m_compute = ComputeShader::load(file.path().string().c_str());
 		}
 	}
 
@@ -105,7 +105,7 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram&& other) {
 	return *this;
 }
 
-void ShaderProgram::bind() const 
+void ShaderProgram::bind() const
 {
 	glUseProgram(m_program);
 }
@@ -179,7 +179,7 @@ unsigned int ShaderProgram::getUniformLocation(std::string uniform_name) const
 		return m_uniform_cache[uniform_name];
 
 	location = glGetUniformLocation(m_program, uniform_name.c_str());
-	if (location == -1) 
+	if (location == -1)
 		std::cerr << "Warning uniform '" << uniform_name << "' doesnt exist." << std::endl;
 
 	m_uniform_cache[uniform_name] = location;
@@ -193,7 +193,7 @@ unsigned int ShaderProgram::getUniformBlockLocation(std::string block_name) cons
 		return m_uniform_cache[block_name];
 
 	location = glGetUniformBlockIndex(m_program, block_name.c_str());
-	if (location == -1) 
+	if (location == -1)
 		std::cerr << "Warning uniform block '" << block_name << "' doesnt exist." << std::endl;
 
 	m_block_cache[block_name] = location;

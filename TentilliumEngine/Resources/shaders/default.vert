@@ -6,12 +6,14 @@ layout(location = 2) in vec2 texCoord;
 
 uniform mat4 MVP;
 
-out vec2 v_uv;
-out vec3 v_normal;
-out vec4 v_colour;
+out VERTEX_OUT {
+	vec3 position;
+	vec2 texcoord;
+	vec3 normal;
+} vertex_out;
 
 void main() {
 	gl_Position = MVP * vec4(position, 1);
-	v_uv = texCoord;
-	v_normal = normal;
+	vertex_out.texcoord = texCoord;
+	vertex_out.normal = normal;
 };

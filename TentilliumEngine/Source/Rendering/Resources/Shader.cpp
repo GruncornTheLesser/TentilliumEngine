@@ -12,9 +12,7 @@ Shader<type>::~Shader()
 	if (destroy(m_handle))
 		glDeleteShader(m_handle);
 }
-template<ShaderType type>
-Shader<type>::Shader(unsigned int handle) : m_handle(handle)
-{ }
+
 template<ShaderType type>
 Shader<type>::Shader(const Shader<type>& other)
 {
@@ -42,7 +40,7 @@ template<ShaderType type>
 Shader<type>::Shader(std::string filepath)
 {
 	std::string data;
-	
+
 	std::ifstream fs(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 	const int m_size = fs.tellg();	// get size
 	fs.seekg(0, std::ios::beg);		// put cursor to beginning
@@ -66,7 +64,7 @@ Shader<type>::Shader(std::string filepath)
 
 	// compile shader
 	glCompileShader(m_handle);
-	
+
 	// verify shader status
 	int status, infoLen;
 	glGetShaderiv(m_handle, GL_COMPILE_STATUS, &status);
@@ -76,7 +74,7 @@ Shader<type>::Shader(std::string filepath)
 		char* message = (char*)alloca(infoLen * sizeof(char));
 		glGetShaderInfoLog(m_handle, infoLen, &infoLen, message);
 
-		std::cerr << "[Shader Error] - Shader '" << filepath <<"' failed to compile: " << message << std::endl;
+		std::cerr << "[Shader Error] - Shader '" << filepath << "' failed to compile: " << message << std::endl;
 		throw std::exception();
 	}
 

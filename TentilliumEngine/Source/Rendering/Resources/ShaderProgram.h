@@ -1,17 +1,19 @@
 #pragma once
-#include "Shader.h"
 #include "Resource.h"
+#include "Shader.h"
+#include "Texture.h"
+
 #include <glm.hpp>
 #include <unordered_map>
 
 class ShaderProgram final {
 private:
 	unsigned int m_program;
-	Shader<ShaderType::COMP> m_compute{0};
-	Shader<ShaderType::VERT> m_vertex{0};
-	Shader<ShaderType::GEOM> m_geometry{0};
-	Shader<ShaderType::FRAG> m_fragment{0};
-	
+	Shader<ShaderType::COMP> m_compute{ 0 };
+	Shader<ShaderType::VERT> m_vertex{ 0 };
+	Shader<ShaderType::GEOM> m_geometry{ 0 };
+	Shader<ShaderType::FRAG> m_fragment{ 0 };
+
 	mutable std::unordered_map<std::string, unsigned int> m_uniform_cache;	// uniform locations
 	mutable std::unordered_map<std::string, unsigned int> m_block_cache;	// uniform block locations
 

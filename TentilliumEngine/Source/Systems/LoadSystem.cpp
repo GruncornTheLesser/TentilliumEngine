@@ -69,11 +69,11 @@
 entt::entity LoadSystem::load(std::string filepath)
 {
 	Assimp::Importer importer;
-	
-	const aiScene* scene = importer.ReadFile(filepath, 
-		aiProcess_Triangulate | 
-		aiProcess_FlipUVs | 
-		aiProcess_GlobalScale | 
+
+	const aiScene* scene = importer.ReadFile(filepath,
+		aiProcess_Triangulate |
+		aiProcess_FlipUVs |
+		aiProcess_GlobalScale |
 		aiProcess_EmbedTextures |
 		aiProcess_OptimizeGraph | // doesnt do enough
 		aiProcess_OptimizeMeshes |
@@ -94,10 +94,10 @@ entt::entity LoadSystem::load(std::string filepath)
 				texPtr[i]->pcData, texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA));
 		}
 	}
-	
+
 	entt::entity e = create();
 
-	if (scene->HasMeshes()) 
+	if (scene->HasMeshes())
 	{
 		// get size needed for buffers
 		unsigned int vertexCount = 0, faceCount = 0;
@@ -111,10 +111,10 @@ entt::entity LoadSystem::load(std::string filepath)
 		{
 			auto aiMeshPtr = scene->mMeshes[mesh_i];
 
-			if (aiMeshPtr->HasFaces()) 
+			if (aiMeshPtr->HasFaces())
 			{
 				std::vector<unsigned int> indices;
-				for (unsigned int face_i = 0; face_i < aiMeshPtr->mNumFaces; face_i++) 
+				for (unsigned int face_i = 0; face_i < aiMeshPtr->mNumFaces; face_i++)
 				{
 					auto& face = aiMeshPtr->mFaces[face_i];
 					for (unsigned int index_i = 0; index_i < face.mNumIndices; index_i++)
@@ -160,19 +160,17 @@ entt::entity LoadSystem::load(std::string filepath)
 		aiString texture;
 
 		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
-			mat.set_diff(Texture::get(texture.C_Str()));
+			mat.set_diffuse(Texture::get(texture.C_Str()));
 		else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
-			mat.set_diff(glm::vec3(colour.r, colour.g, colour.b));
+			mat.set_diffuse(glm::vec4(colour.r, colour.g, colour.b, 1));
 
 		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
-			mat.set_spec(Texture::get(texture.C_Str()));
+			mat.set_specular(Texture::get(texture.C_Str()));
 		else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
-			mat.set_spec(colour.r);
+			mat.set_specular(glm::vec4(colour.r, colour.g, colour.b, 1));
 
-		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
-			mat.set_glos(Texture::get(texture.C_Str()));
-		else if (aiMatPtr->Get(AI_MATKEY_SHININESS, colour) == AI_SUCCESS)
-			mat.set_glos(colour.r);
+		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
+			mat.set_normal(Texture::get(texture.C_Str()));
 
 	}
 
@@ -184,46 +182,39 @@ entt::entity LoadSystem::load(std::string filepath)
 		// get next node
 		aiNode* node = sceneStack.front();
 		sceneStack.pop();
-
 		std::cout << node->mName.C_Str() << " ";
-
 		// create entity
 		entt::entity e = create();
 		entt_lookup.emplace(node, e);
-
 		// enqueue children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 			sceneStack.push(node->mChildren[i]);
-		
+
 		// hierarchy component
 		if (node->mParent) {
 			emplace<Hierarchy>(e, entt_lookup[node->mParent]);
 			std::cout << "hierarchy, ";
 		}
-
 		// transform component -> if it has no transform it can more than likely be used as a component container
 		auto transform = (aiMatrix4x4t<float>)(node->mTransformation);
 		emplace<Transform>(e, *(glm::mat4*)&transform);
-
 		// model mesh, material, texture components
 		// combine all meshes in this entity into 1 mesh
 		if (node->mNumMeshes > 0)
 		{
 			std::cout << "mesh, ";
-
 			// get size needed for buffers
 			unsigned int vertexCount = 0, faceCount = 0;
 			for (unsigned int mesh_i = 0; mesh_i < node->mNumMeshes; mesh_i++) {
 				vertexCount += scene->mMeshes[node->mMeshes[mesh_i]]->mNumVertices;
 				faceCount += scene->mMeshes[node->mMeshes[mesh_i]]->mNumFaces;
 			}
-
 			// iterate through meshes and add to buffers
 			unsigned int vertexOffset = 0, faceOffset = 0, boneOffset = 0;
 			for (unsigned int mesh_i = 0; mesh_i < node->mNumMeshes; mesh_i++)
 			{
 				auto aiMeshPtr = scene->mMeshes[node->mMeshes[mesh_i]];
-				
+
 				if (aiMeshPtr->HasFaces()) {
 					std::vector<unsigned int> indices;
 					for (unsigned int face_i = 0; face_i < aiMeshPtr->mNumFaces; face_i++) {
@@ -234,17 +225,14 @@ entt::entity LoadSystem::load(std::string filepath)
 					get_or_emplace<VBO<Index>>(e, nullptr, sizeof(int) * faceCount * 3)
 						.set_data(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
 				}
-
 				if (aiMeshPtr->HasPositions()) {
 					get_or_emplace<VBO<Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
 						.set_data(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 				}
-
 				if (aiMeshPtr->HasNormals()) {
 					get_or_emplace<VBO<Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
 						.set_data(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 				}
-
 				if (aiMeshPtr->HasTextureCoords(0)) {
 					std::vector<float> texCoords;
 					for (unsigned int uv_i = 0; uv_i < aiMeshPtr->mNumVertices; uv_i++) {
@@ -254,46 +242,37 @@ entt::entity LoadSystem::load(std::string filepath)
 					get_or_emplace<VBO<TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
 						.set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
 				}
-				
+
 				// TODO: bones
 				if (aiMeshPtr->HasBones()) { }
-
 				vertexOffset += aiMeshPtr->mNumVertices;
 				faceOffset += aiMeshPtr->mNumFaces;
 			}
-			
+
 			// TODO: materials???
 			// currently only does the first material and doesnt store it
-
 			auto aiMatPtr = scene->mMaterials[scene->mMeshes[node->mMeshes[0]]->mMaterialIndex];
-			
-			auto& mat = emplace<SpecularMaterial>(e);
 
+			auto& mat = emplace<SpecularMaterial>(e);
 			aiColor3D colour;
 			aiString texture;
-
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
 				mat.set_diff(Texture::get(texture.C_Str()));
 			else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
 				mat.set_diff(glm::vec3(colour.r, colour.g, colour.b));
-
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
 				mat.set_spec(Texture::get(texture.C_Str()));
 			else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
 				mat.set_spec(colour.r);
-
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
 				mat.set_glos(Texture::get(texture.C_Str()));
 			else if (aiMatPtr->Get(AI_MATKEY_SHININESS, colour) == AI_SUCCESS)
 				mat.set_glos(colour.r);
 		}
-
 		std::cout << std::endl;
-
 	} while (!sceneStack.empty());
-
 	*/
-	
+
 	// removes the first node 
 	//destroy(entt_lookup[scene->mRootNode]);
 	//entt_lookup.erase(scene->mRootNode);
@@ -305,21 +284,17 @@ entt::entity LoadSystem::load(std::string filepath)
 
 
 /*
-
 std::shared_ptr<Mesh> loadMesh(aiMesh* aiMeshPtr, std::string filename)
 {
 	if (auto mesh = Mesh::get(filename))
 		return mesh;
-
 	size_t index_size = aiMeshPtr->mNumFaces * 3;
 	size_t vertex_size = aiMeshPtr->mNumVertices;
-
 	unsigned int* index_data	= new unsigned int[index_size];
 	float* position_data		= nullptr;
 	float* tCoord_data			= nullptr;
 	float* normal_data			= nullptr;
 	float* colour_data			= nullptr;
-
 	if (index_data) {
 		for (unsigned int i = 0; i < aiMeshPtr->mNumFaces; i++)
 		{
@@ -328,11 +303,9 @@ std::shared_ptr<Mesh> loadMesh(aiMesh* aiMeshPtr, std::string filename)
 			index_data[i * 3 + 2] = aiMeshPtr->mFaces[i].mIndices[2];
 		}
 	}
-
 	if (aiMeshPtr->HasPositions()) {
 		position_data = (float*)aiMeshPtr->mVertices;
 	}
-
 	if (aiMeshPtr->HasTextureCoords(0))
 	{	// texels are annoying becuase there are 3 of them in assimp specification
 		tCoord_data = new float[aiMeshPtr->mNumVertices * 2u];
@@ -342,11 +315,9 @@ std::shared_ptr<Mesh> loadMesh(aiMesh* aiMeshPtr, std::string filename)
 			tCoord_data[i * 2 + 1] = aiMeshPtr->mTextureCoords[0][i].y;
 		}
 	}
-
 	if (aiMeshPtr->HasNormals()) {
 		normal_data = (float*)aiMeshPtr->mNormals;
 	}
-
 	if (aiMeshPtr->HasVertexColors(0))
 	{
 		colour_data = new float[aiMeshPtr->mNumVertices * 4u];
@@ -358,46 +329,36 @@ std::shared_ptr<Mesh> loadMesh(aiMesh* aiMeshPtr, std::string filename)
 			colour_data[i * 2 + 3] = aiMeshPtr->mColors[0][i].a;
 		}
 	}
-
 	auto mesh = Mesh::stash(filename, index_size * sizeof(unsigned int), vertex_size * sizeof(float),
 		index_data, position_data, tCoord_data, normal_data, colour_data);
-
 	// only arrays created by this function are deleted
 	// other arrays managed from elsewhere
 	if (index_data) delete[] index_data;
 	if (tCoord_data) delete[] tCoord_data;
 	if (colour_data) delete[] colour_data;
-
 	return mesh;
 }
 */
 
 /*
 std::shared_ptr<Material> loadMaterial(aiMaterial* aiMatPtr, std::string filename) {
-
 	if (auto mat = Material::get(filename))
 		return mat;
-
 	Material mat = Material();
-
 	aiColor3D colour;
 	aiString texture;
-
 	if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
 		mat.Diffuse_map = Texture::get(texture.C_Str());
 	else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
 		mat.Diffuse_val = glm::vec3(colour.r, colour.g, colour.b);
-
 	if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
 		mat.Specular_map = Texture::get(texture.C_Str());
 	else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
 		mat.Specular_val = colour.r;
-
 	if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
 		mat.Gloss_map = Texture::get(texture.C_Str());
 	else if (aiMatPtr->Get(AI_MATKEY_SHININESS, colour) == AI_SUCCESS)
 		mat.Gloss_val = colour.r;
-
 	return Material::stash(filename, std::move(mat));
 }
 */
@@ -408,13 +369,11 @@ entt::entity Scene::load(std::string filepath)
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs
 		| aiProcess_GlobalScale | aiProcess_EmbedTextures);
-
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cerr << "[Loading Error] : " << importer.GetErrorString() << std::endl;
 		throw std::exception();
 	}
-
 	// array of embedded textures
 	std::vector<std::shared_ptr<Texture>> textures;
 	if (scene->HasTextures()) {
@@ -424,7 +383,6 @@ entt::entity Scene::load(std::string filepath)
 				texPtr[i]->mWidth, texPtr[i]->mHeight, NULL, texPtr[i]->pcData, Texture::Format::RGBA));
 		}
 	}
-
 	std::map<aiNode*, entt::entity> entt_lookup;
 	std::queue<aiNode*> sceneStack;
 	sceneStack.push(scene->mRootNode);
@@ -432,50 +390,35 @@ entt::entity Scene::load(std::string filepath)
 		// get next node
 		aiNode* node = sceneStack.front();
 		sceneStack.pop();
-
 		// create entity
 		entt::entity e = create();
 		entt_lookup.emplace(node, e);
-
 		// queue children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 			sceneStack.push(node->mChildren[i]);
-
 		// hierarchy component
 		if (node->mParent) {
 			auto x = entt_lookup[node->mParent];
 			emplace<Hierarchy>(e, x);
 		}
-
 		// transform component
 		auto transform = (aiMatrix4x4t<float>)(node->mTransformation);
 		emplace<Transform>(e, *(glm::mat4*)&transform);
-
 		// model mesh,material,texture components
-
 		if (node->mNumMeshes > 0)
 		{
-
 			auto& model = emplace<Model>(e);
-
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
 			{
 				auto aiMeshPtr = scene->mMeshes[node->mMeshes[i]];
 				auto aiMatPtr = scene->mMaterials[aiMeshPtr->mMaterialIndex];
-
 				model.add(
 					loadMesh(aiMeshPtr, MESH_FILENAME(filepath, node, aiMeshPtr)),
 					loadMaterial(aiMatPtr, MAT_FILENAME(filepath, node, aiMatPtr)));
 			}
-
 		}
-
 	} while (!sceneStack.empty());
-
-
 	// if (scene->HasAnimations()) emplace<AnimationHandler>(entt_lookup[scene->mRootNode], scene->mAnimations, scene->mNumAnimations);
-
-
 	return entt_lookup[scene->mRootNode]; // return scene root
 }
 */

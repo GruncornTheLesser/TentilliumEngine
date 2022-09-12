@@ -10,13 +10,13 @@
 // shader
 
 template<class T>
-class Resource 
+class Resource
 {
 private:
 	inline static std::map<std::string, unsigned int> m_file_cache;
 	inline static std::map<unsigned int, unsigned int> m_ref_count;
 
-protected:
+public:
 	/* use in constructors, reports new instance of handle */
 	static void create(unsigned int handle) {
 		if (handle == 0)
@@ -28,14 +28,14 @@ protected:
 		else
 			m_ref_count.emplace(std::pair(handle, 1));
 	}
-	
+
 	/* use in destructor, returns true if all copies of handle destroyed */
 	static bool destroy(unsigned int handle) {
 		if (handle == 0)
 			return false;
 
 		auto it = m_ref_count.find(handle);
-		
+
 		if (it == m_ref_count.end())
 			return false;
 
@@ -49,7 +49,7 @@ protected:
 
 		return false;
 	}
-	
+
 	/* returns true if ref count equals 0 */
 	static bool expired(unsigned int handle)
 	{
@@ -84,11 +84,10 @@ public:
 		m_file_cache.emplace(filepath, value.m_handle);
 		return value;
 	}
-	
+
 	/* gets value associated with 'filepath' or creates new value from filepath if none is found */
 	const static T load(std::string filepath)
 	{
 		return get_or_default(filepath, filepath);
 	}
 };
-

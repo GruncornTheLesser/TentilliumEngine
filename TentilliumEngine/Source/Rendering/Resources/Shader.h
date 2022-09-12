@@ -18,10 +18,10 @@ class Shader : public Resource<Shader<type>> {
 	using Resource<Shader<type>>::create;
 	using Resource<Shader<type>>::destroy;
 
+private:
+	Shader(unsigned int handle) : m_handle(handle) { }
 public:
-	
-
-	Shader(unsigned int handle);
+	Shader() : m_handle(0) { }
 	Shader(std::string filepath);
 	~Shader();
 
