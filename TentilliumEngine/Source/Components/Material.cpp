@@ -2,52 +2,34 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 
-void Material::set_diff(Texture texture)
+void Material::set_diffuse(Texture texture)
 {
 	m_textures.insert(std::pair(0, texture));
-	set_data(true, offsetof(UniformData, hasD));
+	set_data(true, offsetof(UniformData, hasDiffuseMap));
 }
 
-void Material::set_diff(glm::vec3 value)
+void Material::set_diffuse(glm::vec4 value)
 {
 	m_textures.erase(0);
-	set_data(value, offsetof(UniformData, diff));
-	set_data(false, offsetof(UniformData, hasD));
+	set_data(value, offsetof(UniformData, diffuse));
+	set_data(false, offsetof(UniformData, hasDiffuseMap));
 }
 
-void Material::set_spec(Texture texture)
+void Material::set_specular(Texture texture)
 {
 	m_textures.insert(std::pair(1, texture));
-	set_data(false, offsetof(UniformData, hasS));
+	set_data(false, offsetof(UniformData, hasSpecularMap));
 }
 
-void Material::set_spec(float value)
+void Material::set_specular(glm::vec4 value)
 {
 	m_textures.erase(1);
-	set_data(value, offsetof(UniformData, spec));
-	set_data(false, offsetof(UniformData, hasS));
+	set_data(value, offsetof(UniformData, specular));
+	set_data(false, offsetof(UniformData, hasSpecularMap));
 }
 
-void Material::set_glos(Texture texture)
+void Material::set_normal(Texture texture)
 {
 	m_textures.insert(std::pair(2, texture));
-	set_data(false, offsetof(UniformData, hasG));
-}
-
-void Material::set_glos(float value)
-{
-	m_textures.erase(2);
-	set_data(value, offsetof(UniformData, glos));
-	set_data(false, offsetof(UniformData, hasG));
-}
-
-void Material::bind()
-{
-	GLbuffer::bind_uniform_slot(0);
-	
-	for (auto [slot, texture] : m_textures)
-	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, texture.m_handle);
-	}
+	set_data(false, offsetof(UniformData, hasNormalMap));
 }

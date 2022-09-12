@@ -83,6 +83,9 @@
     <ClCompile Include="Source\Components\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\default.frag">
@@ -100,6 +103,10 @@
     <None Include="Resources\shaders\light_accumul.vert" />
     <None Include="Resources\shaders\light_culling.comp" />
     <None Include="Resources\shaders\light_accumul.frag" />
+    <None Include="Resources\shaders\cluster_prepass.comp" />
+    <None Include="Resources\shaders\cluster_culling.comp" />
+    <None Include="Resources\shaders\cluster_shading.frag" />
+    <None Include="Resources\shaders\cluster_shading.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
@@ -142,6 +149,8 @@
     <ClInclude Include="Source\Systems\RenderSystem.h" />
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
+    <ClInclude Include="Source\Rendering\Resources\Framebuffer.h" />
+    <ClInclude Include="Source\Components\PointLight.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

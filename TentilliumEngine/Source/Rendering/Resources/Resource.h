@@ -16,7 +16,7 @@ private:
 	inline static std::map<std::string, unsigned int> m_file_cache;
 	inline static std::map<unsigned int, unsigned int> m_ref_count;
 
-protected:
+public:
 	/* use in constructors, reports new instance of handle */
 	static void create(unsigned int handle) {
 		if (handle == 0)

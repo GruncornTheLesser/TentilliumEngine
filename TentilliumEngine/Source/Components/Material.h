@@ -7,49 +7,37 @@
 
 
 template <typename T>
-concept diffuse = std::is_same_v<T, Texture> || std::is_same_v<T, glm::vec3>;
-
-template <typename T>
-concept specular = std::is_same_v<T, Texture> || std::is_same_v<T, float>;
-
-template <typename T>
-concept gloss = std::is_same_v<T, Texture> || std::is_same_v<T, float>;
+concept Map = std::is_same_v<T, Texture> || std::is_same_v<T, glm::vec4>;
 
 class Material final : protected GLbuffer {
-	friend class MaterialSystem;
+	friend class RenderSystem;
 private:
 	struct UniformData {
-		glm::vec3		diff;
-		unsigned int	hasD;
-		float			spec;
-		unsigned int	hasS;
-		float			glos;
-		unsigned int	hasG;
+		glm::vec4		diffuse;
+		glm::vec4		specular;
+		bool			hasDiffuseMap;
+		bool			hasSpecularMap;
+		bool			hasNormalMap;
 	};
-
 
 	std::unordered_map<unsigned int, Texture> m_textures;
 
 public:
 	Material() : GLbuffer(nullptr, sizeof(UniformData))
 	{ }
-	template<diffuse diff_t, specular spec_t, gloss glos_t>
-	Material(diff_t diff, spec_t spec, glos_t glos)
+	template<Map diff_t, Map spec_t>
+	Material(diff_t diff, spec_t spec)
 		: GLbuffer(nullptr, sizeof(UniformData))
 	{
-		set_diff(diff);
-		set_spec(spec);
-		set_glos(glos);
+		set_diffuse(diff);
+		set_specular(spec);
 	}
 
-	void set_diff(Texture texture);
-	void set_diff(glm::vec3 value);
+	void set_diffuse(Texture texture);
+	void set_diffuse(glm::vec4 value);
 
-	void set_spec(Texture texture);
-	void set_spec(float value);
+	void set_specular(Texture texture);
+	void set_specular(glm::vec4 value);
 
-	void set_glos(Texture texture);
-	void set_glos(float value);
-
-	void bind();
+	void set_normal(Texture texture);
 };

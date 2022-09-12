@@ -160,19 +160,17 @@ entt::entity LoadSystem::load(std::string filepath)
 		aiString texture;
 
 		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
-			mat.set_diff(Texture::get(texture.C_Str()));
+			mat.set_diffuse(Texture::get(texture.C_Str()));
 		else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
-			mat.set_diff(glm::vec3(colour.r, colour.g, colour.b));
+			mat.set_diffuse(glm::vec4(colour.r, colour.g, colour.b, 1));
 
 		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
-			mat.set_spec(Texture::get(texture.C_Str()));
+			mat.set_specular(Texture::get(texture.C_Str()));
 		else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
-			mat.set_spec(colour.r);
+			mat.set_specular(glm::vec4(colour.r, colour.g, colour.b, 1));
 
-		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
-			mat.set_glos(Texture::get(texture.C_Str()));
-		else if (aiMatPtr->Get(AI_MATKEY_SHININESS, colour) == AI_SUCCESS)
-			mat.set_glos(colour.r);
+		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
+			mat.set_normal(Texture::get(texture.C_Str()));
 
 	}
 

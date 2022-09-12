@@ -30,7 +30,6 @@ public:
 	using RenderSystem::camera;
 	
 	using LoadSystem::load;
-	
 
 	void process() {
 		HierarchySystem::update();

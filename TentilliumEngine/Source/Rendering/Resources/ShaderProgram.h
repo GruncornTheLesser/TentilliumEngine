@@ -1,6 +1,8 @@
 #pragma once
-#include "Shader.h"
 #include "Resource.h"
+#include "Shader.h"
+#include "Texture.h"
+
 #include <glm.hpp>
 #include <unordered_map>
 

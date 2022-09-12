@@ -68,11 +68,6 @@ unsigned int generateTexture(void* data, int width, int height, Texture::Format 
 	return m_handle;
 }
 
-Texture::Texture(unsigned int handle) : m_handle(handle) 
-{ 
-	create(m_handle);
-}
-
 Texture::Texture(std::string filepath)
 {
 	int width, height, data_format;

@@ -9,10 +9,11 @@ class Texture : public Resource<Texture>
 {
 	friend class Material;
 	friend class Resource<Texture>;
+	friend class Framebuffer;
 public:
 	enum class Filter { NEAREST, LINEAR };
 	enum class Wrap { CLAMP_EDGE, REPEAT, MIRRORED_REPEAT };
-	enum class Format { NONE, R, RG, RGB, RGBA, DEPTH };
+	enum class Format { NONE, R, RG, RGB, RGBA, DEPTH, STENCIL };
 	enum class Type { NONE, UNSIGNED_INT, UNSIGNED_BYTE, FLOAT };
 
 	__declspec(property (get=getHandle)) unsigned int handle;
@@ -23,17 +24,17 @@ public:
 
 private:
 	unsigned int m_handle;
-
-	Texture(unsigned int handle);
+	Texture(unsigned int handle) : m_handle(handle) { };
 public:
+	Texture() : m_handle(0) { }
 	Texture(std::string filepath);
 	
 	Texture(void* data, int width, int height = 0, Format channels = Format::NONE, Format format_hint = Format::NONE, Type type_hint = Type::NONE); // defaults to unsigned byte
 
 	~Texture();
 
-	Texture(Texture const& other);
-	Texture& operator=(Texture const& other);
+	Texture(const Texture& other);
+	Texture& operator=(const Texture& other);
 
 	int getWidth() const;
 	int getHeight() const;

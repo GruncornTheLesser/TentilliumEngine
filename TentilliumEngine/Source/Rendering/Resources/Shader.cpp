@@ -12,9 +12,7 @@ Shader<type>::~Shader()
 	if (destroy(m_handle))
 		glDeleteShader(m_handle);
 }
-template<ShaderType type>
-Shader<type>::Shader(unsigned int handle) : m_handle(handle)
-{ }
+
 template<ShaderType type>
 Shader<type>::Shader(const Shader<type>& other)
 {
