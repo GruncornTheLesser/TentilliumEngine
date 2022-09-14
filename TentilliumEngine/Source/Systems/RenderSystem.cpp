@@ -6,7 +6,7 @@
 
 #define CLUSTER_MAX_LIGHT 256
 #define LIGHTS_CHUNK_SIZE 256
-#define CALC_WORKGROUPS_N(size) (int)std::sqrtf(144 * size.x / size.y), (int)std::sqrtf(144 * size.y / size.x), 24
+#define CALC_WORKGROUPS_N(size) (int)std::sqrtf(144.0f * size.x / size.y), (int)std::sqrtf(144.0f * size.y / size.x), 24
 
 /* TODO:
 * > Light Chunk Management
@@ -83,12 +83,11 @@ RenderSystem::RenderSystem(glm::ivec2 size) :
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_ptLightBuffer.handle);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_visibleBuffer.handle);
 
+	// testing
 	glBindVertexArray(m_line_vao.handle);
 	glBindBuffer(GL_ARRAY_BUFFER, m_clusterBuffer.handle);
-
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
-
 	glBindVertexArray(NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, NULL);
 }
@@ -131,8 +130,8 @@ void RenderSystem::setCamera(entt::entity e)
 	m_ScreenBuffer.set_data(&data, sizeof(ScreenData) - sizeof(glm::uvec2), 0);
 
 	m_prepass.bind();
-	glDispatchCompute(m_workGroups.x, m_workGroups.y, m_workGroups.z);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	m_prepass.dispatch(m_workGroups);
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 entt::entity RenderSystem::getCamera()

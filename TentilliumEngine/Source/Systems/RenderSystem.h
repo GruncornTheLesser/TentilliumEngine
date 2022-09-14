@@ -37,13 +37,13 @@ private:
 	GLbuffer m_ptLightBuffer; // 2
 	GLbuffer m_visibleBuffer; // 3
 	
-	ShaderProgram m_prepass{ "Resources/shaders/cluster_prepass.comp" };
-	ShaderProgram m_culling{ "Resources/shaders/cluster_culling.comp" };
-	ShaderProgram m_shading{ "Resources/shaders/cluster_shading.shader" };
+	ShaderProgram<COMP> m_prepass{ "Resources/shaders/cluster_prepass.comp" };
+	ShaderProgram<COMP> m_culling{ "Resources/shaders/cluster_culling.comp" };
+	ShaderProgram<VERT, FRAG> m_shading{ "Resources/shaders/cluster_shading.shader" };
 
-	ShaderProgram m_program{ "Resources/shaders/default.shader" };
+	ShaderProgram<VERT, FRAG> m_program{ "Resources/shaders/default.shader" };
 
-	ShaderProgram m_line_program{ "Resources/shaders/debug_line.shader" };
+	ShaderProgram<VERT, FRAG> m_line_program{ "Resources/shaders/debug_line.shader" };
 	
 	VAO m_line_vao;
 };

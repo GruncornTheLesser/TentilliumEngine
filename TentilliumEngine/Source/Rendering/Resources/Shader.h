@@ -4,7 +4,7 @@
 
 
 // this shouldnt be public it should be completely internal
-enum class ShaderType : int {
+enum ShaderType : int {
 	FRAG = 0x8b31,
 	GEOM = 0x8dd9,
 	VERT = 0x8b30,
@@ -13,26 +13,26 @@ enum class ShaderType : int {
 
 template<ShaderType type>
 class Shader : public Resource<Shader<type>> {
-	friend class ShaderProgram;
 	friend class Resource<Shader<type>>;
-	using Resource<Shader<type>>::create;
-	using Resource<Shader<type>>::destroy;
-
-private:
-	Shader(unsigned int handle) : m_handle(handle) { }
 public:
-	Shader() : m_handle(0) { }
+	__declspec(property(get = get_handle)) unsigned int handle;
+
 	Shader(std::string filepath);
 	~Shader();
 
 	Shader(const Shader&);
 	Shader& operator=(const Shader&);
 
+	unsigned int get_handle() { return m_handle; }
+
 protected:
 	unsigned int m_handle;
+private:
+	Shader(unsigned int handle) : m_handle(handle) { }
+
 };
 
-using FragmentShader = Shader<ShaderType::FRAG>;
-using GeometryShader = Shader<ShaderType::GEOM>;
-using VertexShader = Shader<ShaderType::VERT>;
-using ComputeShader = Shader<ShaderType::COMP>;
+using FragmentShader = Shader<FRAG>;
+using VertexShader = Shader<VERT>;
+using ComputeShader = Shader<COMP>;
+using GeometryShader = Shader<GEOM>;

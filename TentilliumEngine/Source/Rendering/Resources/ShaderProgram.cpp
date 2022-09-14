@@ -5,174 +5,167 @@
 #include <gtc/type_ptr.hpp>
 #include <filesystem>
 
-unsigned int ShaderProgram::createProgram(unsigned int vertex, unsigned int geometry, unsigned int fragment, unsigned int compute) {
+template<ShaderType ...Ts>
+ShaderProgram<Ts...>::ShaderProgram(std::string filepath) : Shader<Ts>(filepath)..., m_program(genProgram()) { }
 
-	m_program = glCreateProgram();
 
-	// if shader in program, attach it
-	if (compute)	glAttachShader(m_program, compute);
-	if (vertex)		glAttachShader(m_program, vertex);
-	if (geometry)	glAttachShader(m_program, geometry);
-	if (fragment)	glAttachShader(m_program, fragment);
+template<ShaderType ...Ts>
+ShaderProgram<Ts...>::ShaderProgram(Shader<Ts> ... shaders) : Shader<Ts>(shaders)..., m_program(genProgram()) { }
+
+template<ShaderType ... Ts>
+ShaderProgram<Ts...>::~ShaderProgram()
+{
+	glDeleteProgram(m_program);
+}
+
+template<ShaderType ... Ts>
+ShaderProgram<Ts...>::ShaderProgram(ShaderProgram&& other) : Shader<Ts>(other)...
+{
+	this->m_program = other.m_program;
+	other.m_program = 0;
+}
+
+template<ShaderType ... Ts>
+ShaderProgram<Ts...>& ShaderProgram<Ts...>::operator=(ShaderProgram <Ts...>&& other) {
+	if (this == &other)
+		return *this; // call copy constructor
+
+	glDeleteProgram(this->m_program);
+
+	this->m_program = other.m_program;
+	other.m_program = 0;
+	this->m_uniform_cache.clear();
+
+	return *this;
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::bind() const
+{
+	glUseProgram(m_program);
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform1i(std::string uniform_name, int v) const
+{
+	glProgramUniform1i(m_program, getUniformLocation(uniform_name), v);
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform1f(std::string uniform_name, float v) const
+{
+	glProgramUniform1f(m_program, getUniformLocation(uniform_name), v);
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform2i(std::string uniform_name, const glm::ivec2& value) const
+{
+	glProgramUniform2iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform2f(std::string uniform_name, const glm::vec2& value) const
+{
+	glProgramUniform2fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform3i(std::string uniform_name, const glm::ivec3& value) const
+{
+	glProgramUniform3iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform3f(std::string uniform_name, const glm::vec3& value) const
+{
+	glProgramUniform3fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform4i(std::string uniform_name, const glm::ivec4& value) const
+{
+	glProgramUniform4iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniform4f(std::string uniform_name, const glm::vec4& value) const
+{
+	glProgramUniform4fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniformMat2(std::string uniform_name, const glm::mat2& value) const
+{
+	glProgramUniformMatrix2fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniformMat3(std::string uniform_name, const glm::mat3& value) const
+{
+	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniformMat4(std::string uniform_name, const glm::mat4& value) const
+{
+	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
+}
+
+template<ShaderType ... Ts>
+void ShaderProgram<Ts...>::setUniformBlock(std::string block_name, unsigned int Binding) const
+{
+	glUniformBlockBinding(m_program, getUniformBlockLocation(block_name), Binding);
+}
+
+template<ShaderType ...Ts>
+void ShaderProgram<Ts...>::dispatch(glm::uvec3 workGroups) 
+	requires is_ComputeProgram<Ts...>
+{
+	bind();
+	glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
+}
+
+template<ShaderType ... Ts>
+unsigned int ShaderProgram<Ts...>::genProgram()
+{
+	unsigned int program = glCreateProgram();
+
+	(glAttachShader(program, Shader<Ts>::get_handle()), ...);
 
 	int infoLen;
 	int status;
 
-	glLinkProgram(m_program);
+	glLinkProgram(program);
 
-	glGetProgramiv(m_program, GL_LINK_STATUS, &status);
+	glGetProgramiv(program, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetProgramInfoLog(m_program, infoLen, NULL, message);
+		glGetProgramInfoLog(program, infoLen, NULL, message);
 
 		std::cerr << "Failed to link program.\nErrorLog: '" << message << "'" << std::endl;
 		throw std::exception();
 	}
 
-	glValidateProgram(m_program);
+	glValidateProgram(program);
 
-	glGetProgramiv(m_program, GL_VALIDATE_STATUS, &status);
+	glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetProgramInfoLog(m_program, infoLen, NULL, message);
+		glGetProgramInfoLog(program, infoLen, NULL, message);
 
 		std::cerr << "Failed to validate program.\nErrorLog: '" << message << "'" << std::endl;
 		throw std::exception();
 	}
 
-	Resource<Shader<ShaderType::COMP>>::create(compute);
-
-	return m_program;
+	return program;
 }
 
-ShaderProgram::ShaderProgram(std::string filepath)
-{
-	std::string fp(filepath);
-
-	size_t p1 = fp.find_last_of("\\/");
-	size_t p2 = fp.find_last_of(".");
-
-	std::string dirPath = fp.substr(0, p1 == std::string::npos ? 0 : p1);
-	std::string dirName = fp.substr(p1 == std::string::npos ? 0 : p1 + 1, (p2 == std::string::npos ? fp.length() : (p2 - 1)) - p1);
-
-	for (const auto& file : std::filesystem::directory_iterator(dirPath)) {
-		std::string fp = file.path().string();
-
-		size_t p1 = fp.find_last_of("\\/");
-		size_t p2 = fp.find_last_of(".");
-
-		if (p1 == std::string::npos) p1 = 0; else p1 += 1;
-		if (p2 == std::string::npos) p2 = fp.length();
-
-		std::string fileName = fp.substr(p1, p2 - p1);
-		std::string fileExt = fp.substr(p2, fp.length() - p2);
-
-		if (dirName == fileName) {
-			if (fileExt == ".frag")
-				m_fragment = FragmentShader::load(file.path().string().c_str());
-			else if (fileExt == ".geom")
-				m_geometry = GeometryShader::load(file.path().string().c_str());
-			else if (fileExt == ".vert")
-				m_vertex = VertexShader::load(file.path().string().c_str());
-			else if (fileExt == ".comp")
-				m_compute = ComputeShader::load(file.path().string().c_str());
-		}
-	}
-
-	createProgram(m_vertex.m_handle, m_geometry.m_handle, m_fragment.m_handle, m_compute.m_handle);
-}
-
-ShaderProgram::~ShaderProgram()
-{
-	glDeleteProgram(m_program);
-}
-
-ShaderProgram::ShaderProgram(const ShaderProgram&& other) {
-	this->m_program = other.m_program;
-}
-
-ShaderProgram& ShaderProgram::operator=(const ShaderProgram&& other) {
-	if (this == &other)
-		return *this; // call copy constructor
-
-	glDeleteProgram(this->m_program);
-	this->m_program = other.m_program;
-	this->m_uniform_cache.clear();
-	return *this;
-}
-
-void ShaderProgram::bind() const
-{
-	glUseProgram(m_program);
-}
-
-void ShaderProgram::setUniform1i(std::string uniform_name, int v) const
-{
-	glProgramUniform1i(m_program, getUniformLocation(uniform_name), v);
-}
-
-void ShaderProgram::setUniform1f(std::string uniform_name, float v) const
-{
-	glProgramUniform1f(m_program, getUniformLocation(uniform_name), v);
-}
-
-void ShaderProgram::setUniform2i(std::string uniform_name, const glm::ivec2& value) const
-{
-	glProgramUniform2iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniform2f(std::string uniform_name, const glm::vec2& value) const
-{
-	glProgramUniform2fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniform3i(std::string uniform_name, const glm::ivec3& value) const
-{
-	glProgramUniform3iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniform3f(std::string uniform_name, const glm::vec3& value) const
-{
-	glProgramUniform3fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniform4i(std::string uniform_name, const glm::ivec4& value) const
-{
-	glProgramUniform4iv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniform4f(std::string uniform_name, const glm::vec4& value) const
-{
-	glProgramUniform4fv(m_program, getUniformLocation(uniform_name), 1, glm::value_ptr(value));
-}
-
-
-
-void ShaderProgram::setUniformMat2(std::string uniform_name, const glm::mat2& value) const
-{
-	glProgramUniformMatrix2fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniformMat3(std::string uniform_name, const glm::mat3& value) const
-{
-	glProgramUniformMatrix3fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniformMat4(std::string uniform_name, const glm::mat4& value) const
-{
-	glProgramUniformMatrix4fv(m_program, getUniformLocation(uniform_name), 1, false, glm::value_ptr(value));
-}
-
-void ShaderProgram::setUniformBlock(std::string block_name, unsigned int Binding) const
-{
-	glUniformBlockBinding(m_program, getUniformBlockLocation(block_name), Binding);
-}
-
-unsigned int ShaderProgram::getUniformLocation(std::string uniform_name) const
+template<ShaderType ... Ts>
+unsigned int ShaderProgram<Ts...>::getUniformLocation(std::string uniform_name) const
 {
 	GLint location;
 	if (m_uniform_cache.find(uniform_name) != m_uniform_cache.end())
@@ -186,7 +179,8 @@ unsigned int ShaderProgram::getUniformLocation(std::string uniform_name) const
 	return location;
 }
 
-unsigned int ShaderProgram::getUniformBlockLocation(std::string block_name) const
+template<ShaderType ... Ts>
+unsigned int ShaderProgram<Ts...>::getUniformBlockLocation(std::string block_name) const
 {
 	GLint location;
 	if (m_block_cache.find(block_name) != m_block_cache.end())
@@ -199,3 +193,8 @@ unsigned int ShaderProgram::getUniformBlockLocation(std::string block_name) cons
 	m_block_cache[block_name] = location;
 	return location;
 }
+
+template class ShaderProgram<COMP>;
+template class ShaderProgram<VERT, FRAG>;
+template class ShaderProgram<VERT, GEOM, FRAG>;
+

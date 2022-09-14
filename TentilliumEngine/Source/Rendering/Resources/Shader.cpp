@@ -9,15 +9,15 @@
 template<ShaderType type>
 Shader<type>::~Shader()
 {
-	if (destroy(m_handle))
+	if (Resource<Shader<type>>::destroy(m_handle))
 		glDeleteShader(m_handle);
 }
 
 template<ShaderType type>
 Shader<type>::Shader(const Shader<type>& other)
 {
-	create(other.m_handle);
-	if (destroy(m_handle))
+	Resource<Shader<type>>::create(other.m_handle);
+	if (Resource<Shader<type>>::destroy(m_handle))
 		glDeleteShader(m_handle);
 	this->m_handle = other.m_handle;
 }
@@ -27,8 +27,8 @@ Shader<type>& Shader<type>::operator=(const Shader<type>& other)
 	if (this == &other)
 		return *this;
 
-	create(other.m_handle);
-	if (destroy(m_handle))
+	Resource<Shader<type>>::create(other.m_handle);
+	if (Resource<Shader<type>>::destroy(m_handle))
 		glDeleteShader(m_handle);
 
 	this->m_handle = other.m_handle;
@@ -39,15 +39,37 @@ Shader<type>& Shader<type>::operator=(const Shader<type>& other)
 template<ShaderType type>
 Shader<type>::Shader(std::string filepath)
 {
+	size_t it1 = filepath.find_last_of(".");
+	size_t it2 = filepath.length();
+
+	std::string fileExt = filepath.substr(it1, it2 - it1);
+
+	if (fileExt == ".shader")
+	{
+		switch (type) {
+		case VERT: filepath.replace(it1, it2, ".vert"); break;
+		case GEOM: filepath.replace(it1, it2, ".geom"); break;
+		case FRAG: filepath.replace(it1, it2, ".frag"); break;
+		case COMP: filepath.replace(it1, it2, ".comp"); break;
+		}
+	}
+
 	std::string data;
 
 	std::ifstream fs(filepath, std::ios::in | std::ios::binary | std::ios::ate);
-	const int m_size = fs.tellg();	// get size
+	const int len = fs.tellg();	// get size
+
+	if (len == 0)
+	{
+		std::cerr << "[Load Error] - failed to load Shader from file '" << filepath << "'" << std::endl;
+		throw std::exception();
+	}
+
 	fs.seekg(0, std::ios::beg);		// put cursor to beginning
 
 	// get filedata
-	data = std::string(m_size, ' ');
-	fs.read(&data[0], m_size);
+	data = std::string(len, ' ');
+	fs.read(&data[0], len);
 	fs.close();
 
 	// create opengl object shader
@@ -60,7 +82,7 @@ Shader<type>::Shader(std::string filepath)
 
 	// add data to opengl object
 	const char* raw_data = (const char*)data.c_str();
-	glShaderSource(m_handle, 1, &raw_data, &m_size);
+	glShaderSource(m_handle, 1, &raw_data, &len);
 
 	// compile shader
 	glCompileShader(m_handle);
@@ -78,7 +100,7 @@ Shader<type>::Shader(std::string filepath)
 		throw std::exception();
 	}
 
-	create(m_handle);
+	Resource<Shader<type>>::create(m_handle);
 }
 
 template class Shader<ShaderType::COMP>;

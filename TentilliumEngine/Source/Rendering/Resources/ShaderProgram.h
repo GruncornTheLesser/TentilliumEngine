@@ -1,33 +1,25 @@
 #pragma once
 #include "Resource.h"
 #include "Shader.h"
-#include "Texture.h"
-
 #include <glm.hpp>
 #include <unordered_map>
 
-class ShaderProgram final {
-private:
-	unsigned int m_program;
-	Shader<ShaderType::COMP> m_compute{ 0 };
-	Shader<ShaderType::VERT> m_vertex{ 0 };
-	Shader<ShaderType::GEOM> m_geometry{ 0 };
-	Shader<ShaderType::FRAG> m_fragment{ 0 };
+template<ShaderType ... Ts>
+concept is_ComputeProgram = (... & Ts) == COMP;
 
-	mutable std::unordered_map<std::string, unsigned int> m_uniform_cache;	// uniform locations
-	mutable std::unordered_map<std::string, unsigned int> m_block_cache;	// uniform block locations
-
-	unsigned int createProgram(unsigned int compute, unsigned int vertex, unsigned int geometry, unsigned int fragment);
-
+template<ShaderType ... Ts>
+class ShaderProgram : Shader<Ts>... {
 public:
 	ShaderProgram(std::string filepath);
+	ShaderProgram(Shader<Ts> ... shaders);
+
 	~ShaderProgram();
 
 	ShaderProgram(const ShaderProgram&) = delete;
 	ShaderProgram& operator=(const ShaderProgram&) = delete;
 
-	ShaderProgram(const ShaderProgram&&);
-	ShaderProgram& operator=(const ShaderProgram&&);
+	ShaderProgram(ShaderProgram&&);
+	ShaderProgram& operator=(ShaderProgram&&);
 
 	void bind() const;
 
@@ -45,7 +37,18 @@ public:
 
 	void setUniformBlock(std::string, unsigned int value) const;
 
+	void dispatch(glm::uvec3 workGroups) requires is_ComputeProgram<Ts...>;
+
 private:
+	unsigned int m_program;
+	mutable std::unordered_map<std::string, unsigned int> m_uniform_cache;	// uniform locations
+	mutable std::unordered_map<std::string, unsigned int> m_block_cache;	// uniform block locations
+
+	unsigned int genProgram();
+
 	unsigned int getUniformLocation(std::string uniform_name) const;
 	unsigned int getUniformBlockLocation(std::string block_name) const;
 };
+
+using ComputeProgram = ShaderProgram<COMP>;
+using ShadingProgram = ShaderProgram<VERT, FRAG>;
