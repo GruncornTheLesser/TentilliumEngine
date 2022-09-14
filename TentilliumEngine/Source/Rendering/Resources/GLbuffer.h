@@ -12,8 +12,7 @@ private:
 private:
     GLbuffer(unsigned int handle) : m_handle(handle) { }
 public:
-    GLbuffer() : m_handle(0) { }
-
+    GLbuffer();
     GLbuffer(void* data, size_t size, int usage = 0x88e4);
 
     template<typename T>
@@ -25,15 +24,10 @@ public:
     GLbuffer& operator=(const GLbuffer& other);
 
 public:
-    void set_data(void* data, size_t size, size_t offset) const;
+    void set_data(const void* data, size_t size, size_t offset) const;
 
     template<typename t>
-    void set_data(t* data, size_t offset = 0) const {
-        return set_data(data, sizeof(t), offset);
-    }
-
-    template<typename t>
-    void set_data(t data, size_t offset = 0) const {
+    void set_data(const t& data, size_t offset = 0) const {
         return set_data(&data, sizeof(t), offset);
     }
 

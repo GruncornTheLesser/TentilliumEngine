@@ -132,7 +132,6 @@ Texture::~Texture()
 Texture::Texture(Texture const& other)
 {
 	create(other.m_handle);
-
 	if (destroy(m_handle))
 		glDeleteTextures(1, &m_handle);
 
@@ -153,32 +152,36 @@ Texture& Texture::operator=(Texture const& other)
 	return *this;
 }
 
-/*
-void Texture::bind() const
+Texture::Texture(Texture&& other)
 {
-	glBindTexture(GL_TEXTURE_2D, m_handle);
+	if (destroy(m_handle))
+		glDeleteTextures(1, &m_handle);
+
+	m_handle = other.m_handle;
+	other.m_handle = 0;
 }
 
-void Texture::bindSlot(int slot) const
+const Texture& Texture::operator=(Texture&& other)
 {
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, m_handle);
-}
-*/
-int Texture::getWidth() const
-{
-	int width;
-	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WIDTH, &width);
-	return width;
+	if (this == &other)
+		return *this; // calls copy constructor
+
+	if (destroy(m_handle))
+		glDeleteTextures(1, &m_handle);
+
+	m_handle = other.m_handle;
+	other.m_handle = 0;
+	return *this;
 }
 
-int Texture::getHeight() const
+glm::ivec2 Texture::getSize() const
 {
-	int height;
+	glm::ivec2 size;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_HEIGHT, &height);
-	return height;
+	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WIDTH, &size.x);
+	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_HEIGHT, &size.y);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return size;
 }
 
 Texture::Wrap Texture::getWrap() const

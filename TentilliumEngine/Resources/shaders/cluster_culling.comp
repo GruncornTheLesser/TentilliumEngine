@@ -1,0 +1,74 @@
+#version 460 core
+// dispatch 1, 1, 6
+layout (local_size_x = 16, local_size_y = 9, local_size_z = 4) in; // 4 slices at a time
+
+#define MAX_LIGHTS 256
+
+// 4 clusters at a time???
+struct PointLight {
+	vec4 position;
+	vec4 color;
+	vec4 radius;
+};
+
+struct AABB {		// axis aligned bounding box
+	vec4 minPoint;	// + padding
+	vec4 maxPoint;	// + padding
+};
+
+struct LightCluster {
+	uint offset;
+	uint count;
+};
+
+// uniform blocks
+layout (std430, binding = 0) readonly buffer Camera {
+    mat4 inverseProjection;
+	float zNear;
+	float zFar;
+    uvec2 screenSize;
+};
+
+// buffers
+layout(std430, binding = 1) readonly buffer ClusterBuffer {
+	AABB clusters[];
+};
+
+layout(std430, binding = 2) readonly buffer LightBuffer {
+	PointLight lights[];
+};
+
+layout(std430, binding = 3) buffer LightClusterBuffer {
+	LightCluster lightCluster[];
+};
+
+
+uniform mat4 view;
+
+// functions
+bool SphereIntersectAABB(PointLight sphere, AABB clusterAABB) {
+    vec3 center = vec3(view * sphere.position);
+	float sqDist = 0;
+    for (int i = 0; i < 3; i++) {
+        if(center[i] < clusterAABB.minPoint[i]) 
+			sqDist += pow(center[i] - clusterAABB.minPoint[i], 2);
+		else if (center[i] > clusterAABB.maxPoint[i]) 
+			sqDist += pow(center[i] - clusterAABB.maxPoint[i], 2);
+    }
+    return sqDist <= (sphere.radius.r * sphere.radius.r);
+}
+
+// for each cluster
+void main() {
+	uint index = gl_WorkGroupID.x + 
+				 gl_WorkGroupID.y * gl_WorkGroupSize.x +
+				 gl_WorkGroupID.z * gl_WorkGroupSize.x * gl_WorkGroupSize.y;
+	
+	// populate local with lights in cluster
+	// count length of lights
+
+	// atomic_add(legnth of lights)
+
+
+	barrier();
+};

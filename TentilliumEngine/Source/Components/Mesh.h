@@ -56,12 +56,9 @@ public:
 };
 
 class VAO final {
-private:
-	unsigned int m_handle;
-	int m_size = 0;
-
-
 public:
+	__declspec(property(get = get_handle)) unsigned int handle;
+
 	template<VertAttrib ... attribs>
 	VAO(VBO<attribs>* ... buffers) 
 	{ 
@@ -76,7 +73,7 @@ public:
 	VAO(VAO&&);
 	VAO& operator=(VAO&&);
 
-	void draw();
+	void draw(int primitive = 0x0004);
 
 	template<VertAttrib attrib>
 	void attach(VBO<attrib>* buffer);
@@ -84,7 +81,10 @@ public:
 	template<VertAttrib attrib>
 	void detach();
 
+	unsigned int get_handle() { return m_handle; }
 private:
 	void genVAO();
 
+	unsigned int m_handle;
+	int m_size = 0;
 };

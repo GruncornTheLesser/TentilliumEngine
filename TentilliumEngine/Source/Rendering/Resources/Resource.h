@@ -60,6 +60,13 @@ public:
 		return it == m_ref_count.end();
 	}
 
+	static bool count(unsigned int handle) {
+		auto it = m_ref_count.find(handle);
+		if (it == m_ref_count.end())
+			return 0;
+
+		return it->second;
+	}
 public:
 	/*gets value associated with 'filepath', throws exception if none is found*/
 	const static T get(std::string filepath)

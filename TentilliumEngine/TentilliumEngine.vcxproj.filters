@@ -107,6 +107,8 @@
     <None Include="Resources\shaders\cluster_culling.comp" />
     <None Include="Resources\shaders\cluster_prepass.comp" />
     <None Include="Resources\shaders\cluster_shading.frag" />
+    <None Include="Resources\shaders\debug_line.vert" />
+    <None Include="Resources\shaders\debug_line.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">

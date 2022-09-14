@@ -28,6 +28,8 @@ public:
 	
 	using RenderSystem::resize;
 	using RenderSystem::camera;
+	using RenderSystem::getCamera;
+	using RenderSystem::setCamera;
 	
 	using LoadSystem::load;
 	
@@ -37,4 +39,8 @@ public:
 		TransformSystem::update();
 		RenderSystem::render();
 	}
+
+	Scene(int width, int height)
+		: RenderSystem(glm::uvec2(width, height)) 
+	{ }
 };

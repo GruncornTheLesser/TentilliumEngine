@@ -104,13 +104,9 @@ unsigned char RGtest[] = {
 };
 unsigned char RGBtest[] = {
 	0xff, 0x00, 0xff, 
-	//0x00, // padding
 	0x00, 0x00, 0xff, 
-	//0x00, // padding
 	0x00, 0x00, 0xff, 
-	//0x00, // padding
 	0xff, 0x00, 0xff, 
-	//0x00, // padding
 };
 unsigned char RGBAtest[] = {
 	0xff, 0x00, 0xff, 0xff,
@@ -135,14 +131,15 @@ public:
 
 	std::vector<entt::entity> lights;
 
-	TestApp(const char* title) : AppWindow(800, 600, title)
+	TestApp(const char* title) : AppWindow(200, 200, title), scene(200, 200)
 	{
 		root = scene.create();
 
 		// create camera
-		scene.camera = scene.create();
-		scene.emplace<Projection>(scene.camera, glm::radians(60.0f), 800.0f / 600.0f, 0.001f, 100.0f);
-		scene.emplace<Transform>(scene.camera, glm::vec3(0, 0, 1));
+		entt::entity cam = scene.create();
+		scene.emplace<Projection>(cam, glm::radians(60.0f), 800.0f / 600.0f, 0.02f, 10.0f);
+		scene.emplace<Transform>(cam, glm::vec3(0, 0, 0));
+		scene.camera = cam;
 
 		// create obj
 		obj = scene.load("Resources/meshes/Person.fbx");
@@ -168,7 +165,8 @@ public:
 		scene.emplace<VBO<Normal>>(box2, scene.get<VBO<Normal>>(box1));
 		scene.emplace<VBO<TexCoord>>(box2, scene.get<VBO<TexCoord>>(box1));
 		scene.emplace<Material>(box2, Texture(RGBtest, 2, 2, Texture::Format::RGB));
-
+		int x = Resource<Texture>::count(2);
+		/*
 		// light 1
 		entt::entity light1 = scene.create();
 		scene.emplace<PointLight>(light1, glm::vec3(0, 0, -0.5f), glm::vec3(1, 0, 1), 5.0f);
@@ -178,7 +176,7 @@ public:
 		scene.emplace<VBO<Normal>>(light1, scene.get<VBO<Normal>>(box1));
 		scene.emplace<VBO<TexCoord>>(light1, scene.get<VBO<TexCoord>>(box1));
 		scene.emplace<Material>(light1, glm::vec4(1, 0, 1, 1));
-
+		*/
 		// light 2
 		entt::entity light2 = scene.create();
 		scene.emplace<PointLight>(light2, glm::vec3(0.5f, 0, 0), glm::vec3(1, 0, 0), 5.0f);
@@ -207,8 +205,6 @@ public:
 		scene.emplace<VBO<Normal>>(floor, scene.get<VBO<Normal>>(box1));
 		scene.emplace<VBO<TexCoord>>(floor, scene.get<VBO<TexCoord>>(box1));
 		scene.emplace<Material>(floor, glm::vec4(1.0f, 1.0f, 1.0f, 1));
-
-		scene.resize(get_width(), get_height());
 	}
 
 	void onProcess(float delta) {
@@ -220,11 +216,9 @@ public:
 
 		auto& cam_trans = scene.get<Transform>(scene.camera);
 		
-		if (isPressed(Button::LEFT)) {
-			cam_dir.x += (float)m_mouse.getDeltaY() / height;
-			cam_dir.y += (float)m_mouse.getDeltaX() / width;
-		}
-		cam_trans.rotation = glm::quat(glm::vec3(cam_dir, 0));
+		if (isPressed(Button::LEFT))
+			cam_dir += (glm::vec2)m_mouse.getDelta() / glm::vec2(getSize());
+		cam_trans.rotation = glm::quat(glm::vec3(cam_dir.y, cam_dir.x, 0));
 		
 		glm::vec3 move_direction{ 0, 0, 0 };
 		if (isPressed(Key::W)) move_direction.z -= 1;
@@ -233,18 +227,16 @@ public:
 		if (isPressed(Key::D)) move_direction.x += 1;
 		if (isPressed(Key::F)) move_direction.y -= 1;
 		if (isPressed(Key::R)) move_direction.y += 1;
+
 		
-		cam_trans.position += cam_trans.rotation * move_direction * delta; // rotate direction by camera rotation
-	
 		if (isPressed(Key::LEFT_SHIFT)) {
-			if (scene.valid(box1)) scene.get_or_emplace<Hierarchy>(obj, box1).parent = box1;
+			move_direction *= 10;
 		}
 		if (isPressed(Key::LEFT_CONTROL)) {
-			if (scene.valid(box2)) scene.get_or_emplace<Hierarchy>(obj, box2).parent = box2;
+			move_direction *= 0.1;
 		}
-		if (isPressed(Key::Z)) {
-			if (scene.valid(box2)) scene.destroy(box2);
-		}
+		cam_trans.position += cam_trans.rotation * move_direction * delta; // rotate direction by camera rotation
+
 	}
 
 	void onDraw() {
@@ -252,15 +244,15 @@ public:
 		refresh();
 	}
 
-	void onResize(int width, int height) {
-		scene.resize(width, height);
+	void onResize(glm::ivec2 size) {
+		scene.resize(size);
 	}
 
 	void onKey(Key key, Action action, Mod mod) { }
 
 	void onMouse(Button button, Action action, Mod mod) { }
 
-	void onMouseMove(int posX, int posY) { }
+	void onMouseMove(glm::ivec2 position) { }
 };
 
 int main(int argc, char** argv)

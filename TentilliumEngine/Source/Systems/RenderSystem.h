@@ -2,6 +2,7 @@
 #include "entt_macros.h"
 #include "../Components/Projection.h"
 #include "../Components/Transform.h"
+#include "../Components/PointLight.h"
 #include "../Components/Mesh.h"
 #include "../Components/Material.h"
 #include "../Rendering/Resources/ShaderProgram.h"
@@ -11,17 +12,38 @@
 
 class RenderSystem : virtual protected entt::registry {
 public:
-	entt::entity camera;
-	glm::mat4 get_cam_view();
-	glm::mat4 get_cam_proj();
-	void resize(int width, int height);
+	__declspec(property(get=getCamera,put=setCamera)) entt::entity camera;
+
+	RenderSystem(glm::ivec2 size);
+
+	void render();
+
+	void resize(glm::ivec2 size);
+
+	void setCamera(entt::entity e);
+
+	entt::entity getCamera();
 
 private:
 	GROUP(render_view, OWN(Material), GET(VAO), EXC());
+	VIEW(light_view, GET(PointLight), EXC());
+
+	entt::entity m_camera;
+
+	glm::uvec3 m_workGroups;
+
+	GLbuffer m_ScreenBuffer;  // 0
+	GLbuffer m_clusterBuffer; // 1
+	GLbuffer m_ptLightBuffer; // 2
+	GLbuffer m_visibleBuffer; // 3
+	
+	ShaderProgram m_prepass{ "Resources/shaders/cluster_prepass.comp" };
+	ShaderProgram m_culling{ "Resources/shaders/cluster_culling.comp" };
+	ShaderProgram m_shading{ "Resources/shaders/cluster_shading.shader" };
+
 	ShaderProgram m_program{ "Resources/shaders/default.shader" };
 
-public:
-	RenderSystem();
-
-	void render();
+	ShaderProgram m_line_program{ "Resources/shaders/debug_line.shader" };
+	
+	VAO m_line_vao;
 };

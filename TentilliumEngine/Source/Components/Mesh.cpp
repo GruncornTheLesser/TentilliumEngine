@@ -25,14 +25,12 @@ VAO& VAO::operator=(VAO&& other)
 	return *this;
 }
 
-void VAO::draw()
+void VAO::draw(int primitive)
 {
 	glBindVertexArray(m_handle);
 
 	if (m_size != 0)
-		glDrawElements(GL_TRIANGLES, m_size, GL_UNSIGNED_INT, NULL);
-	else
-		glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_INT);
+		glDrawElements(primitive, m_size, GL_UNSIGNED_INT, NULL);
 }
 
 void VAO::genVAO()

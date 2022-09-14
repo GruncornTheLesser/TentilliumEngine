@@ -20,7 +20,6 @@ GLbuffer::GLbuffer(const GLbuffer& other) {
         glDeleteBuffers(1, &m_handle);
 
     m_handle = other.m_handle;
-
 }
 
 GLbuffer& GLbuffer::operator=(const GLbuffer& other) {
@@ -36,7 +35,7 @@ GLbuffer& GLbuffer::operator=(const GLbuffer& other) {
     return *this;
 }
 
-void GLbuffer::set_data(void* data, size_t size, size_t offset) const
+void GLbuffer::set_data(const void* data, size_t size, size_t offset) const
 {
     glNamedBufferSubData(m_handle, offset, size, data);
 }

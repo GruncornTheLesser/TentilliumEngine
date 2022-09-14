@@ -209,6 +209,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Resources\shaders\default.vert" />
+    <None Include="Resources\shaders\debug_line.vert" />
+    <None Include="Resources\shaders\debug_line.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Components\PointLight.h" />

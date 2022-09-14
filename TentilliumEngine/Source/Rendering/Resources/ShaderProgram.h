@@ -20,8 +20,6 @@ private:
 	unsigned int createProgram(unsigned int compute, unsigned int vertex, unsigned int geometry, unsigned int fragment);
 
 public:
-	ShaderProgram(std::string vertex, std::string geometry, std::string fragment, std::string compute);
-
 	ShaderProgram(std::string filepath);
 	~ShaderProgram();
 

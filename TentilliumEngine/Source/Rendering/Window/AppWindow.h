@@ -1,4 +1,5 @@
 #pragma once
+#include <glm.hpp>	// GL maths
 #include <string>
 #include <vector>
 #include "inputs.h"
@@ -7,23 +8,31 @@ class AppWindow
 {
 	friend class callback_func;
 public:
-	struct Keyboard {
+	class Keyboard {
+		friend class AppWindow;
+		friend class callback_func;
+	private:
 		static Key IntToKey(int key);
 		static int KeyToInt(Key key);
 	} m_keyboard;
 
-	struct Mouse {
-		int cur_pos_x, cur_pos_y, next_pos_x, next_pos_y;
+	class Mouse {
+		friend class AppWindow;
+		friend class callback_func;
+	public:
+		glm::ivec2 getDelta() { return next_pos - cur_pos; }
+	private:
+		glm::ivec2 cur_pos, next_pos;
 
 		static Button IntToButton(int button);
+
 		static int ButtonToInt(Button button);
 
-		int getDeltaX() { return next_pos_x - cur_pos_x; }
-		int getDeltaY() { return next_pos_y - cur_pos_y; }
 	} m_mouse;
 
 public:
 	__declspec(property (get = getTitle, put = setTitle)) const char* title;
+	__declspec(property (get = getSize)) glm::ivec2 size;
 	__declspec(property (get = get_width)) int width;
 	__declspec(property (get = get_height)) int height;
 
@@ -37,22 +46,19 @@ public:
 	
 	~AppWindow();
 
-	bool isPressed(Key key);
-
-	bool isPressed(Button key);
-
-	int get_width();
-
-	int get_height();
+	glm::ivec2 getSize();
 
 	const char* get_title();
 
 	void set_title(const char* title);
 
-public:
 	void close();	
 
 	void refresh();
+
+	bool isPressed(Button key);
+
+	bool isPressed(Key key);
 
 	virtual void onProcess(float delta) = 0;
 
@@ -62,10 +68,9 @@ public:
 
 	virtual void onMouse(Button button, Action action, Mod mod) = 0;
 
-	virtual void onMouseMove(int posX, int posY) = 0;
+	virtual void onMouseMove(glm::ivec2 position) = 0;
 
-	virtual void onResize(int width, int height) = 0;
-
+	virtual void onResize(glm::ivec2 size) = 0;
 
 public:
 	static void main(std::vector<AppWindow*> windows);
