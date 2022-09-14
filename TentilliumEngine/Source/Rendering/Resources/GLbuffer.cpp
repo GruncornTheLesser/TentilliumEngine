@@ -44,3 +44,15 @@ void GLbuffer::get_data(void* data, size_t size, size_t offset) const
 {
     glGetNamedBufferSubData(m_handle, offset, size, data);
 }
+
+void GLbuffer::resize(size_t size, int usage) const
+{
+    glNamedBufferData(m_handle, size, nullptr, usage);
+}
+
+int GLbuffer::get_size() const
+{
+    int size;
+    glGetNamedBufferParameteriv(m_handle, GL_BUFFER_SIZE, &size);
+    return size;
+}

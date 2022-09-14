@@ -6,12 +6,6 @@ class GLbuffer : Resource<GLbuffer>
 public:
     __declspec(property(get = get_handle)) unsigned int handle;
 
-private:
-    unsigned int m_handle;
-
-private:
-    GLbuffer(unsigned int handle) : m_handle(handle) { }
-public:
     GLbuffer();
     GLbuffer(void* data, size_t size, int usage = 0x88e4);
 
@@ -23,7 +17,6 @@ public:
     GLbuffer(const GLbuffer& other);
     GLbuffer& operator=(const GLbuffer& other);
 
-public:
     void set_data(const void* data, size_t size, size_t offset) const;
 
     template<typename t>
@@ -38,8 +31,17 @@ public:
         return get_data(data, sizeof(t), offset);
     }
 
+    void resize(size_t size, int usage = 0x88e4) const;
+
     unsigned int get_handle() const {
         return m_handle;
     }
+
+    int get_size() const;
+
+private:
+    GLbuffer(unsigned int handle) : m_handle(handle) { }
+
+    unsigned int m_handle;
 };
 

@@ -58,9 +58,9 @@ struct ScreenData {
 RenderSystem::RenderSystem(glm::ivec2 size) :
 	m_workGroups(CALC_WORKGROUPS_N(size)),
 	m_ScreenBuffer(ScreenData{ glm::mat4(), 0, 0, (glm::uvec2)size }),
-	m_clusterBuffer(nullptr, sizeof(AABB) * m_workGroups.x * m_workGroups.y * m_workGroups.z),
-	m_ptLightBuffer(nullptr, sizeof(PointLight) * LIGHTS_CHUNK_SIZE, GL_DYNAMIC_DRAW),
-	m_visibleBuffer(nullptr, sizeof(int) * CLUSTER_MAX_LIGHT * m_workGroups.x * m_workGroups.y * m_workGroups.z, GL_DYNAMIC_DRAW)
+	m_clusterBuffer(nullptr, sizeof(AABB)* m_workGroups.x* m_workGroups.y* m_workGroups.z),
+	m_ptLightBuffer(nullptr, sizeof(PointLight)* LIGHTS_CHUNK_SIZE, GL_DYNAMIC_DRAW),
+	m_visibleBuffer(nullptr, sizeof(int)* CLUSTER_MAX_LIGHT* m_workGroups.x* m_workGroups.y* m_workGroups.z, GL_DYNAMIC_DRAW)
 {
 	//m_program.setUniformBlock("material", 0);
 
@@ -84,14 +84,9 @@ RenderSystem::RenderSystem(glm::ivec2 size) :
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_visibleBuffer.handle);
 
 	// testing
-	glBindVertexArray(m_line_vao.handle);
-	glBindBuffer(GL_ARRAY_BUFFER, m_clusterBuffer.handle);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
-}
+	m_line_vao.attach(Custom, &m_clusterBuffer, 4);
 
+}
 
 
 void RenderSystem::resize(glm::ivec2 size)
@@ -112,9 +107,11 @@ void RenderSystem::resize(glm::ivec2 size)
 	});
 
 	m_workGroups = glm::uvec3(CALC_WORKGROUPS_N(size));
-	m_prepass.bind();
-	glDispatchCompute(m_workGroups.x, m_workGroups.y, m_workGroups.z);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	m_clusterBuffer.resize(sizeof(AABB) * m_workGroups.x * m_workGroups.y * m_workGroups.z);
+	m_prepass.dispatch(m_workGroups);
+
+	m_line_vao.updateSize();
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 void RenderSystem::setCamera(entt::entity e)
@@ -176,8 +173,8 @@ void RenderSystem::render()
 
 	m_line_program.bind();
 	m_line_program.setUniformMat4("VP", proj * view);
-	glBindVertexArray(m_line_vao.handle);
-	glDrawArrays(GL_POINTS, 0, 2 * m_workGroups.x * m_workGroups.y * m_workGroups.z);
-
+	//glBindVertexArray(m_line_vao.handle);
+	//glDrawArrays(GL_POINTS, 0, 2 * m_workGroups.x * m_workGroups.y * m_workGroups.z);
+	m_line_vao.draw(GL_POINTS);
 	glEnable(GL_DEPTH_TEST);
 }

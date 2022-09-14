@@ -43,7 +43,7 @@
 //	> can adjust mesh per program to include or exclude vertex data
 //	> more data oriented allowing easier repurposing of data
 
-enum VertAttrib { Index, Position, TexCoord, Normal, BoneID, BoneWeight };
+enum VertAttrib { Index = -1, Position, Normal, TexCoord, BoneID, BoneWeight, Custom, None, };
 
 template<VertAttrib>
 class VBO final : public GLbuffer {
@@ -60,8 +60,8 @@ public:
 	__declspec(property(get = get_handle)) unsigned int handle;
 
 	template<VertAttrib ... attribs>
-	VAO(VBO<attribs>* ... buffers) 
-	{ 
+	VAO(VBO<attribs>* ... buffers)
+	{
 		genVAO();
 		(attach(buffers), ...);
 	}
@@ -81,10 +81,19 @@ public:
 	template<VertAttrib attrib>
 	void detach();
 
+	void attach(int attrib_no, GLbuffer* buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
+
+	void detach(int attrib_no);
+
+	void updateSize();
+
 	unsigned int get_handle() { return m_handle; }
 private:
 	void genVAO();
 
+	void findSize();
+
 	unsigned int m_handle;
 	int m_size = 0;
+	VertAttrib m_size_attribute = None;
 };

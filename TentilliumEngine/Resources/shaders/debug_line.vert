@@ -1,6 +1,6 @@
 #version 460 core
 
-layout(location = 0) in vec4 position;
+layout(location = 5) in vec4 position;
 
 uniform mat4 VP;
 
