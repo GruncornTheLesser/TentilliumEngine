@@ -55,6 +55,12 @@ struct ScreenData {
 	glm::uvec2 screenSize;
 };
 
+struct CameraData {
+	glm::mat4 inverseProjection;
+	float zNear;
+	float zFar;
+};
+
 RenderSystem::RenderSystem(glm::ivec2 size) :
 	m_workGroups(CALC_WORKGROUPS_N(size)),
 	m_ScreenBuffer(ScreenData{ glm::mat4(), 0, 0, (glm::uvec2)size }),
@@ -99,19 +105,14 @@ void RenderSystem::resize(glm::ivec2 size)
 	proj->m_ratio = ((float)size.x) / size.y;
 	proj->m_proj = glm::perspective(proj->m_fovY, proj->m_ratio, proj->m_zNear, proj->m_zFar);
 	
-	m_ScreenBuffer.set_data(ScreenData{
-		glm::inverse(proj->m_proj),
-		proj->m_zNear,
-		proj->m_zFar,
-		(glm::uvec2)size,
-	});
-
+	m_ScreenBuffer.set_data(ScreenData{ glm::inverse(proj->m_proj), proj->m_zNear, proj->m_zFar, (glm::uvec2)size });
+	
 	m_workGroups = glm::uvec3(CALC_WORKGROUPS_N(size));
 	m_clusterBuffer.resize(sizeof(AABB) * m_workGroups.x * m_workGroups.y * m_workGroups.z);
+
 	m_prepass.dispatch(m_workGroups);
 
-	m_line_vao.updateSize();
-	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	
 }
 
 void RenderSystem::setCamera(entt::entity e)
@@ -123,12 +124,9 @@ void RenderSystem::setCamera(entt::entity e)
 	
 	m_camera = e;
 
-	ScreenData data = ScreenData{ glm::inverse(proj->m_proj), proj->m_zNear, proj->m_zFar };
-	m_ScreenBuffer.set_data(&data, sizeof(ScreenData) - sizeof(glm::uvec2), 0);
+	m_ScreenBuffer.set_data(CameraData{ glm::inverse(proj->m_proj), proj->m_zNear, proj->m_zFar }); // doesnt update screen size
 
-	m_prepass.bind();
 	m_prepass.dispatch(m_workGroups);
-	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 entt::entity RenderSystem::getCamera()
@@ -140,14 +138,16 @@ void RenderSystem::render()
 {
 	// get camera
 	if (!valid(m_camera)) return;
+	
 	// get camera projection
 	auto proj_comp = try_get<Projection>(m_camera);
 	if (!proj_comp) throw std::exception();
-	glm::mat4 proj = proj_comp->get();
+	const glm::mat4& proj = proj_comp->get();
+	
 	// get camera view
 	auto view_comp = try_get<Transform>(m_camera);
 	if (!view_comp) throw std::exception();
-	glm::mat4 view = glm::inverse(view_comp->getWorldMatrix());
+	const glm::mat4& view = glm::inverse(view_comp->getWorldMatrix());
 	
 	m_program.bind();
 	for (auto [entity, material, vao] : render_view.each())
@@ -173,8 +173,7 @@ void RenderSystem::render()
 
 	m_line_program.bind();
 	m_line_program.setUniformMat4("VP", proj * view);
-	//glBindVertexArray(m_line_vao.handle);
-	//glDrawArrays(GL_POINTS, 0, 2 * m_workGroups.x * m_workGroups.y * m_workGroups.z);
 	m_line_vao.draw(GL_POINTS);
+
 	glEnable(GL_DEPTH_TEST);
 }

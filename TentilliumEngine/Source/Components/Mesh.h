@@ -85,15 +85,14 @@ public:
 
 	void detach(int attrib_no);
 
-	void updateSize();
+	int getSize();
 
 	unsigned int get_handle() { return m_handle; }
 private:
 	void genVAO();
 
-	void findSize();
+	int findSize();
 
 	unsigned int m_handle;
-	int m_size = 0;
 	VertAttrib m_size_attribute = None;
 };

@@ -11,7 +11,6 @@ VAO::~VAO()
 VAO::VAO(VAO&& other)
 {
 	m_handle = other.m_handle;
-	m_size = other.m_size;
 	m_size_attribute = other.m_size_attribute;
 
 	other.m_handle = 0;
@@ -23,7 +22,6 @@ VAO& VAO::operator=(VAO&& other)
 		glDeleteVertexArrays(1, &m_handle);
 
 	m_handle = other.m_handle;
-	m_size = other.m_size;
 	m_size_attribute = other.m_size_attribute;
 
 	other.m_handle = 0;
@@ -36,9 +34,9 @@ void VAO::draw(int primitive)
 	glBindVertexArray(m_handle);
 
 	if (m_size_attribute == Index)
-		glDrawElements(primitive, m_size, GL_UNSIGNED_INT, NULL);
+		glDrawElements(primitive, getSize(), GL_UNSIGNED_INT, NULL);
 	else
-		glDrawArrays(primitive, 0, m_size);
+		glDrawArrays(primitive, 0, getSize());
 }
 
 template<> void VAO::attach<Index>(VBO<Index>* buffer)
@@ -51,10 +49,8 @@ template<> void VAO::attach<Index>(VBO<Index>* buffer)
 	glBindVertexArray(NULL);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
 
-	if (m_size_attribute > Index) {
+	if (m_size_attribute > Index)
 		m_size_attribute = Index;
-		m_size = buffer->get_size() / 4;
-	}
 }
 template<> void VAO::attach<Position>(VBO<Position>* buffer) { attach(Position, buffer, 3, GL_FLOAT, false, 0); }
 template<> void VAO::attach<Normal>(VBO<Normal>* buffer) { attach(Normal, buffer, 3, GL_FLOAT, false, 0); }
@@ -94,7 +90,6 @@ void VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int type, boo
 
 	if (m_size_attribute > attrib_no) {
 		m_size_attribute = (VertAttrib)attrib_no;
-		m_size = buffer->get_size() / attrib_size / 4;
 	}
 }
 
@@ -110,21 +105,24 @@ void VAO::detach(int attrib_no)
 	glBindVertexArray(NULL);
 }
 
-void VAO::updateSize()
+int VAO::getSize()
 {
+	int bo, attrib_size, size;
 	glBindVertexArray(m_handle);
-	int vbo = 0;
-	glGetVertexAttribiv(m_size_attribute, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &vbo);
-	if (vbo == 0) {
-		findSize();
-		return;
-	}
-	int attrib_size;
 
-	glGetNamedBufferParameteriv(vbo, GL_BUFFER_SIZE, &m_size);
-	glGetVertexAttribiv(m_size_attribute, GL_VERTEX_ATTRIB_ARRAY_SIZE, &attrib_size);
-		
-	m_size = m_size / 4 / attrib_size;
+	if (m_size_attribute == Index) {
+		glGetVertexArrayiv(m_handle, GL_ELEMENT_ARRAY_BUFFER_BINDING, &bo);
+		attrib_size = 1;
+	}
+	else 
+	{
+		glGetVertexAttribiv(m_size_attribute, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &bo);
+		glGetVertexAttribiv(m_size_attribute, GL_VERTEX_ATTRIB_ARRAY_SIZE, &attrib_size);
+	}
+	if (bo == 0) return findSize(); // shouldnt happen but just in case
+
+	glGetNamedBufferParameteriv(bo, GL_BUFFER_SIZE, &size);
+	return size / 4 / attrib_size;
 }
 
 void VAO::genVAO()
@@ -132,32 +130,30 @@ void VAO::genVAO()
 	glGenVertexArrays(1, &m_handle);
 }
 
-void VAO::findSize()
+int VAO::findSize()
 {
-	m_size_attribute = None;
-	m_size = 0;
-
-	int ebo = 0;
-	glGetVertexArrayiv(m_handle, GL_ELEMENT_ARRAY_BUFFER_BINDING, &ebo);
-
-	if (ebo != 0) {
-		m_size_attribute = Index;
-		glGetNamedBufferParameteriv(ebo, GL_BUFFER_SIZE, &m_size);
-		return;
-	}
-
+	int bo, attrib_size, size, attribute = None;
 	glBindVertexArray(m_handle);
-	for (int i = 1; i < None; i++)
+
+	glGetVertexArrayiv(m_handle, GL_ELEMENT_ARRAY_BUFFER_BINDING, &bo);
+	if (bo != 0) {
+		m_size_attribute = Index;
+		attrib_size = 1;
+	}
+	else 
 	{
-		int vbo = 0;
-		glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &vbo);
-		if (vbo != 0) {
-			m_size_attribute = (VertAttrib)i;
-			glGetNamedBufferParameteriv(vbo, GL_BUFFER_SIZE, &m_size);
-			int attrib_size;
-			glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &attrib_size);
-			m_size = m_size / 4 / attrib_size;
+		for (int i = 1; i < None; i++)
+		{
+			glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &bo);
+			if (bo != 0) {
+				m_size_attribute = (VertAttrib)i;
+				glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &attrib_size);
+				break;
+			}
 		}
 	}
+	glGetNamedBufferParameteriv(bo, GL_BUFFER_SIZE, &size);
 	glBindVertexArray(NULL);
+
+	return size / 4 / attrib_size;
 }
