@@ -80,6 +80,9 @@ void callback_func::resize(GLFWwindow* wnd, int width, int height)
 
 void GLAPIENTRY callback_func::GLerror(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
+    if (type == GL_DEBUG_TYPE_OTHER)
+        return;
+
     std::cout << "[OpenGL ";
     switch (type) {
     case GL_DEBUG_TYPE_ERROR:

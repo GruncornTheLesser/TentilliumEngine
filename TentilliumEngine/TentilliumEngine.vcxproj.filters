@@ -107,8 +107,9 @@
     <None Include="Resources\shaders\cluster_culling.comp" />
     <None Include="Resources\shaders\cluster_prepass.comp" />
     <None Include="Resources\shaders\cluster_shading.frag" />
-    <None Include="Resources\shaders\debug_line.vert" />
-    <None Include="Resources\shaders\debug_line.frag" />
+    <None Include="Resources\shaders\debug_cluster.frag" />
+    <None Include="Resources\shaders\debug_cluster.vert" />
+    <None Include="Resources\shaders\debug_cluster.geom" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
@@ -153,6 +154,7 @@
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Components\PointLight.h" />
     <ClInclude Include="Source\Rendering\Resources\Framebuffer.h" />
+    <ClInclude Include="Source\Systems\MeshSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
@@ -180,6 +182,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\textures\pigeon.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Downloads\R (1).png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

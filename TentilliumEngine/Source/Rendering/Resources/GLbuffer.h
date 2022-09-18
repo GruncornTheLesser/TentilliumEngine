@@ -6,7 +6,6 @@ class GLbuffer : Resource<GLbuffer>
 public:
     __declspec(property(get = get_handle)) unsigned int handle;
 
-    GLbuffer();
     GLbuffer(void* data, size_t size, int usage = 0x88e4);
 
     template<typename T>

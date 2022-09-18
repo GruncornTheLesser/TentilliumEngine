@@ -1,5 +1,5 @@
 #version 460 core
-layout(local_size_x = 1, local_size_y = 1) in; // Per Tile variables
+layout(local_size_x = 1, local_size_y = 1) in;  // 1 innvocation per work group
 
 struct AABB {
 	vec4 minPoint; // + padding
@@ -7,18 +7,17 @@ struct AABB {
 };
 
 // buffers
-layout (std430, binding = 0) readonly buffer Camera {
-    mat4 inverseProjection;
+layout (std430, binding = 0) readonly buffer RenderData {
+    mat4 invProj;
 	float zNear;
 	float zFar;
-    uvec2 screenSize;
+	uvec2 screenSize;
+    uvec3 clusterCount;
 };
 
 layout(std430, binding = 1) buffer ClusterBuffer { // axis alligned bounding box
 	AABB clusters[];
 };
-
-
 
 // functions
 vec3 intersectDepth(vec3 p, float z) {
@@ -31,7 +30,7 @@ vec3 intersectDepth(vec3 p, float z) {
 
 vec4 screenToView(vec2 uv) {
     vec4 clip = vec4(uv.xy * 2.0 - 1.0, -1.0, 1.0);
-    vec4 view = inverseProjection * clip;
+    vec4 view = invProj * clip;
     view = view / view.w;
     return view;
 }
@@ -41,7 +40,7 @@ void main() {
     uint tileIndex = gl_WorkGroupID.x +
                      gl_WorkGroupID.y * gl_NumWorkGroups.x +
                      gl_WorkGroupID.z * gl_NumWorkGroups.x * gl_NumWorkGroups.y;
-   
+
     //   ---B
     //  |   |
     //  A--- 
@@ -54,7 +53,7 @@ void main() {
     //  current  \_|_|_/  tile near
     //            \   /
     // Near and far values of the cluster in view space
-    float farSlice  = -zNear * pow(zFar / zNear, gl_WorkGroupID.z       / float(gl_NumWorkGroups.z));
+    float farSlice  = -zNear * pow(zFar / zNear,  gl_WorkGroupID.z      / float(gl_NumWorkGroups.z));
     float nearSlice = -zNear * pow(zFar / zNear, (gl_WorkGroupID.z + 1) / float(gl_NumWorkGroups.z));
 
     //   v tileA      v far slice
@@ -65,7 +64,11 @@ void main() {
     //  \ /       |   |
     //   X--------X---|------ 
     //   ^ tileB  ^ near slice
-    clusters[tileIndex].minPoint  = vec4(intersectDepth(tileA, nearSlice), 0.0);
-    clusters[tileIndex].maxPoint  = vec4(intersectDepth(tileB, farSlice), 0.0);
-    
+    vec3 p1 = intersectDepth(tileA, nearSlice);
+    vec3 p2 = intersectDepth(tileB, farSlice);
+    vec3 p3 = intersectDepth(tileB, nearSlice);
+    vec3 p4 = intersectDepth(tileB, farSlice);
+
+    clusters[tileIndex].minPoint  = vec4(min(min(p1, p2),min(p3, p4)), 0.0);
+    clusters[tileIndex].maxPoint  = vec4(max(max(p1, p2),max(p3, p4)), 0.0);
 }

@@ -33,3 +33,12 @@ void Material::set_normal(Texture texture)
 	m_textures.insert(std::pair(2, texture));
 	set_data(false, offsetof(UniformData, hasNormalMap));
 }
+
+void Material::bind(int index, int texture_slot_offset) const {
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GLbuffer::get_handle());
+	for (auto& [slot, texture] : m_textures)
+	{
+		glActiveTexture(GL_TEXTURE0+ texture_slot_offset + slot);
+		glBindTexture(GL_TEXTURE_2D, texture.handle);
+	}
+}

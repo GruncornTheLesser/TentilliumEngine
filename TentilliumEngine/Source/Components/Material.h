@@ -45,4 +45,6 @@ public:
 	void set_specular(glm::vec4 value);
 
 	void set_normal(Texture texture);
+
+	void bind(int index = 0, int texture_slot_offset = 0) const;
 };

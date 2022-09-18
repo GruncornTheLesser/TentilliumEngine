@@ -1,10 +1,10 @@
 #version 460 core
-// dispatch 1, 1, 6
-layout (local_size_x = 16, local_size_y = 9, local_size_z = 4) in; // 4 slices at a time
 
-#define MAX_LIGHTS 256
+#define CLUSTER_MAX_LIGHTS 4		// the maximum number of lights per cluster
+#define OPTIMUM_TILE_COUNT 16		// the target number of clusters per depth
 
-// 4 clusters at a time???
+layout (local_size_x = OPTIMUM_TILE_COUNT, local_size_y = 1, local_size_z = 1) in;
+
 struct PointLight {
 	vec4 position;
 	vec4 color;
@@ -16,20 +16,20 @@ struct AABB {		// axis aligned bounding box
 	vec4 maxPoint;	// + padding
 };
 
-struct LightCluster {
-	uint offset;
+struct LightArray {
+	uint index;
 	uint count;
 };
 
-// uniform blocks
-layout (std430, binding = 0) readonly buffer Camera {
-    mat4 inverseProjection;
+// buffers
+layout(std430, binding = 0) readonly buffer RenderData {
+    mat4 invProj;
 	float zNear;
 	float zFar;
-    uvec2 screenSize;
+	uvec2 screenSize;
+	uvec3 clusterCount;
 };
 
-// buffers
 layout(std430, binding = 1) readonly buffer ClusterBuffer {
 	AABB clusters[];
 };
@@ -38,19 +38,27 @@ layout(std430, binding = 2) readonly buffer LightBuffer {
 	PointLight lights[];
 };
 
-layout(std430, binding = 3) buffer LightClusterBuffer {
-	LightCluster lightCluster[];
+layout(std430, binding = 3) writeonly buffer IndicesBuffer {
+	uint lightIndices[];
 };
 
+layout(std430, binding = 4) writeonly buffer LightArrayBuffer {
+	LightArray lightArrays[];
+};
+
+layout(std430, binding = 5) buffer LightCountBuffer {
+	uint visibleCount;
+};
 
 uniform mat4 view;
+uniform int lightCount;
 
 // functions
 bool SphereIntersectAABB(PointLight sphere, AABB clusterAABB) {
     vec3 center = vec3(view * sphere.position);
 	float sqDist = 0;
     for (int i = 0; i < 3; i++) {
-        if(center[i] < clusterAABB.minPoint[i]) 
+        if(center[i] < clusterAABB.minPoint[i])
 			sqDist += pow(center[i] - clusterAABB.minPoint[i], 2);
 		else if (center[i] > clusterAABB.maxPoint[i]) 
 			sqDist += pow(center[i] - clusterAABB.maxPoint[i], 2);
@@ -60,15 +68,42 @@ bool SphereIntersectAABB(PointLight sphere, AABB clusterAABB) {
 
 // for each cluster
 void main() {
-	uint index = gl_WorkGroupID.x + 
-				 gl_WorkGroupID.y * gl_WorkGroupSize.x +
-				 gl_WorkGroupID.z * gl_WorkGroupSize.x * gl_WorkGroupSize.y;
+	uint threadCount = clusterCount.x * clusterCount.y;		// number of local active invocations
+	uint clusterID = threadCount * gl_WorkGroupID.z +		// Index to unique cluster
+				     gl_LocalInvocationID.x;								
 	
-	// populate local with lights in cluster
-	// count length of lights
-
-	// atomic_add(legnth of lights)
-
+	visibleCount = 0;										// initialize global count to 0
+	uint localCount = 0;									// initialize local count to 0
+    
+	uint localIndices[CLUSTER_MAX_LIGHTS];					// temporary array for local lights found
+	
+	if (gl_LocalInvocationID.x < threadCount)				// only search for lights in active invocations
+	{
+		for(uint lightID = 0; lightID < lightCount; lightID++)				// for each light in the scene
+		{
+			if(SphereIntersectAABB(lights[lightID], clusters[clusterID]))	// is light in cluster AABB
+			{
+				localIndices[localCount] = lightID;			// add light to local collection
+				localCount += 1;							// count lights
+				
+				if (localCount == CLUSTER_MAX_LIGHTS)
+					break;
+			}
+		}
+	}
 
 	barrier();
+	
+	if (gl_LocalInvocationID.x < threadCount)
+	{
+		// get the global count and atomically add local count
+		uint globalIndex = atomicAdd(visibleCount, localCount);
+
+		// set array index and count
+		lightArrays[clusterID] = LightArray(globalIndex, localCount);						
+	
+		// copy index into global index buffer at lightArray
+		for(int i = 0; i < localCount; i++)
+			lightIndices[globalIndex + i] = localIndices[i];
+	}
 };

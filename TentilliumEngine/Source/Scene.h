@@ -4,43 +4,42 @@
 #include "Systems/RenderSystem.h"
 #include "Systems/HierarchySystem.h"
 #include "Systems/LoadSystem.h"
+#include "Systems/MeshSystem.h"
 
-class Scene : HierarchySystem, TransformSystem, RenderSystem, LoadSystem
+class Scene : HierarchySystem, TransformSystem, RenderSystem, MeshSystem, LoadSystem
 {
 public:
+	// entt functions
 	using entt::basic_registry<entt::entity>::get;
 	using entt::basic_registry<entt::entity>::get_or_emplace;
 	using entt::basic_registry<entt::entity>::try_get;
 	using entt::basic_registry<entt::entity>::create;
 	using entt::basic_registry<entt::entity>::emplace;
+	using entt::basic_registry<entt::entity>::emplace_or_replace;
 	using entt::basic_registry<entt::entity>::erase;
 	using entt::basic_registry<entt::entity>::valid;
 	using entt::basic_registry<entt::entity>::destroy;
 	using entt::basic_registry<entt::entity>::all_of;
 	using entt::basic_registry<entt::entity>::any_of;
-	using entt::basic_registry<entt::entity>::view;
-	using entt::basic_registry<entt::entity>::group;
-
+	using entt::basic_registry<entt::entity>::replace;
+	using entt::basic_registry<entt::entity>::clear;
 	
-	using HierarchySystem::update;
-	using TransformSystem::update;
-	using RenderSystem::render;
 	
-	using RenderSystem::resize;
+	// render functions
+	using RenderSystem::size;
+	using RenderSystem::setSize;
+	using RenderSystem::getSize;
 	using RenderSystem::camera;
-	using RenderSystem::getCamera;
 	using RenderSystem::setCamera;
-	
+	using RenderSystem::getCamera;
+	using RenderSystem::render;
+
+	// load functions
 	using LoadSystem::load;
 	
-
 	void process() {
 		HierarchySystem::update();
 		TransformSystem::update();
 		RenderSystem::render();
 	}
-
-	Scene(int width, int height)
-		: RenderSystem(glm::uvec2(width, height)) 
-	{ }
 };

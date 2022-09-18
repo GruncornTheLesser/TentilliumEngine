@@ -29,7 +29,7 @@ public:
 	}
 	Texture(std::string filepath);
 
-	Texture(void* data, int width, int height = 0, Format channels = Format::NONE, Format format_hint = Format::NONE, Type type_hint = Type::NONE); // defaults to unsigned byte
+	Texture(void* data, int width, int height = 0, Format internal_format_hint = Format::NONE, Format data_format_hint = Format::NONE, Type type_hint = Type::NONE); // defaults to unsigned byte
 
 	~Texture();
 

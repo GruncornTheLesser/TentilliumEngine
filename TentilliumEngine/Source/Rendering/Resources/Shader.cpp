@@ -59,7 +59,7 @@ Shader<type>::Shader(std::string filepath)
 	std::ifstream fs(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 	const int len = fs.tellg();	// get size
 
-	if (len == 0)
+	if (len < 1)
 	{
 		std::cerr << "[Load Error] - failed to load Shader from file '" << filepath << "'" << std::endl;
 		throw std::exception();

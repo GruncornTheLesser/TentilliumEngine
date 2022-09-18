@@ -193,6 +193,7 @@
     <None Include="Resources\shaders\cluster_prepass.comp" />
     <None Include="Resources\shaders\cluster_shading.frag" />
     <None Include="Resources\shaders\cluster_shading.vert" />
+    <None Include="Resources\shaders\debug_cluster.vert" />
     <None Include="Resources\shaders\light_accumul.frag" />
     <None Include="Resources\shaders\light_culling.comp" />
     <None Include="Resources\shaders\light_accumul.vert" />
@@ -209,8 +210,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Resources\shaders\default.vert" />
-    <None Include="Resources\shaders\debug_line.vert" />
-    <None Include="Resources\shaders\debug_line.frag" />
+    <None Include="Resources\shaders\debug_cluster.frag" />
+    <None Include="Resources\shaders\debug_cluster.geom" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Components\PointLight.h" />
@@ -223,6 +224,7 @@
     <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
+    <ClInclude Include="Source\Systems\MeshSystem.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />
     <ClInclude Include="Source\Systems\entt_macros.h" />
@@ -251,6 +253,7 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\R (1).png" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />

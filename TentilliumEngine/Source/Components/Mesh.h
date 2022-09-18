@@ -73,7 +73,7 @@ public:
 	VAO(VAO&&);
 	VAO& operator=(VAO&&);
 
-	void draw(int primitive = 0x0004);
+	void draw(int primitive = 0x0004, int size = 0);
 
 	template<VertAttrib attrib>
 	void attach(VBO<attrib>* buffer);
@@ -85,14 +85,13 @@ public:
 
 	void detach(int attrib_no);
 
-	int getSize();
-
 	unsigned int get_handle() { return m_handle; }
 private:
 	void genVAO();
 
-	int findSize();
+	void findSize();
 
 	unsigned int m_handle;
+	int m_size;
 	VertAttrib m_size_attribute = None;
 };
