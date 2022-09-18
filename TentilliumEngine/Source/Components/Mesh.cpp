@@ -36,7 +36,7 @@ void VAO::draw(int primitive, int size)
 
 	glBindVertexArray(m_handle);
 	
-	if (m_size_attribute == Index)
+	if (m_size_attribute == V_Index)
 		glDrawElements(primitive, size, GL_UNSIGNED_INT, NULL);
 	else
 		glDrawArrays(primitive, 0, size);
@@ -44,7 +44,7 @@ void VAO::draw(int primitive, int size)
 	glBindVertexArray(NULL);
 }
 
-template<> void VAO::attach<Index>(VBO<Index>* buffer)
+template<> void VAO::attach<V_Index>(VBO<V_Index>* buffer)
 {
 	if (!buffer) return;
 
@@ -54,33 +54,33 @@ template<> void VAO::attach<Index>(VBO<Index>* buffer)
 	glBindVertexArray(NULL);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
 
-	if (m_size_attribute > Index) {
-		m_size_attribute = Index;
+	if (m_size_attribute > V_Index) {
+		m_size_attribute = V_Index;
 		m_size = buffer->get_size() / 4;
 	}
 }
-template<> void VAO::attach<Position>(VBO<Position>* buffer) { attach(Position, buffer, 3, GL_FLOAT, false, 0); }
-template<> void VAO::attach<Normal>(VBO<Normal>* buffer) { attach(Normal, buffer, 3, GL_FLOAT, false, 0); }
-template<> void VAO::attach<TexCoord>(VBO<TexCoord>* buffer) { attach(TexCoord, buffer, 2, GL_FLOAT, false, 0); }
-template<> void VAO::attach<BoneID>(VBO<BoneID>* buffer) { attach(BoneID, buffer, 4, GL_INT, false, 0); }
-template<> void VAO::attach<BoneWeight>(VBO<BoneWeight>* buffer) { attach(BoneWeight, buffer, 4, GL_FLOAT, false, 0); }
+template<> void VAO::attach<V_Position>(VBO<V_Position>* buffer) { attach(V_Position, buffer, 3, GL_FLOAT, false, 0); }
+template<> void VAO::attach<V_Normal>(VBO<V_Normal>* buffer) { attach(V_Normal, buffer, 3, GL_FLOAT, false, 0); }
+template<> void VAO::attach<V_TexCoord>(VBO<V_TexCoord>* buffer) { attach(V_TexCoord, buffer, 2, GL_FLOAT, false, 0); }
+template<> void VAO::attach<V_BoneID>(VBO<V_BoneID>* buffer) { attach(V_BoneID, buffer, 4, GL_INT, false, 0); }
+template<> void VAO::attach<V_BoneWeight>(VBO<V_BoneWeight>* buffer) { attach(V_BoneWeight, buffer, 4, GL_FLOAT, false, 0); }
 
-template<> void VAO::detach<Index>()
+template<> void VAO::detach<V_Index>()
 {
 	glBindVertexArray(m_handle);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
 	glBindVertexArray(NULL);
 
-	if (m_size_attribute == Index)
+	if (m_size_attribute == V_Index)
 		findSize();
 
 	glBindVertexArray(NULL);
 }
-template<> void VAO::detach<Position>() { detach(Position); }
-template<> void VAO::detach<Normal>() { detach(Normal); }
-template<> void VAO::detach<TexCoord>() { detach(TexCoord); }
-template<> void VAO::detach<BoneID>() { detach(BoneID); }
-template<> void VAO::detach<BoneWeight>() { detach(BoneWeight); }
+template<> void VAO::detach<V_Position>() { detach(V_Position); }
+template<> void VAO::detach<V_Normal>() { detach(V_Normal); }
+template<> void VAO::detach<V_TexCoord>() { detach(V_TexCoord); }
+template<> void VAO::detach<V_BoneID>() { detach(V_BoneID); }
+template<> void VAO::detach<V_BoneWeight>() { detach(V_BoneWeight); }
 
 void VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int type, bool normalized, int stride)
 {
@@ -120,17 +120,17 @@ void VAO::genVAO()
 
 void VAO::findSize()
 {
-	int bo, attrib_size, attribute = None;
+	int bo, attrib_size, attribute = V_None;
 	glBindVertexArray(m_handle);
 
 	glGetVertexArrayiv(m_handle, GL_ELEMENT_ARRAY_BUFFER_BINDING, &bo);
 	if (bo != 0) {
-		m_size_attribute = Index;
+		m_size_attribute = V_Index;
 		attrib_size = 1;
 	}
 	else 
 	{
-		for (int i = 0; i < None; i++)
+		for (int i = 0; i < V_None; i++)
 		{
 			glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &bo);
 			if (bo != 0) {

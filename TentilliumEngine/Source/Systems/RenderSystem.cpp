@@ -102,7 +102,7 @@ RenderSystem::RenderSystem() :
 	std::cout << "max work group invocations: " << max_invocations << std::endl;
 	std::cout << "max shared memory: " << max_shared_memory << " bytes" << std::endl;
 	*/
-	m_debug_cluster_vao.attach(Custom, &m_lightArrayBuffer, 2, GL_UNSIGNED_INT, false, 0);
+	m_debug_cluster_vao.attach(V_Custom, &m_lightArrayBuffer, 2, GL_UNSIGNED_INT, false, 0);
 #endif
 }
 

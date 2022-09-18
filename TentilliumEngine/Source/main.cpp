@@ -155,10 +155,10 @@ public:
 			box1 = scene.create();
 			scene.emplace<Hierarchy>(box1, root);
 			scene.emplace<Transform>(box1, glm::vec3(-0.5, 0, 0), glm::vec3(0.5f));
-			scene.emplace<VBO<Index>>(box1, indices);
-			scene.emplace<VBO<Position>>(box1, positions);
-			scene.emplace<VBO<Normal>>(box1, normals);
-			scene.emplace<VBO<TexCoord>>(box1, texCoords);
+			scene.emplace<VBO<V_Index>>(box1, indices);
+			scene.emplace<VBO<V_Position>>(box1, positions);
+			scene.emplace<VBO<V_Normal>>(box1, normals);
+			scene.emplace<VBO<V_TexCoord>>(box1, texCoords);
 			scene.emplace<Material>(box1, Texture("Resources/textures/pigeon.jpg"));
 		}
 
@@ -167,10 +167,10 @@ public:
 			box2 = scene.create();
 			scene.emplace<Hierarchy>(box2, box1);
 			scene.emplace<Transform>(box2, glm::vec3(0.5, 0, 0), glm::vec3(0.5f));
-			scene.emplace<VBO<Index>>(box2, scene.get<VBO<Index>>(box1));
-			scene.emplace<VBO<Position>>(box2, scene.get<VBO<Position>>(box1));
-			scene.emplace<VBO<Normal>>(box2, scene.get<VBO<Normal>>(box1));
-			scene.emplace<VBO<TexCoord>>(box2, scene.get<VBO<TexCoord>>(box1));
+			scene.emplace<VBO<V_Index>>(box2, scene.get<VBO<V_Index>>(box1));
+			scene.emplace<VBO<V_Position>>(box2, scene.get<VBO<V_Position>>(box1));
+			scene.emplace<VBO<V_Normal>>(box2, scene.get<VBO<V_Normal>>(box1));
+			scene.emplace<VBO<V_TexCoord>>(box2, scene.get<VBO<V_TexCoord>>(box1));
 			scene.emplace<Material>(box2, Texture(RGBtest, 2, 2, Texture::Format::RGB));
 			int x = Resource<Texture>::count(2);
 		}
@@ -179,10 +179,10 @@ public:
 		{
 			entt::entity floor = scene.create();
 			scene.emplace<Transform>(floor, glm::vec3(0, -0.1f, 0), glm::vec3(200, 0, 200));
-			scene.emplace<VBO<Index>>(floor, scene.get<VBO<Index>>(box1));
-			scene.emplace<VBO<Position>>(floor, scene.get<VBO<Position>>(box1));
-			scene.emplace<VBO<Normal>>(floor, scene.get<VBO<Normal>>(box1));
-			scene.emplace<VBO<TexCoord>>(floor, scene.get<VBO<TexCoord>>(box1));
+			scene.emplace<VBO<V_Index>>(floor, scene.get<VBO<V_Index>>(box1));
+			scene.emplace<VBO<V_Position>>(floor, scene.get<VBO<V_Position>>(box1));
+			scene.emplace<VBO<V_Normal>>(floor, scene.get<VBO<V_Normal>>(box1));
+			scene.emplace<VBO<V_TexCoord>>(floor, scene.get<VBO<V_TexCoord>>(box1));
 			scene.emplace<Material>(floor, Texture("Resources/textures/grid.png"));
 		}
 
@@ -191,10 +191,10 @@ public:
 			light1 = scene.create();
 			scene.emplace<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(1, 0, 0), 10.0f);
 			scene.emplace<Transform>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(0.1f));
-			scene.emplace<VBO<Index>>(light1, scene.get<VBO<Index>>(box1));
-			scene.emplace<VBO<Position>>(light1, scene.get<VBO<Position>>(box1));
-			scene.emplace<VBO<Normal>>(light1, scene.get<VBO<Normal>>(box1));
-			scene.emplace<VBO<TexCoord>>(light1, scene.get<VBO<TexCoord>>(box1));
+			scene.emplace<VBO<V_Index>>(light1, scene.get<VBO<V_Index>>(box1));
+			scene.emplace<VBO<V_Position>>(light1, scene.get<VBO<V_Position>>(box1));
+			scene.emplace<VBO<V_Normal>>(light1, scene.get<VBO<V_Normal>>(box1));
+			scene.emplace<VBO<V_TexCoord>>(light1, scene.get<VBO<V_TexCoord>>(box1));
 			scene.emplace<Material>(light1, glm::vec4(1, 0, 0, 1));
 		}
 
@@ -203,10 +203,10 @@ public:
 			light2 = scene.create();
 			scene.emplace<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 1), 10.0f);
 			scene.emplace<Transform>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0.1f));
-			scene.emplace<VBO<Index>>(light2, scene.get<VBO<Index>>(box1));
-			scene.emplace<VBO<Position>>(light2, scene.get<VBO<Position>>(box1));
-			scene.emplace<VBO<Normal>>(light2, scene.get<VBO<Normal>>(box1));
-			scene.emplace<VBO<TexCoord>>(light2, scene.get<VBO<TexCoord>>(box1));
+			scene.emplace<VBO<V_Index>>(light2, scene.get<VBO<V_Index>>(box1));
+			scene.emplace<VBO<V_Position>>(light2, scene.get<VBO<V_Position>>(box1));
+			scene.emplace<VBO<V_Normal>>(light2, scene.get<VBO<V_Normal>>(box1));
+			scene.emplace<VBO<V_TexCoord>>(light2, scene.get<VBO<V_TexCoord>>(box1));
 			scene.emplace<Material>(light2, glm::vec4(0, 0, 1, 1));
 		}
 	}

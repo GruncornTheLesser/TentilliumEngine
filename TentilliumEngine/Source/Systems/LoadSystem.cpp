@@ -120,17 +120,17 @@ entt::entity LoadSystem::load(std::string filepath)
 					for (unsigned int index_i = 0; index_i < face.mNumIndices; index_i++)
 						indices.push_back(face.mIndices[index_i] + vertexOffset);
 				}
-				get_or_emplace<VBO<Index>>(e, nullptr, sizeof(int) * faceCount * 3)
+				get_or_emplace<VBO<V_Index>>(e, nullptr, sizeof(int) * faceCount * 3)
 					.set_data(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
 			}
 
 			if (aiMeshPtr->HasPositions()) {
-				get_or_emplace<VBO<Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+				get_or_emplace<VBO<V_Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
 					.set_data(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 			}
 
 			if (aiMeshPtr->HasNormals()) {
-				get_or_emplace<VBO<Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+				get_or_emplace<VBO<V_Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
 					.set_data(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 			}
 
@@ -140,7 +140,7 @@ entt::entity LoadSystem::load(std::string filepath)
 					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].x);
 					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].y);
 				}
-				get_or_emplace<VBO<TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
+				get_or_emplace<VBO<V_TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
 					.set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
 			}
 

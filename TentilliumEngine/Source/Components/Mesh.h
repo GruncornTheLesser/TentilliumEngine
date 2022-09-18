@@ -43,7 +43,7 @@
 //	> can adjust mesh per program to include or exclude vertex data
 //	> more data oriented allowing easier repurposing of data
 
-enum VertAttrib { Index = -1, Position, Normal, TexCoord, BoneID, BoneWeight, Custom, None, };
+enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None, };
 
 template<VertAttrib>
 class VBO final : public GLbuffer {
@@ -93,5 +93,5 @@ private:
 
 	unsigned int m_handle;
 	int m_size;
-	VertAttrib m_size_attribute = None;
+	VertAttrib m_size_attribute = V_None;
 };
