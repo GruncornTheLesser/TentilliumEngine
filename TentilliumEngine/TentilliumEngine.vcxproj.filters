@@ -44,12 +44,6 @@
     <ClCompile Include="Source\Rendering\Window\AppWindow.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Components\Transform.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Components\FlagManager.h">
-      <Filter>Header Files\Components</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp">
       <Filter>Source Files\Rendering\Resources</Filter>
     </ClCompile>
@@ -133,9 +127,6 @@
     <ClInclude Include="Source\Scene.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Flag.h">
-      <Filter>Header Files\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Components\Material.h">
       <Filter>Header Files\Rendering\Resources</Filter>
     </ClInclude>
@@ -182,9 +173,6 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\textures\pigeon.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\..\Downloads\R (1).png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

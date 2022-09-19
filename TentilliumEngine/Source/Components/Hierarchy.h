@@ -1,6 +1,5 @@
 #pragma once
 #include <entt/entt.hpp>
-#include "Flag.h"
 
 struct Hierarchy
 {

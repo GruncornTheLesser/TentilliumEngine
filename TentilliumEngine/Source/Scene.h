@@ -41,5 +41,7 @@ public:
 		HierarchySystem::update();
 		TransformSystem::update();
 		RenderSystem::render();
+
+		clear<UpdateTag>();
 	}
 };

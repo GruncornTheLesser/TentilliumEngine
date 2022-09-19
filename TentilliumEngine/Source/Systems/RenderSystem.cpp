@@ -14,9 +14,9 @@
 #define OPTIMUM_TILE_COUNT 16		// the target number of clusters per depth
 #define MAX_CLUSTER_COUNT 64		// the maximum number of clusters
 
-#define CALC_CLUSTER_SIZE(size) (int)std::sqrtf(OPTIMUM_TILE_COUNT * (size.x) / size.y), \
-								(int)std::sqrtf(OPTIMUM_TILE_COUNT * (size.y) / size.x), \
-								MAX_CLUSTER_COUNT / OPTIMUM_TILE_COUNT
+#define CALC_CLUSTER_SIZE(size) (int)std::sqrtf(OPTIMUM_TILE_COUNT * size.x / size.y), \
+								(int)std::sqrtf(OPTIMUM_TILE_COUNT * size.y / size.x), \
+								(int)(MAX_CLUSTER_COUNT / OPTIMUM_TILE_COUNT)
 
 /* TODO:
 * > Light Chunk Management
@@ -86,22 +86,6 @@ RenderSystem::RenderSystem() :
 	m_depth_framebuffer.attach(Framebuffer::DEPTH, Texture(nullptr, 1, 1, Texture::Format::DEPTH));
 
 #ifdef CLUSTER_DEBUG
-	/*
-	glm::ivec3 max_count, max_size; int max_invocations, max_shared_memory;
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &max_count[0]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &max_count[1]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &max_count[2]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &max_size[0]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &max_size[1]);
-	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &max_size[2]);
-	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &max_invocations);
-	glGetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, &max_shared_memory);
-
-	std::cout << "max work group count: " << max_count.x << ", " << max_count.y << ", " << max_count.z << std::endl;
-	std::cout << "max work group size: " << max_size.x << ", " << max_size.y << ", " << max_size.z << std::endl;
-	std::cout << "max work group invocations: " << max_invocations << std::endl;
-	std::cout << "max shared memory: " << max_shared_memory << " bytes" << std::endl;
-	*/
 	m_debug_cluster_vao.attach(V_Custom, &m_lightArrayBuffer, 2, GL_UNSIGNED_INT, false, 0);
 #endif
 }
@@ -111,7 +95,7 @@ void RenderSystem::setSize(glm::ivec2 size)
 {
 	if (size.x == 0 || size.y == 0)  return;
 
-	m_size = size;
+	m_size = (glm::uvec2)size;
 	m_clusterSize = glm::uvec3(CALC_CLUSTER_SIZE(size));
 
 	if (!valid(m_camera)) return;
@@ -141,17 +125,13 @@ glm::ivec2 RenderSystem::getSize()
 
 void RenderSystem::setCamera(entt::entity e)
 {
-	if (!valid(m_camera)) throw std::exception();
-	
-	auto [proj, view] = try_get<Projection, Transform>(e);
-	if (!proj || !view) throw std::exception();
-	
 	m_camera = e;
-
+	auto [proj, view] = get<Projection, WorldTransform>(camera);	
+	
 	m_renderDataBuffer.set_data(RenderData{ 
-		glm::inverse(proj->m_proj), 
-		proj->m_zNear, 
-		proj->m_zFar, 
+		glm::inverse(proj.m_proj), 
+		proj.m_zNear, 
+		proj.m_zFar, 
 		m_size,
 		m_clusterSize
 		});
@@ -166,18 +146,10 @@ entt::entity RenderSystem::getCamera()
 
 void RenderSystem::render()
 {
-	// get camera
-	if (!valid(m_camera)) return;
-
-	// get camera projection
-	auto proj_comp = try_get<Projection>(m_camera);
-	if (!proj_comp) throw std::exception();
-	glm::mat4 proj = *proj_comp;
-
 	// get camera view
-	auto view_comp = try_get<Transform>(m_camera);
-	if (!view_comp) throw std::exception();
-	const glm::mat4& view = glm::inverse(view_comp->getWorldMatrix());
+	glm::mat4 proj = get<Projection>(camera);
+	glm::mat4 view = get<WorldTransform>(camera);
+	view = glm::inverse(view);
 
 	// depth prepass
 	/*
@@ -191,13 +163,13 @@ void RenderSystem::render()
 	// light culling
 	m_culling.bind();
 	m_culling.setUniformMat4("view", view);
-	m_culling.setUniform1i("lightCount", storage<PointLight>().size());
+	m_culling.setUniform1i("lightCount", (int)storage<PointLight>().size());
 	m_culling.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
 	
 	m_program.bind();
 	for (auto [entity, mesh, material, transform] : render_scene_view.each())
 	{
-		m_program.setUniformMat4("MVP", proj * view * transform.getWorldMatrix());
+		m_program.setUniformMat4("MVP", proj * view * (glm::mat4)transform);
 		material.bind(6);
 		mesh.draw();
 	}

@@ -10,10 +10,11 @@
 
 /* REVIEW:
 *	> localize reference counting to Resource
+*	> replace current flag system with replace and a entt tag
 */
 
 /* TODO:
-*	> replace current flag system with replace and a entt tag
+*	
 *	> seperate rendering functionality further for mesh/camera/rendering type
 * 
 *	> Tidy AppWindow functionality into something less ugly
@@ -139,7 +140,8 @@ public:
 		{ 
 			entt::entity cam = scene.create();
 			scene.emplace<Projection>(cam, glm::radians(60.0f), 800.0f / 600.0f, 0.02f, 100.0f);
-			scene.emplace<Transform>(cam, glm::vec3(0, 0, 0));
+			scene.emplace<Position>(cam);
+			scene.emplace<Rotation>(cam);
 			scene.camera = cam;
 		}
 
@@ -147,18 +149,23 @@ public:
 		{
 			obj = scene.load("Resources/meshes/Person.fbx");
 			scene.emplace<Hierarchy>(obj, root);
-			scene.emplace<Transform>(obj, glm::vec3(0, 0, -2), glm::vec3(1));
+			scene.emplace<Position>(obj, 0, 0, -2);
+			scene.emplace<Rotation>(obj);
 		}
 
 		// create box1
 		{
 			box1 = scene.create();
-			scene.emplace<Hierarchy>(box1, root);
-			scene.emplace<Transform>(box1, glm::vec3(-0.5, 0, 0), glm::vec3(0.5f));
+			scene.emplace<Hierarchy>(box1, obj);
+			
+			scene.emplace<Position>(box1, -0.5, 0, 0);
+			scene.emplace<Scale>(box1, 0.5f);
+			
 			scene.emplace<VBO<V_Index>>(box1, indices);
 			scene.emplace<VBO<V_Position>>(box1, positions);
 			scene.emplace<VBO<V_Normal>>(box1, normals);
 			scene.emplace<VBO<V_TexCoord>>(box1, texCoords);
+			
 			scene.emplace<Material>(box1, Texture("Resources/textures/pigeon.jpg"));
 		}
 
@@ -166,23 +173,30 @@ public:
 		{
 			box2 = scene.create();
 			scene.emplace<Hierarchy>(box2, box1);
-			scene.emplace<Transform>(box2, glm::vec3(0.5, 0, 0), glm::vec3(0.5f));
+			
+			scene.emplace<Position>(box2, 0.5, 0, 0);
+			scene.emplace<Scale>(box2, 0.5f);
+			
 			scene.emplace<VBO<V_Index>>(box2, scene.get<VBO<V_Index>>(box1));
 			scene.emplace<VBO<V_Position>>(box2, scene.get<VBO<V_Position>>(box1));
 			scene.emplace<VBO<V_Normal>>(box2, scene.get<VBO<V_Normal>>(box1));
 			scene.emplace<VBO<V_TexCoord>>(box2, scene.get<VBO<V_TexCoord>>(box1));
+			
 			scene.emplace<Material>(box2, Texture(RGBtest, 2, 2, Texture::Format::RGB));
-			int x = Resource<Texture>::count(2);
 		}
 		
 		// floor
 		{
 			entt::entity floor = scene.create();
-			scene.emplace<Transform>(floor, glm::vec3(0, -0.1f, 0), glm::vec3(200, 0, 200));
+			
+			scene.emplace<Position>(floor, 0, -0.1f, 0);
+			scene.emplace<Scale>(floor, 200, 0, 200);
+			
 			scene.emplace<VBO<V_Index>>(floor, scene.get<VBO<V_Index>>(box1));
 			scene.emplace<VBO<V_Position>>(floor, scene.get<VBO<V_Position>>(box1));
 			scene.emplace<VBO<V_Normal>>(floor, scene.get<VBO<V_Normal>>(box1));
 			scene.emplace<VBO<V_TexCoord>>(floor, scene.get<VBO<V_TexCoord>>(box1));
+			
 			scene.emplace<Material>(floor, Texture("Resources/textures/grid.png"));
 		}
 
@@ -190,11 +204,15 @@ public:
 		{
 			light1 = scene.create();
 			scene.emplace<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(1, 0, 0), 10.0f);
-			scene.emplace<Transform>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(0.1f));
+			
+			scene.emplace<Position>(light1, 0.5f, 0, 0);
+			scene.emplace<Scale>(light1, 0.1f);
+			
 			scene.emplace<VBO<V_Index>>(light1, scene.get<VBO<V_Index>>(box1));
 			scene.emplace<VBO<V_Position>>(light1, scene.get<VBO<V_Position>>(box1));
 			scene.emplace<VBO<V_Normal>>(light1, scene.get<VBO<V_Normal>>(box1));
 			scene.emplace<VBO<V_TexCoord>>(light1, scene.get<VBO<V_TexCoord>>(box1));
+			
 			scene.emplace<Material>(light1, glm::vec4(1, 0, 0, 1));
 		}
 
@@ -202,31 +220,26 @@ public:
 		{
 			light2 = scene.create();
 			scene.emplace<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 1), 10.0f);
-			scene.emplace<Transform>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0.1f));
+			
+			scene.emplace<Position>(light2, -0.5f, 0, 0);
+			scene.emplace<Scale>(light2, 0.1f);
+
 			scene.emplace<VBO<V_Index>>(light2, scene.get<VBO<V_Index>>(box1));
 			scene.emplace<VBO<V_Position>>(light2, scene.get<VBO<V_Position>>(box1));
 			scene.emplace<VBO<V_Normal>>(light2, scene.get<VBO<V_Normal>>(box1));
 			scene.emplace<VBO<V_TexCoord>>(light2, scene.get<VBO<V_TexCoord>>(box1));
+			
 			scene.emplace<Material>(light2, glm::vec4(0, 0, 1, 1));
 		}
 	}
 
 	void onProcess(float delta) {
-
-		scene.get<Transform>(box1).position = glm::vec3(cos(time), sin(time), -1);
-		scene.get<Transform>(box2).position = glm::vec3(-sin(time), -cos(time), -1);
-
-		//scene.replace<PointLight>(light1, PointLight(glm::vec3(-sin(time) * 20, 1, 0), glm::vec3(1, 0, 0), 10.0f));
-
 		time += delta;
 
-		Transform& view = scene.get<Transform>(scene.camera);
-		glm::mat4 proj = scene.get<Projection>(scene.camera);
-		if (isPressed(Button::LEFT))
-			cam_dir += (glm::vec2)m_mouse.getDelta() / glm::vec2(getSize());
-		view.rotation = glm::quat(glm::vec3(cam_dir.y, cam_dir.x, 0));
+		if (isPressed(Button::LEFT)) cam_dir += (glm::vec2)m_mouse.getDelta() / glm::vec2(getSize());
 		
-		glm::vec3 move_direction{ 0, 0, 0 };
+
+		glm::vec3 move_direction;
 		if (isPressed(Key::W)) move_direction.z -= 1;
 		if (isPressed(Key::S)) move_direction.z += 1;
 		if (isPressed(Key::A)) move_direction.x -= 1;
@@ -235,14 +248,18 @@ public:
 		if (isPressed(Key::R)) move_direction.y += 1;
 
 		
-		if (isPressed(Key::LEFT_SHIFT)) {
-			move_direction *= 10;
-		}
-		if (isPressed(Key::LEFT_CONTROL)) {
-			move_direction *= 0.1;
-		}
+		if (isPressed(Key::LEFT_SHIFT))		move_direction *= 10;
+		if (isPressed(Key::LEFT_CONTROL))	move_direction *= 0.1;
 
-		view.position += view.rotation * move_direction * delta; // rotate direction by camera rotation
+		glm::quat camera_rotation = scene.get<Rotation>(scene.camera);
+		glm::vec3 camera_position = scene.get<Position>(scene.camera);
+		
+		scene.replace<Position>(scene.camera, camera_rotation * move_direction * delta + camera_position); // rotate direction by camera rotation
+		scene.replace<Rotation>(scene.camera, cam_dir.y, cam_dir.x, 0.0f);
+
+		scene.replace<Position>(box1, cos(time), sin(time), 0.0f);
+		scene.replace<Position>(box2, -sin(time), -cos(time), 0.0f);
+		scene.replace<Rotation>(obj, 0.0, time, 0);
 	}
 
 	void onDraw() {

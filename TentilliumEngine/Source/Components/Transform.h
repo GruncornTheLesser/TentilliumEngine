@@ -1,50 +1,120 @@
 #pragma once
 #include <glm.hpp>
 #include <gtc/quaternion.hpp>
-#include "Flag.h"
+#include <gtx/transform.hpp>
+#include <gtc/quaternion.hpp>
 
 
-struct Transform
-{
-public:
+struct Position {
 	friend class TransformSystem;
-
-	__declspec(property (put = setPosition, get = getPosition)) const glm::vec3& position;
-	__declspec(property (put = setRotation, get = getRotation)) const glm::quat& rotation;
-	__declspec(property (put = setScale, get = getScale)) const glm::vec3& scale;
-
-	static void Decompose(glm::mat4 mat, glm::vec3& pos, glm::vec3& sca, glm::quat& rot);
-
 public:
-	/*constructs new transform by setting local matrix and decomposing local matrix into position, scale and rotation*/
-	Transform(const glm::mat4& localMatrix);
-	/*constructs new transform by calculating new local matrix and setting position, scale and rotation*/
-	Transform(const glm::vec3& position = glm::vec3(0, 0, 0), 
-			  const glm::vec3& scale = glm::vec3(1),
-			  const glm::quat& rotation = glm::quat(glm::vec3(0, 0, 0)));
+	Position() { }
 
-	const glm::vec3& getPosition();
-	const glm::vec3& getScale();
-	const glm::quat& getRotation();
-	const glm::mat4& getLocalMatrix();
-	const glm::mat4& getWorldMatrix();
+	template<typename t_x, typename t_y, typename t_z>
+	Position(const t_x& x, const t_y& y, const t_z& z)
+		: m_position(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z))
+	{ }
 
-	void setPosition(const glm::vec3& pos);
-	void setScale(const glm::vec3& scl);
-	void setRotation(const glm::quat& rot);
-	
-	// updates local matrix 
-	void updateLocal();
+	template<typename T, glm::precision P>
+	Position(const glm::tvec3<T, P>& position)
+		: m_position(position)
+	{ }
 
-	operator glm::mat4() { return m_worldMatrix; }
+	glm::mat4 getMatrix() { return glm::translate(m_position); }
+	operator glm::vec3() { return m_position; }
 
 private:
-	Flag m_updateFlag;
-
-	glm::vec3 m_scale;
 	glm::vec3 m_position;
-	glm::quat m_rotation;
-	glm::mat4 m_localMatrix;
-	glm::mat4 m_worldMatrix;
 };
 
+struct Scale {
+	friend class TransformSystem;
+public:
+	Scale() { }
+
+	template<typename t_x, typename t_y, typename t_z>
+	Scale(const t_x& x, const t_y& y, const t_z& z)
+		: m_scale(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z))
+	{ }
+	
+	template<typename t>
+	Scale(const t& s)
+		: m_scale(s, s, s)
+	{ }
+
+	template<typename T, glm::precision P>
+	Scale(const glm::tvec3<T, P>& scale)
+		: m_scale(scale)
+	{ }
+
+	glm::mat4 getMatrix() { return glm::scale(m_scale); }
+	operator glm::vec3() { return m_scale; }
+
+private:
+	glm::vec3 m_scale;
+};
+
+struct Rotation {
+	friend class TransformSystem;
+public:
+	Rotation() { }
+
+	template<typename T, glm::precision P>
+	Rotation(const glm::tquat<T, P>& rotation)
+		: m_rotation(rotation)
+	{ }
+
+	template<typename T, glm::precision P>
+	Rotation(const glm::tvec3<T, P>& eulerAngles)
+		: m_rotation(eulerAngles)
+	{ }
+	template<typename t_x, typename t_y, typename t_z>
+	Rotation(const t_x& euler_x, const t_y& euler_y, const t_z& euler_z)
+		: m_rotation(glm::vec3(static_cast<float>(euler_x), static_cast<float>(euler_y), static_cast<float>(euler_z)))
+	{ }
+
+	glm::mat4 getMatrix() { return (glm::mat4)m_rotation; }
+	glm::vec3 getEulerAngles() { return glm::eulerAngles(m_rotation); }
+	operator glm::quat() { return m_rotation; }
+
+private:
+	glm::quat m_rotation;
+};
+
+struct LocalTransform {
+	friend class TransformSystem;
+public:
+	LocalTransform()
+		: m_transform()
+	{ }
+
+	template<typename T, glm::precision P>
+	LocalTransform(const glm::tmat4x4<T, P>& transform)
+		: m_transform(transform)
+	{ }
+
+	operator glm::mat4() { return m_transform; }
+
+private:
+	glm::mat4 m_transform;
+};
+
+struct WorldTransform {
+	friend class TransformSystem;
+public:
+	WorldTransform()
+		: m_transform()
+	{ }
+
+	template<typename T, glm::precision P>
+	WorldTransform(const glm::tmat4x4<T, P>& transform)
+		: m_transform(transform)
+	{ }
+
+	glm::vec3 getPosition() { return glm::vec3(m_transform[3]); }
+	
+	operator glm::mat4() { return m_transform; }
+
+private:
+	glm::mat4 m_transform;
+};

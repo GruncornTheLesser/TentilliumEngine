@@ -5,7 +5,6 @@
 #include <glfw3.h>	// GL framework
 #include <iostream>
 #include <vector>
-#include "../../Components/FlagManager.h"
 
 class callback_func {
 
@@ -269,8 +268,6 @@ void AppWindow::main(std::vector<AppWindow*> windows)
         float temp = (float)glfwGetTime();
         delta = temp - time;
         time = temp;
-
-        FlagManager::clear();
     }
 }
 

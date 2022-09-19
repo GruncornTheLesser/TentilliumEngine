@@ -177,8 +177,6 @@
     <ClCompile Include="Source\Systems\LoadSystem.cpp" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
     <ClCompile Include="Source\Components\Projection.cpp" />
-    <ClCompile Include="Source\Components\Transform.cpp" />
-    <ClCompile Include="Source\Components\FlagManager.h" />
     <ClCompile Include="Source\Components\Mesh.cpp" />
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp" />
     <ClCompile Include="Source\Rendering\Window\AppWindow.cpp" />
@@ -221,7 +219,6 @@
     <ClInclude Include="Source\Components\Mesh.h" />
     <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
     <ClInclude Include="Source\Components\Material.h" />
-    <ClInclude Include="Source\Components\Flag.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
@@ -253,7 +250,6 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\R (1).png" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />

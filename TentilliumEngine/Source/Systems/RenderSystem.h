@@ -11,8 +11,7 @@
 
 #include <gtc/matrix_transform.hpp>
 
-//#define CLUSTER_GENERATION_DEBUG
-#define CLUSTER_DEBUG
+//#define CLUSTER_DEBUG
 
 class RenderSystem : virtual protected entt::registry {
 public:
@@ -31,8 +30,7 @@ public:
 
 	entt::entity getCamera();
 private:
-	VIEW(render_scene_view, GET(VAO, Material, Transform), EXC());
-	VIEW(render_UI_view, GET(VAO, Material), EXC(Transform));
+	VIEW(render_scene_view, GET(VAO, Material, WorldTransform), EXC());
 	VIEW(light_view, GET(PointLight), EXC());
 
 	entt::entity m_camera;
@@ -64,6 +62,8 @@ private:
 #endif
 
 	static void constructLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);
+
 	static void destroyLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);
+
 	static void updateLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);
 };

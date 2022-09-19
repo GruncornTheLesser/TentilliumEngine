@@ -4,14 +4,23 @@
 #include "../Components/Transform.h"
 
 class TransformSystem : virtual protected entt::registry {
-private:
-	
-	VIEW(viewRootTransform, GET(Transform), EXC(Hierarchy));
-	VIEW(viewTransform, GET(Hierarchy, Transform), EXC());
 
 public:
-	TransformSystem() { }
+	TransformSystem();
+
+	void update();
 
 protected:
-	void update();
+	TAG(UpdateTag);
+
+private:
+	VIEW(localUpdateView, GET(LocalTransform, UpdateTag), EXC());
+	VIEW(worldUpdateView, GET(Hierarchy, LocalTransform, WorldTransform), EXC());
+	VIEW(worldRootUpdateView, GET(LocalTransform, WorldTransform), EXC(Hierarchy)); // any order
+
+	static void attachTransform(entt::registry& reg, entt::entity e);
+
+	static void detachTransform(entt::registry& reg, entt::entity e);
+
+	static void updateTransform(entt::registry& reg, entt::entity e);
 };
