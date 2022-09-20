@@ -4,7 +4,7 @@
 class HierarchySystem : virtual protected entt::registry {
 
 private:
-	VIEW(viewHierarchy, GET(Hierarchy), EXC());
+	VIEW(viewHierarchy, GET(Parent), EXC());
 
 public:
 	void update();

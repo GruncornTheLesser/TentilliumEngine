@@ -1,7 +1,7 @@
 #pragma once
 #include <entt/entt.hpp>
 
-struct Hierarchy
+struct Parent
 {
 friend class TransformSystem;
 
@@ -9,5 +9,5 @@ public:
 	entt::entity parent;
 
 public:
-	Hierarchy(entt::entity p) : parent(p) { }
+	Parent(entt::entity p) : parent(p) { }
 };

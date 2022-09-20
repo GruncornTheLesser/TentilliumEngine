@@ -30,16 +30,16 @@
 void HierarchySystem::update()
 {
 	for (auto it = viewHierarchy.rbegin(); it != viewHierarchy.rend();) {	// iterate over Hierarchies in reverse
-		Hierarchy& hierarchy = get<Hierarchy>(*it);							// get Hierarchy
+		Parent& hierarchy = get<Parent>(*it);							// get Hierarchy
 
 		if (!valid(hierarchy.parent) || hierarchy.parent == *it) {	// if parent invalid or parent of itself
-			erase<Hierarchy>(*it);									// this is does not capture all edge cases 
+			erase<Parent>(*it);									// this is does not capture all edge cases 
 			continue;												// eg if a graph contains a loop the system will break			
 		}
 
-		Hierarchy* hierachyParent = try_get<Hierarchy>(hierarchy.parent);	// if hierarchy child(current) is being processed before
+		Parent* hierachyParent = try_get<Parent>(hierarchy.parent);	// if hierarchy child(current) is being processed before
 		if (hierachyParent && &hierarchy > hierachyParent) {				// it's parent; swap their positions
-			viewHierarchy.storage<Hierarchy>().swap_elements(*it, hierarchy.parent);
+			viewHierarchy.storage<Parent>().swap_elements(*it, hierarchy.parent);
 			continue;														// by continuing it skips the iteration
 		}
 

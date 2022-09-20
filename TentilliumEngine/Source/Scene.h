@@ -10,21 +10,21 @@ class Scene : HierarchySystem, TransformSystem, RenderSystem, MeshSystem, LoadSy
 {
 public:
 	// entt functions
-	using entt::basic_registry<entt::entity>::get;
-	using entt::basic_registry<entt::entity>::get_or_emplace;
-	using entt::basic_registry<entt::entity>::try_get;
 	using entt::basic_registry<entt::entity>::create;
-	using entt::basic_registry<entt::entity>::emplace;
-	using entt::basic_registry<entt::entity>::emplace_or_replace;
+	using entt::basic_registry<entt::entity>::get;
 	using entt::basic_registry<entt::entity>::erase;
 	using entt::basic_registry<entt::entity>::valid;
 	using entt::basic_registry<entt::entity>::destroy;
 	using entt::basic_registry<entt::entity>::all_of;
 	using entt::basic_registry<entt::entity>::any_of;
-	using entt::basic_registry<entt::entity>::replace;
 	using entt::basic_registry<entt::entity>::clear;
-	
-	
+	// aliased entt functions
+	template<typename Component, typename ... Args>
+	void set(entt::entity e, Args&& ... args) {
+		emplace_or_replace<Component>(e, args...);
+	}
+
+
 	// render functions
 	using RenderSystem::size;
 	using RenderSystem::setSize;
@@ -42,6 +42,6 @@ public:
 		TransformSystem::update();
 		RenderSystem::render();
 
-		clear<UpdateTag>();
+		clear<Transform::UpdateTag>();
 	}
 };

@@ -35,10 +35,10 @@ void Material::set_normal(Texture texture)
 }
 
 void Material::bind(int index, int texture_slot_offset) const {
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, GLbuffer::get_handle());
+	glBindBufferBase(GL_UNIFORM_BUFFER, index, GLbuffer::get_handle());
 	for (auto& [slot, texture] : m_textures)
 	{
-		glActiveTexture(GL_TEXTURE0+ texture_slot_offset + slot);
+		glActiveTexture(GL_TEXTURE0 + texture_slot_offset + slot);
 		glBindTexture(GL_TEXTURE_2D, texture.handle);
 	}
 }

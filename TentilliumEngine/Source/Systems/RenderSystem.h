@@ -9,8 +9,6 @@
 #include "../Rendering/Resources/Framebuffer.h"
 #include <glm.hpp>
 
-#include <gtc/matrix_transform.hpp>
-
 //#define CLUSTER_DEBUG
 
 class RenderSystem : virtual protected entt::registry {
@@ -30,7 +28,7 @@ public:
 
 	entt::entity getCamera();
 private:
-	VIEW(render_scene_view, GET(VAO, Material, WorldTransform), EXC());
+	VIEW(render_scene_view, GET(VAO, Material, Transform::WorldMatrix), EXC());
 	VIEW(light_view, GET(PointLight), EXC());
 
 	entt::entity m_camera;
@@ -52,15 +50,15 @@ private:
 	ShaderProgram<COMP> m_prepass{ "Resources/shaders/cluster_prepass.comp" };
 	ShaderProgram<COMP> m_culling{ "Resources/shaders/cluster_culling.comp" };
 	ShaderProgram<VERT, FRAG> m_shading{ "Resources/shaders/cluster_shading.shader" };
-	ShaderProgram<VERT, FRAG> m_depth_prepass{ "Resources/shaders/depth_prepass.shader" };
 
-	ShaderProgram<VERT, FRAG> m_program{ "Resources/shaders/default.shader" };
+	//ShaderProgram<VERT, FRAG> m_depth_prepass{ "Resources/shaders/depth_prepass.shader" };
+
+	//ShaderProgram<VERT, FRAG> m_program{ "Resources/shaders/default.shader" };
 
 #if defined(CLUSTER_DEBUG)
 	ShaderProgram<VERT, GEOM, FRAG> m_debug_cluster_program{ "Resources/shaders/debug_cluster.shader" };
 	VAO m_debug_cluster_vao;
 #endif
-
 	static void constructLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);
 
 	static void destroyLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);

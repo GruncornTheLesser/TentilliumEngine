@@ -175,6 +175,9 @@
     <Image Include="Resources\textures\pigeon.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\textures\grid.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Source\notes.txt" />

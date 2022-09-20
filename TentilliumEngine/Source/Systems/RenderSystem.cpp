@@ -9,14 +9,14 @@
 #define OPTIMUM_TILE_COUNT 128		// the target number of clusters per depth
 #define MAX_CLUSTER_COUNT 4096		// the maximum number of clusters
 */
-#define CLUSTER_MAX_LIGHTS 4		// the maximum number of lights per cluster
-#define SCENE_MAX_LIGHTS 16			// the maximum number of lights in the entire scene
-#define OPTIMUM_TILE_COUNT 16		// the target number of clusters per depth
-#define MAX_CLUSTER_COUNT 64		// the maximum number of clusters
+#define CLUSTER_MAX_LIGHTS 256		// the maximum number of lights per cluster
+#define SCENE_MAX_LIGHTS 65536		// the maximum number of lights in the entire scene
+#define OPTIMUM_TILE_COUNT 144		// the target number of clusters per depth
+#define MAX_CLUSTER_COUNT 3456		// the maximum number of clusters
 
-#define CALC_CLUSTER_SIZE(size) (int)std::sqrtf(OPTIMUM_TILE_COUNT * size.x / size.y), \
-								(int)std::sqrtf(OPTIMUM_TILE_COUNT * size.y / size.x), \
-								(int)(MAX_CLUSTER_COUNT / OPTIMUM_TILE_COUNT)
+#define CALC_CLUSTER_SIZE(size) std::sqrtf(OPTIMUM_TILE_COUNT * size.x / size.y), \
+								std::sqrtf(OPTIMUM_TILE_COUNT * size.y / size.x), \
+								24
 
 /* TODO:
 * > Light Chunk Management
@@ -48,10 +48,12 @@
 
 struct RenderData {
 	glm::mat4 invProj;
+	glm::uvec3 clusterSize;
+	float bias;
+	glm::uvec2 screenSize;
+	float scale;
 	float zNear;
 	float zFar;
-	glm::uvec2 screenSize;
-	glm::ivec3 clusterSize;
 };
 
 struct AABB {
@@ -60,8 +62,8 @@ struct AABB {
 };
 
 struct LightArray {
-	unsigned int index;
-	unsigned int count;
+	unsigned int begin;
+	unsigned int end;
 };
 
 RenderSystem::RenderSystem() : 
@@ -107,12 +109,17 @@ void RenderSystem::setSize(glm::ivec2 size)
 
 	m_depth_framebuffer.resize(size);
 
+	float scale = m_clusterSize.z / std::log2f(proj->m_zFar / proj->m_zNear);
+	float bias = m_clusterSize.z * -std::log2f(proj->m_zNear) / std::log2f(proj->m_zFar / proj->m_zNear);
+
 	m_renderDataBuffer.set_data(RenderData{
 		glm::inverse(proj->m_proj),
-		proj->m_zNear,
-		proj->m_zFar,
+		m_clusterSize,
+		bias,
 		m_size,
-		m_clusterSize
+		scale,
+		proj->m_zNear,
+		proj->m_zFar,		
 		});
 
 	m_prepass.dispatch(m_clusterSize);
@@ -126,14 +133,19 @@ glm::ivec2 RenderSystem::getSize()
 void RenderSystem::setCamera(entt::entity e)
 {
 	m_camera = e;
-	auto [proj, view] = get<Projection, WorldTransform>(camera);	
+	auto [proj, view] = get<Projection, Transform::WorldMatrix>(camera);
 	
-	m_renderDataBuffer.set_data(RenderData{ 
-		glm::inverse(proj.m_proj), 
-		proj.m_zNear, 
-		proj.m_zFar, 
+	float scale = m_clusterSize.z / std::log2f(proj.m_zFar / proj.m_zNear);
+	float bias = m_clusterSize.z * -std::log2f(proj.m_zNear) / std::log2f(proj.m_zFar / proj.m_zNear);
+
+	m_renderDataBuffer.set_data(RenderData{
+		glm::inverse(proj.m_proj),
+		m_clusterSize,
+		bias,
 		m_size,
-		m_clusterSize
+		scale,
+		proj.m_zNear,
+		proj.m_zFar,
 		});
 	
 	m_prepass.dispatch(m_clusterSize);
@@ -148,7 +160,7 @@ void RenderSystem::render()
 {
 	// get camera view
 	glm::mat4 proj = get<Projection>(camera);
-	glm::mat4 view = get<WorldTransform>(camera);
+	glm::mat4 view = get<Transform::WorldMatrix>(camera);
 	view = glm::inverse(view);
 
 	// depth prepass
@@ -166,14 +178,15 @@ void RenderSystem::render()
 	m_culling.setUniform1i("lightCount", (int)storage<PointLight>().size());
 	m_culling.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
 	
-	m_program.bind();
+	m_shading.bind();
 	for (auto [entity, mesh, material, transform] : render_scene_view.each())
 	{
-		m_program.setUniformMat4("MVP", proj * view * (glm::mat4)transform);
-		material.bind(6);
+		m_shading.setUniformMat4("model", transform);
+		m_shading.setUniformMat4("MVP", proj * view * (glm::mat4)transform);
+		material.bind();
 		mesh.draw();
-	}
-	
+	};
+
 #if defined(CLUSTER_DEBUG)
 	glDisable(GL_DEPTH_TEST);
 
@@ -182,7 +195,8 @@ void RenderSystem::render()
 	m_debug_cluster_vao.draw(GL_LINES, m_clusterSize.x * m_clusterSize.y * m_clusterSize.z);
 	
 	glEnable(GL_DEPTH_TEST);
-
+	
+	
 	unsigned int visible_lights;
 	m_visibleCountBuffer.get_data(&visible_lights);
 
@@ -202,8 +216,7 @@ void RenderSystem::render()
 
 	std::sort(lightArrays.begin(), lightArrays.end(), 
 		[](const LightArray& a, const LightArray& b) -> bool { 
-			if (a.index == b.index) return a.count < b.count;
-			else					return a.index < b.index;
+			return a.begin < b.begin;
 		});
 	
 #endif
@@ -211,10 +224,8 @@ void RenderSystem::render()
 
 void RenderSystem::constructLight(GLbuffer& m_pointLightBuffer, entt::registry& reg, entt::entity e)
 {
-	if (reg.storage<PointLight>().size() == SCENE_MAX_LIGHTS) {
-		// resize buffer???
+	if (reg.storage<PointLight>().size() == SCENE_MAX_LIGHTS)
 		throw std::exception();
-	}
 
 	// add light to end of buffer array
 	auto back = reg.storage<PointLight>().size() - 1;

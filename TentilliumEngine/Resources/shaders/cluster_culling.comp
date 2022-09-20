@@ -1,7 +1,7 @@
 #version 460 core
 
-#define CLUSTER_MAX_LIGHTS 4		// the maximum number of lights per cluster
-#define OPTIMUM_TILE_COUNT 16		// the target number of clusters per depth
+#define CLUSTER_MAX_LIGHTS 256		// the maximum number of lights per cluster
+#define OPTIMUM_TILE_COUNT 144		// the target number of clusters per depth
 
 layout (local_size_x = OPTIMUM_TILE_COUNT, local_size_y = 1, local_size_z = 1) in;
 
@@ -17,17 +17,19 @@ struct AABB {		// axis aligned bounding box
 };
 
 struct LightArray {
-	uint index;
-	uint count;
+	uint begin;
+	uint end;
 };
 
 // buffers
 layout(std430, binding = 0) readonly buffer RenderData {
     mat4 invProj;
+	uvec3 clusterSize;
+	float bias;
+	uvec2 screenSize;
+	float scale;
 	float zNear;
 	float zFar;
-	uvec2 screenSize;
-	uvec3 clusterCount;
 };
 
 layout(std430, binding = 1) readonly buffer ClusterBuffer {
@@ -55,7 +57,7 @@ uniform int lightCount;
 
 // functions
 bool SphereIntersectAABB(PointLight sphere, AABB clusterAABB) {
-    vec3 center = vec3(view * sphere.position);
+    vec3 center = vec3(view * vec4(sphere.position.xyz, 1));
 	float sqDist = 0;
     for (int i = 0; i < 3; i++) {
         if(center[i] < clusterAABB.minPoint[i])
@@ -68,16 +70,16 @@ bool SphereIntersectAABB(PointLight sphere, AABB clusterAABB) {
 
 // for each cluster
 void main() {
-	uint threadCount = clusterCount.x * clusterCount.y;		// number of local active invocations
-	uint clusterID = threadCount * gl_WorkGroupID.z +		// Index to unique cluster
+	uint threadCount = clusterSize.x * clusterSize.y;	// number of local active invocations
+	uint clusterID = threadCount * gl_WorkGroupID.z +	// Index to unique cluster
 				     gl_LocalInvocationID.x;								
 	
-	visibleCount = 0;										// initialize global count to 0
-	uint localCount = 0;									// initialize local count to 0
+	visibleCount = 0;									// initialize global count to 0
+	uint localCount = 0;								// initialize local count to 0
     
-	uint localIndices[CLUSTER_MAX_LIGHTS];					// temporary array for local lights found
+	uint localIndices[CLUSTER_MAX_LIGHTS];				// temporary array for local lights found
 	
-	if (gl_LocalInvocationID.x < threadCount)				// only search for lights in active invocations
+	if (gl_LocalInvocationID.x < threadCount)			// only search for lights in active invocations
 	{
 		for(uint lightID = 0; lightID < lightCount; lightID++)				// for each light in the scene
 		{
@@ -93,14 +95,13 @@ void main() {
 	}
 
 	barrier();
+	// get the global count and atomically add local count
+	uint globalIndex = atomicAdd(visibleCount, localCount);
 	
 	if (gl_LocalInvocationID.x < threadCount)
 	{
-		// get the global count and atomically add local count
-		uint globalIndex = atomicAdd(visibleCount, localCount);
-
 		// set array index and count
-		lightArrays[clusterID] = LightArray(globalIndex, localCount);						
+		lightArrays[clusterID] = LightArray(globalIndex, globalIndex + localCount);						
 	
 		// copy index into global index buffer at lightArray
 		for(int i = 0; i < localCount; i++)

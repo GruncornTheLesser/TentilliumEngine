@@ -20,5 +20,5 @@ layout(std430, binding = 1) readonly buffer ClusterBuffer {
 void main() {
 	vert_out.minPoint = vec4(clusters[gl_VertexID].minPoint.xyz, 1);
 	vert_out.maxPoint = vec4(clusters[gl_VertexID].maxPoint.xyz, 1);
-	vert_out.isActive = lightArray.y; // count
+	vert_out.isActive = lightArray.y - lightArray.x; // count
 }

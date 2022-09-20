@@ -11,12 +11,12 @@ public:
 	void update();
 
 protected:
-	TAG(UpdateTag);
+	
 
 private:
-	VIEW(localUpdateView, GET(LocalTransform, UpdateTag), EXC());
-	VIEW(worldUpdateView, GET(Hierarchy, LocalTransform, WorldTransform), EXC());
-	VIEW(worldRootUpdateView, GET(LocalTransform, WorldTransform), EXC(Hierarchy)); // any order
+	VIEW(localUpdateView, GET(Transform::LocalMatrix, Transform::UpdateTag), EXC());
+	VIEW(worldUpdateView, GET(Parent, Transform::LocalMatrix, Transform::WorldMatrix), EXC());
+	VIEW(worldRootUpdateView, GET(Transform::LocalMatrix, Transform::WorldMatrix), EXC(Parent)); // any order
 
 	static void attachTransform(entt::registry& reg, entt::entity e);
 

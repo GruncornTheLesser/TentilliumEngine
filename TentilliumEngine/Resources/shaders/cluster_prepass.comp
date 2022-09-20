@@ -7,12 +7,14 @@ struct AABB {
 };
 
 // buffers
-layout (std430, binding = 0) readonly buffer RenderData {
+layout(std430, binding = 0) readonly buffer RenderData {
     mat4 invProj;
+	uvec3 clusterSize;
+	float bias;
+	uvec2 screenSize;
+	float scale;
 	float zNear;
 	float zFar;
-	uvec2 screenSize;
-    uvec3 clusterCount;
 };
 
 layout(std430, binding = 1) buffer ClusterBuffer { // axis alligned bounding box

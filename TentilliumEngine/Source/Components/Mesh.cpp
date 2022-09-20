@@ -59,11 +59,26 @@ template<> void VAO::attach<V_Index>(VBO<V_Index>* buffer)
 		m_size = buffer->get_size() / 4;
 	}
 }
-template<> void VAO::attach<V_Position>(VBO<V_Position>* buffer) { attach(V_Position, buffer, 3, GL_FLOAT, false, 0); }
-template<> void VAO::attach<V_Normal>(VBO<V_Normal>* buffer) { attach(V_Normal, buffer, 3, GL_FLOAT, false, 0); }
-template<> void VAO::attach<V_TexCoord>(VBO<V_TexCoord>* buffer) { attach(V_TexCoord, buffer, 2, GL_FLOAT, false, 0); }
-template<> void VAO::attach<V_BoneID>(VBO<V_BoneID>* buffer) { attach(V_BoneID, buffer, 4, GL_INT, false, 0); }
-template<> void VAO::attach<V_BoneWeight>(VBO<V_BoneWeight>* buffer) { attach(V_BoneWeight, buffer, 4, GL_FLOAT, false, 0); }
+
+template<> void VAO::attach<V_Position>(VBO<V_Position>* buffer) { 
+	attach(V_Position, buffer, 3, GL_FLOAT, false, 0); 
+}
+
+template<> void VAO::attach<V_Normal>(VBO<V_Normal>* buffer) { 
+	attach(V_Normal, buffer, 3, GL_FLOAT, false, 0); 
+}
+
+template<> void VAO::attach<V_TexCoord>(VBO<V_TexCoord>* buffer) { 
+	attach(V_TexCoord, buffer, 2, GL_FLOAT, false, 0); 
+}
+
+template<> void VAO::attach<V_BoneID>(VBO<V_BoneID>* buffer) { 
+	attach(V_BoneID, buffer, 4, GL_INT, false, 0); 
+}
+
+template<> void VAO::attach<V_BoneWeight>(VBO<V_BoneWeight>* buffer) { 
+	attach(V_BoneWeight, buffer, 4, GL_FLOAT, false, 0); 
+}
 
 template<> void VAO::detach<V_Index>()
 {
@@ -76,11 +91,26 @@ template<> void VAO::detach<V_Index>()
 
 	glBindVertexArray(NULL);
 }
-template<> void VAO::detach<V_Position>() { detach(V_Position); }
-template<> void VAO::detach<V_Normal>() { detach(V_Normal); }
-template<> void VAO::detach<V_TexCoord>() { detach(V_TexCoord); }
-template<> void VAO::detach<V_BoneID>() { detach(V_BoneID); }
-template<> void VAO::detach<V_BoneWeight>() { detach(V_BoneWeight); }
+
+template<> void VAO::detach<V_Position>() { 
+	detach(V_Position); 
+}
+
+template<> void VAO::detach<V_Normal>() { 
+	detach(V_Normal); 
+}
+
+template<> void VAO::detach<V_TexCoord>() { 
+	detach(V_TexCoord); 
+}
+
+template<> void VAO::detach<V_BoneID>() { 
+	detach(V_BoneID); 
+}
+
+template<> void VAO::detach<V_BoneWeight>() { 
+	detach(V_BoneWeight); 
+}
 
 void VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int type, bool normalized, int stride)
 {

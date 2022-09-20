@@ -250,6 +250,7 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\textures\grid.png" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />
