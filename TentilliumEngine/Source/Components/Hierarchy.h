@@ -6,8 +6,10 @@ struct Parent
 friend class TransformSystem;
 
 public:
-	entt::entity parent;
+	Parent(entt::entity p) : m_parent(p) { }
 
-public:
-	Parent(entt::entity p) : parent(p) { }
+	operator entt::entity() { return m_parent; }
+
+private:
+	entt::entity m_parent;
 };

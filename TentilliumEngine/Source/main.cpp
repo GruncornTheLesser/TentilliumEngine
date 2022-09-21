@@ -136,9 +136,7 @@ public:
 	{
 		scene.size = AppWindow::size;
 
-		root = scene.create();
-
-		// create camera
+		// create camera (entity 0)
 		{ 
 			entt::entity cam = scene.create();
 			scene.set<Projection>(cam, glm::radians(60.0f), 800.0f / 600.0f, 0.02f, 100.0f);
@@ -147,15 +145,14 @@ public:
 			scene.camera = cam;
 		}
 
-		// create obj
+		// create obj (entity 1)
 		{
 			obj = scene.load("Resources/meshes/Person.fbx");
-			scene.set<Parent>(obj, root);
-			scene.set<Position>(obj, 0, 0, -2);
+			scene.set<Position>(obj, 0, 0, -1);
 			scene.set<Rotation>(obj);
 		}
 
-		// create box1
+		// create box1 (entity 2)
 		{
 			box1 = scene.create();
 			scene.set<Parent>(box1, obj);
@@ -171,7 +168,7 @@ public:
 			scene.set<Material>(box1, Texture("Resources/textures/pigeon.jpg"));
 		}
 
-		// create box2
+		// create box2 (entity 3)
 		{
 			box2 = scene.create();
 			scene.set<Parent>(box2, box1);
@@ -187,7 +184,7 @@ public:
 			scene.set<Material>(box2, Texture(RGBtest, 2, 2, Texture::Format::RGB));
 		}
 		
-		// floor
+		// floor (entity 4)
 		{
 			entt::entity floor = scene.create();
 			
@@ -202,12 +199,12 @@ public:
 			scene.set<Material>(floor, Texture("Resources/textures/grid.png"));
 		}
 
-		// light 1
+		// light 1 (entity 5)
 		{
 			light1 = scene.create();
-			scene.set<PointLight>(light1, glm::vec3(0.5f, 1, 0), glm::vec3(1, 0, 0), 2.0f);
+			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(1, 0, 0), 2.0f);
 			
-			scene.set<Position>(light1, 0.5f, 1, 0);
+			scene.set<Position>(light1, 0.5f, 0, 0);
 			scene.set<Scale>(light1, 0.1f);
 			
 			scene.set<VBO<V_Index>>(light1, scene.get<VBO<V_Index>>(box1));
@@ -218,12 +215,12 @@ public:
 			scene.set<Material>(light1, glm::vec4(1, 0, 0, 1));
 		}
 
-		// light 2
+		// light 2 (entity 6)
 		{
 			light2 = scene.create();
-			scene.set<PointLight>(light2, glm::vec3(-0.5f, 1, 0), glm::vec3(0, 0, 1), 2.0f);
+			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 1), 2.0f);
 			
-			scene.set<Position>(light2, -0.5f, 1, 0);
+			scene.set<Position>(light2, -0.5f, 0, 0);
 			scene.set<Scale>(light2, 0.1f);
 
 			scene.set<VBO<V_Index>>(light2, scene.get<VBO<V_Index>>(box1));
@@ -238,19 +235,6 @@ public:
 	void onProcess(float delta) {
 		time += delta;
 
-		if (isPressed(Button::LEFT)) cam_dir;
-		
-		glm::vec3 move_direction;
-		if (isPressed(Key::W)) move_direction.z -= 1;
-		if (isPressed(Key::S)) move_direction.z += 1;
-		if (isPressed(Key::A)) move_direction.x -= 1;
-		if (isPressed(Key::D)) move_direction.x += 1;
-		if (isPressed(Key::F)) move_direction.y -= 1;
-		if (isPressed(Key::R)) move_direction.y += 1;
-
-		if (isPressed(Key::LEFT_SHIFT))		move_direction *= 10;
-		if (isPressed(Key::LEFT_CONTROL))	move_direction *= 0.1;
-		
 		glm::vec3 camera_position = scene.get<Position>(scene.camera);
 		glm::quat camera_rotation = scene.get<Rotation>(scene.camera);
 		
@@ -263,15 +247,29 @@ public:
 			glm::quat yaw = glm::angleAxis(cam_dir.x, glm::vec3(0, 1, 0));
 			
 			camera_rotation = glm::normalize(yaw * pitch);
+
+			scene.set<Rotation>(scene.camera, camera_rotation);
 		}
 
-		scene.set<Rotation>(scene.camera, camera_rotation);
-		scene.set<Position>(scene.camera, camera_rotation * move_direction * delta + camera_position); // rotate direction by camera rotation
+		glm::vec3 move_direction;
+		if (isPressed(Key::W)) move_direction.z -= 1;
+		if (isPressed(Key::S)) move_direction.z += 1;
+		if (isPressed(Key::A)) move_direction.x -= 1;
+		if (isPressed(Key::D)) move_direction.x += 1;
+		if (isPressed(Key::F)) move_direction.y -= 1;
+		if (isPressed(Key::R)) move_direction.y += 1;
+
+		if (isPressed(Key::LEFT_SHIFT))		move_direction *= 10;
+		if (isPressed(Key::LEFT_CONTROL))	move_direction *= 0.1;
+
+
+		if (move_direction != glm::vec3(0, 0, 0))
+			scene.set<Position>(scene.camera, camera_rotation * move_direction * delta + camera_position); // rotate direction by camera rotation
 		
 
 		scene.set<Position>(box1, cos(time), sin(time), 0.0f);
 		scene.set<Position>(box2, -sin(time), -cos(time), 0.0f);
-		scene.set<Rotation>(obj, 0.0, time, 0);
+		//scene.set<Rotation>(obj, 0.0, time, 0);
 	}
 
 	void onDraw() {

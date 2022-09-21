@@ -56,16 +56,14 @@ uniform mat4 view;
 uniform int lightCount;
 
 // functions
-bool SphereIntersectAABB(PointLight sphere, AABB clusterAABB) {
-    vec3 center = vec3(view * vec4(sphere.position.xyz, 1));
+bool SphereIntersectAABB(vec3 position, float r, vec3 bMin, vec3 bMax) {
+    vec3 c = vec3(view * vec4(position, 1));
 	float sqDist = 0;
     for (int i = 0; i < 3; i++) {
-        if(center[i] < clusterAABB.minPoint[i])
-			sqDist += pow(center[i] - clusterAABB.minPoint[i], 2);
-		else if (center[i] > clusterAABB.maxPoint[i]) 
-			sqDist += pow(center[i] - clusterAABB.maxPoint[i], 2);
+        if (c[i] < bMin[i]) sqDist += pow(c[i] - bMin[i], 2); else 
+		if (c[i] > bMax[i]) sqDist += pow(c[i] - bMax[i], 2);
     }
-    return sqDist <= (sphere.radius.r * sphere.radius.r);
+    return sqDist <= (r * r);
 }
 
 // for each cluster
@@ -83,7 +81,10 @@ void main() {
 	{
 		for(uint lightID = 0; lightID < lightCount; lightID++)				// for each light in the scene
 		{
-			if(SphereIntersectAABB(lights[lightID], clusters[clusterID]))	// is light in cluster AABB
+			PointLight light = lights[lightID];
+			AABB boundBox = clusters[clusterID];
+
+			if(SphereIntersectAABB(light.position.xyz, light.radius.r, boundBox.minPoint.xyz, boundBox.maxPoint.xyz))	// is light in cluster AABB
 			{
 				localIndices[localCount] = lightID;			// add light to local collection
 				localCount += 1;							// count lights

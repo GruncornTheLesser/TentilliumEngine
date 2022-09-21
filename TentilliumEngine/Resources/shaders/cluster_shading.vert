@@ -15,7 +15,7 @@ uniform mat4 MVP;
 
 void main() {
 	gl_Position = MVP * vec4(position, 1);
-	vertex_out.position = mat3(model) * position;
+	vertex_out.position = (model * vec4(position, 1)).xyz;
 	vertex_out.texcoord = texcoord;
 	vertex_out.normal = normal;
 };

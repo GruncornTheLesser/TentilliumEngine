@@ -16,7 +16,7 @@ protected:
 private:
 	VIEW(localUpdateView, GET(Transform::LocalMatrix, Transform::UpdateTag), EXC());
 	VIEW(worldUpdateView, GET(Parent, Transform::LocalMatrix, Transform::WorldMatrix), EXC());
-	VIEW(worldRootUpdateView, GET(Transform::LocalMatrix, Transform::WorldMatrix), EXC(Parent)); // any order
+	VIEW(rootUpdateView, GET(Transform::LocalMatrix, Transform::WorldMatrix, Transform::UpdateTag), EXC(Parent)); // any order
 
 	static void attachTransform(entt::registry& reg, entt::entity e);
 

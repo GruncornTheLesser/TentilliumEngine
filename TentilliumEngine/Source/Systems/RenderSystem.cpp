@@ -194,9 +194,11 @@ void RenderSystem::render()
 	m_debug_cluster_program.setUniformMat4("VP", proj * view);
 	m_debug_cluster_vao.draw(GL_LINES, m_clusterSize.x * m_clusterSize.y * m_clusterSize.z);
 	
+
+
 	glEnable(GL_DEPTH_TEST);
 	
-	
+	/*
 	unsigned int visible_lights;
 	m_visibleCountBuffer.get_data(&visible_lights);
 
@@ -218,7 +220,7 @@ void RenderSystem::render()
 		[](const LightArray& a, const LightArray& b) -> bool { 
 			return a.begin < b.begin;
 		});
-	
+	*/
 #endif
 }
 

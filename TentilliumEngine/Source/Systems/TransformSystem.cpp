@@ -22,29 +22,41 @@ TransformSystem::TransformSystem()
 }
 
 void TransformSystem::update() {
+	using namespace Transform;
 	for (auto [e, local] : localUpdateView.each()) {
 
-		auto scale = try_get<Transform::Scale>(e);
-		auto rotation = try_get<Transform::Rotation>(e);
-		auto position = try_get<Transform::Position>(e);
-
-		if (!scale)		local = glm::mat4(); 
-		else			local = scale->getMatrix();
-		if (rotation)	local = rotation->getMatrix() * (glm::mat4)local;
-		if (position)	local = position->getMatrix() * (glm::mat4)local;
+		if (auto scale = try_get<Scale>(e))			local = scale->getMatrix();
+		else										local = glm::mat4(); 
+		if (auto rotation = try_get<Rotation>(e))	local = rotation->getMatrix() * (glm::mat4)local;
+		if (auto position = try_get<Position>(e))	local = position->getMatrix() * (glm::mat4)local;
 	}
 
-	for (auto [e, local, world] : worldRootUpdateView.each())
-		world = Transform::WorldMatrix((glm::mat4)local);
+	for (auto [e, local, world] : rootUpdateView.each())
+		world = WorldMatrix((glm::mat4)local);
 
-	for (auto [child, hierarchy, local, world] : worldUpdateView.each()) {
-		Transform::WorldMatrix* parent = try_get<Transform::WorldMatrix>(hierarchy.parent);	// parent transform if exists
-		if (parent && all_of<Transform::UpdateTag>(hierarchy.parent)) {	// if parent was updated
-			world = (glm::mat4)(*parent) * (glm::mat4)local;			// update world Transform Tag
-			get_or_emplace<Transform::UpdateTag>(child);
+	for (auto [child, parent, local, world] : worldUpdateView.each()) {
+		if (all_of<UpdateTag>(parent))
+		{
+			if (!any_of<UpdateTag>(child)) // propergate UpdateTag
+				emplace<UpdateTag>(child);
+			
+			// contains UpdateTag implies contains Transform Components
 		}
-		else if (all_of<Transform::UpdateTag>(child))					// if updated from local transform
-			world = (glm::mat4)local;
+		else if (all_of<UpdateTag>(child))
+		{
+			if (!all_of<WorldMatrix>(parent))	// if no parent Transform
+			{
+				world = (glm::mat4)local;		// treat as root transform
+				continue;						// skip parent update path
+			}
+
+			// Update Tag already added -> no need to propergate Update Tag
+		}
+		else continue; // neither child nor parent Transform update, continue
+
+		// update from parent
+		glm::mat4 parentTransform = get<WorldMatrix>(parent);
+		world = parentTransform * (glm::mat4)local;
 	}
 }
 

@@ -9,7 +9,7 @@
 #include "../Rendering/Resources/Framebuffer.h"
 #include <glm.hpp>
 
-//#define CLUSTER_DEBUG
+#define CLUSTER_DEBUG
 
 class RenderSystem : virtual protected entt::registry {
 public:
@@ -58,6 +58,8 @@ private:
 #if defined(CLUSTER_DEBUG)
 	ShaderProgram<VERT, GEOM, FRAG> m_debug_cluster_program{ "Resources/shaders/debug_cluster.shader" };
 	VAO m_debug_cluster_vao;
+
+
 #endif
 	static void constructLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);
 
