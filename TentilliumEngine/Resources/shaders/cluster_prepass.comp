@@ -55,8 +55,8 @@ void main() {
     //  current  \_|_|_/  tile near
     //            \   /
     // Near and far values of the cluster in view space
-    float farSlice  = -zNear * pow(zFar / zNear,  gl_WorkGroupID.z      / float(gl_NumWorkGroups.z));
-    float nearSlice = -zNear * pow(zFar / zNear, (gl_WorkGroupID.z + 1) / float(gl_NumWorkGroups.z));
+    float nearSlice = -zNear * pow(zFar / zNear,  gl_WorkGroupID.z      / float(gl_NumWorkGroups.z));
+    float farSlice  = -zNear * pow(zFar / zNear, (gl_WorkGroupID.z + 1) / float(gl_NumWorkGroups.z));
 
     //   v tileA      v far slice
     //   X--------|---X------   identify remaining points
@@ -67,7 +67,7 @@ void main() {
     //   X--------X---|------ 
     //   ^ tileB  ^ near slice
     vec3 p1 = intersectDepth(tileA, nearSlice);
-    vec3 p2 = intersectDepth(tileB, farSlice);
+    vec3 p2 = intersectDepth(tileA, farSlice);
     vec3 p3 = intersectDepth(tileB, nearSlice);
     vec3 p4 = intersectDepth(tileB, farSlice);
 

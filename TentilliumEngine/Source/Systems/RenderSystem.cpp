@@ -16,7 +16,7 @@
 
 #define CALC_CLUSTER_SIZE(size) std::sqrtf(OPTIMUM_TILE_COUNT * size.x / size.y), \
 								std::sqrtf(OPTIMUM_TILE_COUNT * size.y / size.x), \
-								24
+								MAX_CLUSTER_COUNT / OPTIMUM_TILE_COUNT
 
 /* TODO:
 * > Light Chunk Management
@@ -66,7 +66,7 @@ struct LightArray {
 	unsigned int end;
 };
 
-RenderSystem::RenderSystem() : 
+RenderSystem::RenderSystem() :
 	m_renderDataBuffer(nullptr, sizeof(RenderData)),
 	m_clusterBuffer(nullptr, sizeof(AABB) * MAX_CLUSTER_COUNT, GL_DYNAMIC_DRAW),
 	m_pointLightBuffer(nullptr, sizeof(PointLight) * SCENE_MAX_LIGHTS, GL_DYNAMIC_DRAW),
@@ -91,7 +91,6 @@ RenderSystem::RenderSystem() :
 	m_debug_cluster_vao.attach(V_Custom, &m_lightArrayBuffer, 2, GL_UNSIGNED_INT, false, 0);
 #endif
 }
-
 
 void RenderSystem::setSize(glm::ivec2 size)
 {
@@ -179,48 +178,30 @@ void RenderSystem::render()
 	m_culling.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
 	
 	m_shading.bind();
-	for (auto [entity, mesh, material, transform] : render_scene_view.each())
+	for (auto [entity, mesh, material, model] : render_scene_view.each())
 	{
-		m_shading.setUniformMat4("model", transform);
-		m_shading.setUniformMat4("MVP", proj * view * (glm::mat4)transform);
+		m_shading.setUniformMat4("model", model);
+		m_shading.setUniformMat4("MVP", proj * view * (glm::mat4)model);
 		material.bind();
 		mesh.draw();
 	};
 
 #if defined(CLUSTER_DEBUG)
 	glDisable(GL_DEPTH_TEST);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glDisable(GL_CULL_FACE);
 
 	m_debug_cluster_program.bind();
 	m_debug_cluster_program.setUniformMat4("VP", proj * view);
 	m_debug_cluster_vao.draw(GL_LINES, m_clusterSize.x * m_clusterSize.y * m_clusterSize.z);
-	
 
-
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+
+
 	
-	/*
-	unsigned int visible_lights;
-	m_visibleCountBuffer.get_data(&visible_lights);
-
-	unsigned int lightCount = storage<PointLight>().size();
-
-	std::vector<AABB> clusters { m_clusterSize.x * m_clusterSize.y * m_clusterSize.z };
-	m_clusterBuffer.get_data(&clusters[0], sizeof(AABB) * m_clusterSize.x * m_clusterSize.y * m_clusterSize.z, 0);
-
-	std::vector<PointLight> lights{ lightCount };
-	m_pointLightBuffer.get_data(&lights[0], sizeof(PointLight) * storage<PointLight>().size(), 0);
-
-	std::vector<int> indices = std::vector<int>(visible_lights, 0);
-	m_lightIndiceBuffer.get_data(&indices[0], sizeof(int) * visible_lights, 0);
-
-	std::vector<LightArray> lightArrays{ m_clusterSize.x * m_clusterSize.y * m_clusterSize.z };
-	m_lightArrayBuffer.get_data(&lightArrays[0], sizeof(LightArray) * m_clusterSize.x * m_clusterSize.y * m_clusterSize.z, 0);
-
-	std::sort(lightArrays.begin(), lightArrays.end(), 
-		[](const LightArray& a, const LightArray& b) -> bool { 
-			return a.begin < b.begin;
-		});
-	*/
+	
 #endif
 }
 

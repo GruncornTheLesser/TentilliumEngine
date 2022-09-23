@@ -46,18 +46,7 @@ void VAO::draw(int primitive, int size)
 
 template<> void VAO::attach<V_Index>(VBO<V_Index>* buffer)
 {
-	if (!buffer) return;
-
-	glBindVertexArray(m_handle);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->handle);
-
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
-
-	if (m_size_attribute > V_Index) {
-		m_size_attribute = V_Index;
-		m_size = buffer->get_size() / 4;
-	}
+	attach(V_Index, buffer, 1, GL_UNSIGNED_INT, false, 0);
 }
 
 template<> void VAO::attach<V_Position>(VBO<V_Position>* buffer) { 
@@ -82,14 +71,7 @@ template<> void VAO::attach<V_BoneWeight>(VBO<V_BoneWeight>* buffer) {
 
 template<> void VAO::detach<V_Index>()
 {
-	glBindVertexArray(m_handle);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
-	glBindVertexArray(NULL);
-
-	if (m_size_attribute == V_Index)
-		findSize();
-
-	glBindVertexArray(NULL);
+	detach(V_Index);
 }
 
 template<> void VAO::detach<V_Position>() { 
@@ -116,15 +98,27 @@ void VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int type, boo
 {
 	if (!buffer) return;
 
-	glBindVertexArray(m_handle);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer->handle);
+	if (attrib_no == V_Index)
+	{
+		glBindVertexArray(m_handle);
 
-	glVertexAttribPointer(attrib_no, attrib_size, type, normalized, stride, NULL);
-	glEnableVertexAttribArray(attrib_no);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->handle);
 
-	glBindVertexArray(NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
+		glBindVertexArray(NULL);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
+	}
+	else
+	{
+		glBindVertexArray(m_handle);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer->handle);
 
+		glVertexAttribPointer(attrib_no, attrib_size, type, normalized, stride, NULL);
+		glEnableVertexAttribArray(attrib_no);
+
+		glBindVertexArray(NULL);
+		glBindBuffer(GL_ARRAY_BUFFER, NULL);
+	}
+	
 	if (m_size_attribute > attrib_no) {
 		m_size_attribute = (VertAttrib)attrib_no;
 		m_size = buffer->get_size() / attrib_size / 4;
@@ -134,8 +128,15 @@ void VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int type, boo
 void VAO::detach(int attrib_no)
 {
 	glBindVertexArray(m_handle);
-	glBindBuffer(GL_ARRAY_BUFFER, NULL);
-	glVertexAttribPointer(attrib_no, 0, GL_FLOAT, GL_FALSE, 0, NULL);
+	if (attrib_no == V_Index) 
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
+	}
+	else
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, NULL);
+		glVertexAttribPointer(attrib_no, 0, GL_FLOAT, GL_FALSE, 0, NULL);
+	}
 
 	if (m_size_attribute == attrib_no)
 		findSize();

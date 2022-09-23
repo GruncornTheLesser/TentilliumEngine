@@ -18,6 +18,14 @@ void main() {
 	{
 		if (geom_in[i].isActive != 0) {
 
+			//	    p4--p8
+			//	  / |  / |
+			//	 /  p2/-p6
+			//  /  / /  /
+			// p3--p7  /
+			// | /  | /
+			// p1--p5 
+
 			vec3 cl_min = geom_in[i].minPoint.xyz;
 			vec3 cl_max = geom_in[i].maxPoint.xyz;
 

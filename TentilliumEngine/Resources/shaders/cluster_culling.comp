@@ -56,21 +56,24 @@ uniform mat4 view;
 uniform int lightCount;
 
 // functions
-bool SphereIntersectAABB(vec3 position, float r, vec3 bMin, vec3 bMax) {
-    vec3 c = vec3(view * vec4(position, 1));
-	float sqDist = 0;
-    for (int i = 0; i < 3; i++) {
-        if (c[i] < bMin[i]) sqDist += pow(c[i] - bMin[i], 2); else 
-		if (c[i] > bMax[i]) sqDist += pow(c[i] - bMax[i], 2);
+bool SphereIntersectAABB(PointLight sphere, AABB box) {
+    vec3 c = vec3(view * vec4(sphere.position.xyz, 1));		// light sphere position in view space
+	float sqDist = 0;										// the nearest length between sphere and box
+    for (int i = 0; i < 3; i++) {							// for each component
+		float delta;
+        if (c[i] < box.minPoint[i]) delta = c[i] - box.minPoint[i]; else	// above range
+		if (c[i] > box.maxPoint[i]) delta = c[i] - box.maxPoint[i];			// below range
+		else continue;														// in range
+		sqDist += delta * delta;
     }
-    return sqDist <= (r * r);
+    return sqDist < sphere.radius.r * sphere.radius.r;
 }
 
 // for each cluster
 void main() {
 	uint threadCount = clusterSize.x * clusterSize.y;	// number of local active invocations
 	uint clusterID = threadCount * gl_WorkGroupID.z +	// Index to unique cluster
-				     gl_LocalInvocationID.x;								
+				     gl_LocalInvocationID.x;	
 	
 	visibleCount = 0;									// initialize global count to 0
 	uint localCount = 0;								// initialize local count to 0
@@ -81,10 +84,7 @@ void main() {
 	{
 		for(uint lightID = 0; lightID < lightCount; lightID++)				// for each light in the scene
 		{
-			PointLight light = lights[lightID];
-			AABB boundBox = clusters[clusterID];
-
-			if(SphereIntersectAABB(light.position.xyz, light.radius.r, boundBox.minPoint.xyz, boundBox.maxPoint.xyz))	// is light in cluster AABB
+			if(SphereIntersectAABB(lights[lightID], clusters[clusterID]))	// is light in cluster AABB
 			{
 				localIndices[localCount] = lightID;			// add light to local collection
 				localCount += 1;							// count lights

@@ -38,6 +38,13 @@
 	O---X
 */
 
+// PointLight only stores Colour, 
+// without Position its a directional light
+// with Position its a pointlight (and/or Scale)
+// with Position and Projection its a Spotlight (and/or Scale)
+// Scale determines Spotlight distance and Pointlight radius
+
+// mesh
 std::vector<float> positions = {
 	-0.5f, -0.5f, -0.5f,
 	 0.5f, -0.5f, -0.5f,
@@ -89,6 +96,7 @@ std::vector<unsigned int> indices = {	// mesh indices
 	2, 3, 11, 11, 3, 15		// e(3, 11)  = -+-,+++	// top
 };
 
+// textures
 unsigned char Rtest[] = {
 	0xff, 
 	0x7f,
@@ -203,33 +211,19 @@ public:
 		{
 			light1 = scene.create();
 			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(1, 0, 0), 2.0f);
-			
 			scene.set<Position>(light1, 0.5f, 0, 0);
-			scene.set<Scale>(light1, 0.1f);
-			
-			scene.set<VBO<V_Index>>(light1, scene.get<VBO<V_Index>>(box1));
-			scene.set<VBO<V_Position>>(light1, scene.get<VBO<V_Position>>(box1));
-			scene.set<VBO<V_Normal>>(light1, scene.get<VBO<V_Normal>>(box1));
-			scene.set<VBO<V_TexCoord>>(light1, scene.get<VBO<V_TexCoord>>(box1));
-			
-			scene.set<Material>(light1, glm::vec4(1, 0, 0, 1));
+			scene.set<Scale>(light1, 2.0f);
 		}
-
+		
 		// light 2 (entity 6)
 		{
 			light2 = scene.create();
 			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 1), 2.0f);
 			
 			scene.set<Position>(light2, -0.5f, 0, 0);
-			scene.set<Scale>(light2, 0.1f);
-
-			scene.set<VBO<V_Index>>(light2, scene.get<VBO<V_Index>>(box1));
-			scene.set<VBO<V_Position>>(light2, scene.get<VBO<V_Position>>(box1));
-			scene.set<VBO<V_Normal>>(light2, scene.get<VBO<V_Normal>>(box1));
-			scene.set<VBO<V_TexCoord>>(light2, scene.get<VBO<V_TexCoord>>(box1));
-			
-			scene.set<Material>(light2, glm::vec4(0, 0, 1, 1));
+			scene.set<Scale>(light2, 2.0f);
 		}
+		
 	}
 
 	void onProcess(float delta) {
@@ -269,7 +263,7 @@ public:
 
 		scene.set<Position>(box1, cos(time), sin(time), 0.0f);
 		scene.set<Position>(box2, -sin(time), -cos(time), 0.0f);
-		//scene.set<Rotation>(obj, 0.0, time, 0);
+		scene.set<Rotation>(obj, 0.0, time, 0);
 	}
 
 	void onDraw() {

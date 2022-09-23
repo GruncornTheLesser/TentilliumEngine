@@ -102,19 +102,13 @@ void main() {
 
 	LightArray lightArray = lightArrays[clusterIndex];
 
-	bool edge;
-	vec3 radiance = vec3(0.1, 0.1, 0.1);
-	for (uint i = lightArray.begin; i < lightArray.end; i++) {
+	vec3 ambiance = vec3(0.1, 0.1, 0.1);
+	vec3 radiance = vec3(0.0, 0.0, 0.0);
+	for (uint i = lightArray.begin; i < lightArray.end; i++) 
+	{
 		PointLight light = lights[lightIndices[i]];
 		radiance += light.colour.xyz * attenuate(fragment_in.position.xyz - light.position.xyz, light.radius.r);
-
-		float x = light.radius.r - length(fragment_in.position.xyz - light.position.xyz);
-		edge = edge || ( 0 < x);
 	}
-	f_colour = vec4(diffuse.xyz * radiance, 1);
-
-	if (edge)
-		f_colour = vec4(1, 0, 1, 1);
-	//else
-	//	f_colour = vec4(fragment_in.position.xyz, 1);
+	f_colour =  vec4(diffuse.xyz * ambiance, 1);
+	f_colour += vec4(diffuse.xyz * radiance, 1);
 }
