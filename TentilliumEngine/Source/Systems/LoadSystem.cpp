@@ -121,17 +121,17 @@ entt::entity LoadSystem::load(std::string filepath)
 						indices.push_back(face.mIndices[index_i] + vertexOffset);
 				}
 				get_or_emplace<Mesh::VBO<Mesh::V_Index>>(e, nullptr, sizeof(int) * faceCount * 3)
-					.set_data(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
+					.setData(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
 			}
 
 			if (aiMeshPtr->HasPositions()) {
 				get_or_emplace<Mesh::VBO<Mesh::V_Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
-					.set_data(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
+					.setData(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 			}
 
 			if (aiMeshPtr->HasNormals()) {
 				get_or_emplace<Mesh::VBO<Mesh::V_Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
-					.set_data(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
+					.setData(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 			}
 
 			if (aiMeshPtr->HasTextureCoords(0)) {
@@ -141,7 +141,7 @@ entt::entity LoadSystem::load(std::string filepath)
 					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].y);
 				}
 				get_or_emplace<Mesh::VBO<Mesh::V_TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
-					.set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
+					.setData(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
 			}
 
 			vertexOffset += aiMeshPtr->mNumVertices;

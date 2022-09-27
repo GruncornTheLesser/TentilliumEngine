@@ -6,9 +6,9 @@
 #include <unordered_map>
 
 
-class Texture : public Resource<Texture>
+class Texture : public GL<Texture>, public FileManager<Texture>
 {
-	friend class Resource<Texture>;
+	friend class GL<Texture>;
 	friend class Material;
 public:
 	enum class Filter { NEAREST, LINEAR };
@@ -37,14 +37,6 @@ public:
 		Filter filter = Filter::NEAREST
 	);
 
-	~Texture();
-
-	Texture(const Texture& other);
-	Texture& operator=(const Texture& other);
-
-	Texture(Texture&& other);
-	const Texture& operator=(Texture&& other);
-
 	void setData(int width, int height, 
 		Format internal_format_hint, 
 		bool normalized = true, 
@@ -65,6 +57,6 @@ public:
 	void setFilter(Filter filter) const;
 
 private:
-	unsigned int m_handle;
-	Texture(unsigned int handle) : m_handle(handle) { };
+	static void destroy(unsigned int handle);
+	Texture(unsigned int handle) { m_handle = handle; }
 };

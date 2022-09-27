@@ -3,33 +3,23 @@
 #include <string>
 
 
-// this shouldnt be public it should be completely internal
 enum ShaderType : int {
-	FRAG = 0x8b31,
+	FRAG = 0x8b30,
 	GEOM = 0x8dd9,
-	VERT = 0x8b30,
+	VERT = 0x8b31,
 	COMP = 0x91b9,
 };
 
 template<ShaderType type>
-class Shader : public Resource<Shader<type>> {
-	friend class Resource<Shader<type>>;
+class Shader : public GL<Shader<type>> {
+	friend class GL<Shader<type>>;
 public:
-	__declspec(property(get = get_handle)) unsigned int handle;
+	__declspec(property(get=getHandle)) unsigned int handle;
 
 	Shader(std::string filepath);
-	~Shader();
 
-	Shader(const Shader&);
-	Shader& operator=(const Shader&);
-
-	unsigned int get_handle() { return m_handle; }
-
-protected:
-	unsigned int m_handle;
 private:
-	Shader(unsigned int handle) : m_handle(handle) { }
-
+	static void destroy(unsigned int handle);
 };
 
 using FragmentShader = Shader<FRAG>;

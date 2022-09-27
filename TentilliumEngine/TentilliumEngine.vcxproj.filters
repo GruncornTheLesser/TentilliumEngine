@@ -56,7 +56,7 @@
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp">
+    <ClCompile Include="Source\Rendering\Resources\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Systems\TransformSystem.cpp">
@@ -123,7 +123,7 @@
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.cpp" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
-    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Rendering\Resources\Buffer.h" />
     <ClInclude Include="Source\Systems\entt_macros.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />

@@ -41,8 +41,6 @@ Texture::Texture(std::string filepath, Wrap wrap, Filter filter)
 	// release stbi image data
 	stbi_image_free(data);
 
-	create(m_handle);
-
 	setWrap(wrap);
 	setFilter(filter);
 }
@@ -73,62 +71,8 @@ Texture::Texture(int width, int height, Format internal_format_hint, bool normal
 		setData(width, height, internal_format_hint, normalized, data, data_format_hint, type_hint);
 	}
 
-	create(m_handle);
-	
 	setWrap(wrap);
 	setFilter(filter);
-}
-
-Texture::~Texture()
-{
-	if (destroy(m_handle))
-		glDeleteTextures(1, &m_handle);
-}
-
-Texture::Texture(Texture const& other)
-{
-	create(other.m_handle);
-
-	if (destroy(m_handle))
-		glDeleteTextures(1, &m_handle);
-
-	m_handle = other.m_handle;
-}
-
-Texture& Texture::operator=(Texture const& other)
-{
-	if (this == &other)
-		return *this; // calls copy constructor
-
-	create(other.m_handle);
-
-	if (destroy(m_handle))
-		glDeleteTextures(1, &m_handle);
-
-	m_handle = other.m_handle;
-	return *this;
-}
-
-Texture::Texture(Texture&& other)
-{
-	if (destroy(m_handle))
-		glDeleteTextures(1, &m_handle);
-
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-}
-
-const Texture& Texture::operator=(Texture&& other)
-{
-	if (this == &other)
-		return *this; // calls copy constructor
-
-	if (destroy(m_handle))
-		glDeleteTextures(1, &m_handle);
-
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-	return *this;
 }
 
 void Texture::setData(int width, int height, Format internal_format_hint, bool normalized, void* data, Format data_format_hint, Type data_type_hint)
@@ -268,4 +212,9 @@ void Texture::setFilter(Texture::Filter filter) const
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilter);
+}
+
+void Texture::destroy(unsigned int handle)
+{
+	glDeleteTextures(1, &handle);
 }

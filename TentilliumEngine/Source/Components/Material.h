@@ -1,6 +1,6 @@
 #pragma once
 #include "../Rendering/Resources/Texture.h"
-#include "../Rendering/Resources/GLbuffer.h"
+#include "../Rendering/Resources/Buffer.h"
 #include <type_traits>
 #include <unordered_map>
 #include <glm.hpp>
@@ -74,45 +74,65 @@ private:
 		bool hasNormalMap;
 	};
 
-	GLbuffer m_uniformBuffer;
+	Buffer m_uniformBuffer;
 
 	Texture m_DiffuseMap{ 0 }; // initiated to 0
 	Texture m_specularMap{ 0 };
 	Texture m_glossMap{ 0 };
 	Texture m_normalMap{ 0 };
 };
-
 /*
-namespace Mat {
-	// [diffuse, specular, glossiness]
-	// [diffuse, metallic, roughness]
+namespace Material {
+	class UBO : private GLbuffer {
+		friend class MaterialSystem;
 
-	template <class T1, class T2>
-	concept MapType = std::is_same_v<T1, const Texture&> || std::is_same_v<T1, T2>;
-
-	template<typename T>
-	class Map {
-	public:
-		template<MapType<T> value_t>
-		Map(const value_t& value) { m_value = value; }
-		void bind(unsigned int& slot) const { 
-			if (auto ptr = std::get_if<Texture>(m_value)) 
-				ptr->bind(slot);
-		}
-
-	protected:
-		std::variant<Texture, T> m_value;
+	private:
+		struct UniformData {
+			glm::vec4 diffuse;
+			float specular;
+			float gloss;
+			bool hasDiffuseMap;
+			bool hasSpecularMap;
+			bool hasGlossMap;
+			bool hasNormalMap;
+		};
 	};
 
-	class DiffuseMap : Map<glm::vec4> { };
-	class MetallicMap : Map<float> {};
-	class RoughnessMap : Map<float> {};
-	class AOMap : Map<float>{};
-	class NormalMap : Texture {};
+	class DiffuseMap final {
+		friend class MaterialSystem;
+	public:
+		DiffuseMap(const Texture& texture) { m_value = texture; }
+		DiffuseMap(const glm::vec4& value) { m_value = value; }
+	private:
+		std::variant<Texture, glm::vec4> m_value;
+	};
 
-	class SpecularMaterial : GLbuffer { };
-	class PBRMaterial : GLbuffer { };
+	class SpecularMap final {
+		friend class MaterialSystem;
+	public:
+		SpecularMap(const Texture& texture) { m_value = texture; }
+		SpecularMap(const glm::vec4& value) { m_value = value; }
+	private:
+		std::variant<Texture, glm::vec4> m_value;
+	};
 
-	//TAG(TransparentTag);
+	class GlossMap final {
+		friend class MaterialSystem;
+	public:
+		GlossMap(const Texture& texture) { m_value = texture; }
+		GlossMap(const glm::vec4& value) { m_value = value; }
+	private:
+		std::variant<Texture, glm::vec4> m_value;
+	};
+
+	class NormalMap final {
+	public:
+		NormalMap(const Texture& texture) { m_value = texture; }
+		NormalMap(const glm::vec4& value) { m_value = value; }
+	private:
+		std::variant<Texture, glm::vec4> m_value;
+	};
+
+	TAG(UpdateTag);
 }
 */

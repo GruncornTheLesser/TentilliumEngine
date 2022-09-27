@@ -94,7 +94,7 @@ template<> void Mesh::VAO::detach<Mesh::V_BoneWeight>() {
 	detach(V_BoneWeight); 
 }
 
-void Mesh::VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int type, bool normalized, int stride)
+void Mesh::VAO::attach(int attrib_no, Buffer* buffer, int attrib_size, int type, bool normalized, int stride)
 {
 	if (!buffer) return;
 
@@ -121,7 +121,7 @@ void Mesh::VAO::attach(int attrib_no, GLbuffer* buffer, int attrib_size, int typ
 	
 	if (m_size_attribute > attrib_no) {
 		m_size_attribute = (VertAttrib)attrib_no;
-		m_size = buffer->get_size() / attrib_size / 4;
+		m_size = buffer->length() / attrib_size / 4;
 	}
 }
 

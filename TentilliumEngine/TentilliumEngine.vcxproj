@@ -174,7 +174,7 @@
     <ClCompile Include="Source\Components\Material.cpp" />
     <ClCompile Include="Source\Systems\HierarchySystem.cpp" />
     <ClCompile Include="Source\Systems\LoadSystem.cpp" />
-    <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\Buffer.cpp" />
     <ClCompile Include="Source\Components\Projection.cpp" />
     <ClCompile Include="Source\Components\Mesh.cpp" />
     <ClCompile Include="Source\Rendering\Resources\ShaderProgram.cpp" />
@@ -207,7 +207,7 @@
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
-    <ClInclude Include="Source\Rendering\Resources\GLbuffer.h" />
+    <ClInclude Include="Source\Rendering\Resources\Buffer.h" />
     <ClInclude Include="Source\Components\Material.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />

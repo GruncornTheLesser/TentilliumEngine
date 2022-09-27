@@ -84,7 +84,7 @@ RenderSystem::RenderSystem() :
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_lightIndiceBuffer.handle);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_lightArrayBuffer.handle);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_visibleCountBuffer.handle);
-
+	
 	m_deferredShadingProgram.setUniform1i("fboAttachment0", 0); // bind to texture slot 0, 1 and 2
 	m_deferredShadingProgram.setUniform1i("fboAttachment1",	1);
 	m_deferredShadingProgram.setUniform1i("fboAttachment2", 2);
@@ -116,7 +116,7 @@ void RenderSystem::setSize(glm::ivec2 size)
 	float scale = m_clusterSize.z / std::log2f(proj->m_zFar / proj->m_zNear);
 	float bias = m_clusterSize.z * -std::log2f(proj->m_zNear) / std::log2f(proj->m_zFar / proj->m_zNear);
 
-	m_renderDataBuffer.set_data(RenderData{
+	m_renderDataBuffer.setData(RenderData{
 		glm::inverse(proj->m_proj),
 		m_clusterSize,
 		bias,
@@ -142,7 +142,7 @@ void RenderSystem::setCamera(entt::entity e)
 	float scale = m_clusterSize.z / std::log2f(proj.m_zFar / proj.m_zNear);
 	float bias = m_clusterSize.z * -std::log2f(proj.m_zNear) / std::log2f(proj.m_zFar / proj.m_zNear);
 
-	m_renderDataBuffer.set_data(RenderData{
+	m_renderDataBuffer.setData(RenderData{
 		glm::inverse(proj.m_proj),
 		m_clusterSize,
 		bias,
@@ -199,7 +199,7 @@ void RenderSystem::render()
 
 
 
-void RenderSystem::constructLight(GLbuffer& m_pointLightBuffer, entt::registry& reg, entt::entity e)
+void RenderSystem::constructLight(Buffer& m_pointLightBuffer, entt::registry& reg, entt::entity e)
 {
 	if (reg.storage<PointLight>().size() == SCENE_MAX_LIGHTS)
 		throw std::exception();
@@ -207,22 +207,22 @@ void RenderSystem::constructLight(GLbuffer& m_pointLightBuffer, entt::registry& 
 	// add light to end of buffer array
 	auto back = reg.storage<PointLight>().size() - 1;
 
-	m_pointLightBuffer.set_data(reg.get<PointLight>(e), back * sizeof(PointLight));
+	m_pointLightBuffer.setData(reg.get<PointLight>(e), back * sizeof(PointLight));
 }
 
-void RenderSystem::destroyLight(GLbuffer& m_pointLightBuffer, entt::registry& reg, entt::entity e)
+void RenderSystem::destroyLight(Buffer& m_pointLightBuffer, entt::registry& reg, entt::entity e)
 {
 	size_t index = reg.storage<PointLight>().index(e);
 	size_t back = reg.storage<PointLight>().size() - 1;
 	if (index == back) return; 
 
 	// remove light by swapping with last light
-	m_pointLightBuffer.set_data(reg.get<PointLight>(reg.storage<PointLight>().at(back)), index * sizeof(PointLight));
+	m_pointLightBuffer.setData(reg.get<PointLight>(reg.storage<PointLight>().at(back)), index * sizeof(PointLight));
 }
 
-void RenderSystem::updateLight(GLbuffer& m_pointLightBuffer, entt::registry& reg, entt::entity e) {
+void RenderSystem::updateLight(Buffer& m_pointLightBuffer, entt::registry& reg, entt::entity e) {
 	auto index = reg.storage<PointLight>().index(e);
-	m_pointLightBuffer.set_data(reg.get<PointLight>(e).m_position, index * sizeof(PointLight) + offsetof(PointLight, m_position));
+	m_pointLightBuffer.setData(reg.get<PointLight>(e).m_position, index * sizeof(PointLight) + offsetof(PointLight, m_position));
 }
 
 

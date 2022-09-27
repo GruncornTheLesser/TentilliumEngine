@@ -7,36 +7,6 @@
 #include <iostream>
 
 template<ShaderType type>
-Shader<type>::~Shader()
-{
-	if (Resource<Shader<type>>::destroy(m_handle))
-		glDeleteShader(m_handle);
-}
-
-template<ShaderType type>
-Shader<type>::Shader(const Shader<type>& other)
-{
-	Resource<Shader<type>>::create(other.m_handle);
-	if (Resource<Shader<type>>::destroy(m_handle))
-		glDeleteShader(m_handle);
-	this->m_handle = other.m_handle;
-}
-template<ShaderType type>
-Shader<type>& Shader<type>::operator=(const Shader<type>& other)
-{
-	if (this == &other)
-		return *this;
-
-	Resource<Shader<type>>::create(other.m_handle);
-	if (Resource<Shader<type>>::destroy(m_handle))
-		glDeleteShader(m_handle);
-
-	this->m_handle = other.m_handle;
-
-	return *this;
-}
-
-template<ShaderType type>
 Shader<type>::Shader(std::string filepath)
 {
 	size_t it1 = filepath.find_last_of(".");
@@ -73,34 +43,33 @@ Shader<type>::Shader(std::string filepath)
 	fs.close();
 
 	// create opengl object shader
-	switch (type) {
-	case ShaderType::VERT: m_handle = glCreateShader(GL_VERTEX_SHADER);		break;
-	case ShaderType::GEOM: m_handle = glCreateShader(GL_GEOMETRY_SHADER);	break;
-	case ShaderType::FRAG: m_handle = glCreateShader(GL_FRAGMENT_SHADER);	break;
-	case ShaderType::COMP: m_handle = glCreateShader(GL_COMPUTE_SHADER);	break;
-	}
+	GL<Shader<type>>::m_handle = glCreateShader(type);
 
 	// add data to opengl object
 	const char* raw_data = (const char*)data.c_str();
-	glShaderSource(m_handle, 1, &raw_data, &len);
+	glShaderSource(GL<Shader<type>>::m_handle, 1, &raw_data, &len);
 
 	// compile shader
-	glCompileShader(m_handle);
+	glCompileShader(GL<Shader<type>>::m_handle);
 
 	// verify shader status
 	int status, infoLen;
-	glGetShaderiv(m_handle, GL_COMPILE_STATUS, &status);
+	glGetShaderiv(GL<Shader<type>>::m_handle, GL_COMPILE_STATUS, &status);
 	if (!status)
 	{
-		glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetShaderiv(GL<Shader<type>>::m_handle, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetShaderInfoLog(m_handle, infoLen, &infoLen, message);
+		glGetShaderInfoLog(GL<Shader<type>>::m_handle, infoLen, &infoLen, message);
 
 		std::cerr << "[Shader Error] - Shader '" << filepath << "' failed to compile: " << message << std::endl;
 		throw std::exception();
 	}
+}
 
-	Resource<Shader<type>>::create(m_handle);
+template<ShaderType type>
+void Shader<type>::destroy(unsigned int handle)
+{
+	glDeleteShader(handle);
 }
 
 template class Shader<ShaderType::COMP>;

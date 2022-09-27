@@ -130,7 +130,7 @@ unsigned int ShaderProgram<Ts...>::genProgram()
 {
 	unsigned int program = glCreateProgram();
 
-	(glAttachShader(program, Shader<Ts>::get_handle()), ...);
+	(glAttachShader(program, Shader<Ts>::getHandle()), ...);
 
 	int infoLen;
 	int status;

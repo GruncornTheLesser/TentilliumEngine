@@ -20,52 +20,52 @@ void Material::bind(int uniformBufferIndex) const {
 
 void Material::setDiffuse(const glm::vec4& value)
 {
-	m_uniformBuffer.set_data(value, offsetof(UniformData, diffuse));
-	m_uniformBuffer.set_data(false, offsetof(UniformData, hasDiffuseMap));
+	m_uniformBuffer.setData(value, offsetof(UniformData, diffuse));
+	m_uniformBuffer.setData(false, offsetof(UniformData, hasDiffuseMap));
 	m_DiffuseMap = Texture(0); // clear Texture value
 }
 
 void Material::setDiffuse(const glm::vec3& value)
 {
-	m_uniformBuffer.set_data(glm::vec4(value.x, value.y, value.z, 1), offsetof(UniformData, diffuse));
-	m_uniformBuffer.set_data(false, offsetof(UniformData, hasDiffuseMap));
+	m_uniformBuffer.setData(glm::vec4(value.x, value.y, value.z, 1), offsetof(UniformData, diffuse));
+	m_uniformBuffer.setData(false, offsetof(UniformData, hasDiffuseMap));
 	m_DiffuseMap = Texture(0); // clear Texture value
 }
 
 void Material::setDiffuse(const Texture& value)
 {
-	m_uniformBuffer.set_data(true, offsetof(UniformData, hasDiffuseMap));
+	m_uniformBuffer.setData(true, offsetof(UniformData, hasDiffuseMap));
 	m_DiffuseMap = value; // set Texture value
 }
 
 void Material::setSpecular(float value)
 {
-	m_uniformBuffer.set_data(value, offsetof(UniformData, specular));
-	m_uniformBuffer.set_data(false, offsetof(UniformData, hasSpecularMap));
+	m_uniformBuffer.setData(value, offsetof(UniformData, specular));
+	m_uniformBuffer.setData(false, offsetof(UniformData, hasSpecularMap));
 	m_specularMap = Texture(0); // clear Texture value
 }
 
 void Material::setSpecular(const Texture& value)
 {
-	m_uniformBuffer.set_data(true, offsetof(UniformData, hasSpecularMap));
+	m_uniformBuffer.setData(true, offsetof(UniformData, hasSpecularMap));
 	m_specularMap = value; // set Texture value
 }
 
 void Material::setGloss(float value)
 {
-	m_uniformBuffer.set_data(value, offsetof(UniformData, gloss));
-	m_uniformBuffer.set_data(false, offsetof(UniformData, hasGlossMap));
+	m_uniformBuffer.setData(value, offsetof(UniformData, gloss));
+	m_uniformBuffer.setData(false, offsetof(UniformData, hasGlossMap));
 	m_glossMap = Texture(0); // clear Texture value
 }
 
 void Material::setGloss(const Texture& value)
 {
-	m_uniformBuffer.set_data(true, offsetof(UniformData, hasGlossMap));
+	m_uniformBuffer.setData(true, offsetof(UniformData, hasGlossMap));
 	m_glossMap = value; // set Texture value
 }
 
 void Material::setNormal(const Texture& value)
 {
-	m_uniformBuffer.set_data(true, offsetof(UniformData, hasNormalMap));
+	m_uniformBuffer.setData(true, offsetof(UniformData, hasNormalMap));
 	m_normalMap = value; // clear Texture value
 }

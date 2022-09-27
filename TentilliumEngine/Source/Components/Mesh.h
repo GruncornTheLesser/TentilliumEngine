@@ -1,5 +1,5 @@
 #pragma once
-#include "../Rendering/Resources/GLbuffer.h"
+#include "../Rendering/Resources/Buffer.h"
 #include <vector>
 // MESH CLASS
 
@@ -48,13 +48,13 @@ namespace Mesh {
 	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None, };
 
 	template<VertAttrib>
-	class VBO final : public GLbuffer {
+	class VBO final : public Buffer {
 		friend class VAO;
 	public:
-		VBO(const void* data, size_t size) : GLbuffer(data, size) { }
+		VBO(const void* data, size_t size) : Buffer(data, size) { }
 
 		template<typename T>
-		VBO(const std::vector<T>& data) : GLbuffer(&data[0], sizeof(T) * data.size()) { }
+		VBO(const std::vector<T>& data) : Buffer(&data[0], sizeof(T) * data.size()) { }
 	};
 
 	class VAO {
@@ -83,7 +83,7 @@ namespace Mesh {
 		template<VertAttrib attrib>
 		void detach();
 
-		void attach(int attrib_no, GLbuffer* buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
+		void attach(int attrib_no, Buffer* buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
 
 		void detach(int attrib_no);
 
