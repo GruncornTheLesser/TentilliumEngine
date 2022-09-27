@@ -16,20 +16,12 @@ struct LightArray {
 	uint end;
 };
 
-in VERTEX_OUT {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} fragment_in;
-
 out vec4 f_colour;
 
-layout(binding = 0) uniform sampler2D diffuseMap;
-layout(binding = 1) uniform sampler2D specularMap;
-layout(binding = 2) uniform sampler2D normalMap;
+uniform sampler2D fboAttachment0;	// position + specular
+uniform sampler2D fboAttachment1;	// normal + gloss
+uniform sampler2D fboAttachment2;	// diffuse + ao
 
-uniform mat4 MVP;
-uniform vec3 viewPosition;
 // buffers
 layout(std430, binding = 0) readonly buffer RenderData {
     mat4 invProj;
@@ -61,14 +53,6 @@ layout(std430, binding = 5) readonly buffer LightCountBuffer {
 	uint visibleCount;
 };
 
-layout(std140) uniform Material {
-	vec4 diffuse;			// align 16,	size 16,	offset 0
-	vec4 specular;			// align 16,	size 16,	offset 16
-	bool hasDiffuseMap;		// align 4,		size 4,		offset 20
-	bool hasSpecularMap;	// align 4,		size 4,		offset 24
-	bool hasNormalMap;		// align 4,		size 4,		offset 28
-} material;
-
 // functions
 float attenuate(vec3 lightVector, float radius) {
 	// Attenuate the point light intensity
@@ -77,28 +61,36 @@ float attenuate(vec3 lightVector, float radius) {
 	return attenuation;
 }
 
-uvec3 getClusterID()
-{
+uvec3 getClusterID(float depth) {
 	uvec3 ID;
-	float linear = 2.0 * zNear * zFar / (zFar + zNear - (2.0 * gl_FragCoord.z - 1.0) * (zFar - zNear));
+	
+	float linear = 2.0 * zNear * zFar / (zFar + zNear - (2.0 * depth - 1.0) * (zFar - zNear));
 	ID.z = uint(max(log2(linear) * scale + bias, 0.0));
 	ID.xy = uvec2(gl_FragCoord.xy / screenSize.xy * clusterSize.xy);
 	return ID;
 }
 
 void main() {
+	vec2 uv = gl_FragCoord.xy / screenSize.xy;
 
-	// Get color and normal components from texture maps
-	vec4 diffuse = material.hasDiffuseMap ? texture(diffuseMap, fragment_in.texcoord) : material.diffuse;
-	vec4 specular = material.hasSpecularMap ? texture(specularMap, fragment_in.texcoord) : material.specular;
-	vec3 normal = material.hasNormalMap ? texture(normalMap, fragment_in.texcoord).rgb : fragment_in.normal;
-	normal = normalize(normal * 2.0 - 1.0);
+	vec4 attachment0 = texture(fboAttachment0, uv); // position + depth
+	vec4 attachment1 = texture(fboAttachment1, uv); // normal + gloss
+	vec4 attachment2 = texture(fboAttachment2, uv); // diffuse + specular
+
+	// geometry data
+	vec3 position = attachment0.rgb;
+	float depth = attachment0.a;
+	vec3 normal = attachment1.rgb;
 	
-	uvec3 ID = getClusterID();
+	// material data
+	float gloss = attachment1.a;
+	vec3 diffuse = attachment2.rgb;
+	float specular = attachment2.a;
 	
-	uint clusterIndex = ID.x + 
-						ID.y * clusterSize.x + 
-						ID.z * clusterSize.x * clusterSize.y;
+	
+	uvec3 ID = getClusterID(depth);
+	
+	uint clusterIndex = ID.x + ID.y * clusterSize.x + ID.z * clusterSize.x * clusterSize.y;
 
 	LightArray lightArray = lightArrays[clusterIndex];
 
@@ -107,8 +99,9 @@ void main() {
 	for (uint i = lightArray.begin; i < lightArray.end; i++) 
 	{
 		PointLight light = lights[lightIndices[i]];
-		radiance += light.colour.xyz * attenuate(fragment_in.position.xyz - light.position.xyz, light.radius.r);
+		radiance += light.colour.xyz * attenuate(position.xyz - light.position.xyz, light.radius.r);
 	}
 	f_colour =  vec4(diffuse.xyz * ambiance, 1);
 	f_colour += vec4(diffuse.xyz * radiance, 1);
+	
 }

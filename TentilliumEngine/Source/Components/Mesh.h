@@ -43,55 +43,58 @@
 //	> can adjust mesh per program to include or exclude vertex data
 //	> more data oriented allowing easier repurposing of data
 
-enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None, };
+namespace Mesh {
 
-template<VertAttrib>
-class VBO final : public GLbuffer {
-	friend class VAO;
-public:
-	VBO(void* data, size_t size) : GLbuffer(data, size) { }
+	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None, };
 
-	template<typename T>
-	VBO(std::vector<T>& data) : GLbuffer(&data[0], sizeof(T) * data.size()) { }
+	template<VertAttrib>
+	class VBO final : public GLbuffer {
+		friend class VAO;
+	public:
+		VBO(const void* data, size_t size) : GLbuffer(data, size) { }
+
+		template<typename T>
+		VBO(const std::vector<T>& data) : GLbuffer(&data[0], sizeof(T) * data.size()) { }
+	};
+
+	class VAO {
+	public:
+		__declspec(property(get = get_handle)) unsigned int handle;
+
+		template<VertAttrib ... attribs>
+		VAO(VBO<attribs>* ... buffers)
+		{
+			genVAO();
+			(attach(buffers), ...);
+		}
+		~VAO();
+
+		VAO(const VAO&) = delete;
+		VAO& operator=(const VAO&) = delete;
+
+		VAO(VAO&&);
+		VAO& operator=(VAO&&);
+
+		void draw(int primitive = 0x0004, int size = 0) const;
+
+		template<VertAttrib attrib>
+		void attach(VBO<attrib>* buffer);
+
+		template<VertAttrib attrib>
+		void detach();
+
+		void attach(int attrib_no, GLbuffer* buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
+
+		void detach(int attrib_no);
+
+		unsigned int get_handle() const { return m_handle; }
+	private:
+		void genVAO();
+
+		void findSize();
+
+		unsigned int m_handle;
+		int m_size;
+		VertAttrib m_size_attribute = V_None;
 };
-
-class VAO final {
-public:
-	__declspec(property(get = get_handle)) unsigned int handle;
-
-	template<VertAttrib ... attribs>
-	VAO(VBO<attribs>* ... buffers)
-	{
-		genVAO();
-		(attach(buffers), ...);
-	}
-	~VAO();
-
-	VAO(const VAO&) = delete;
-	VAO& operator=(const VAO&) = delete;
-
-	VAO(VAO&&);
-	VAO& operator=(VAO&&);
-
-	void draw(int primitive = 0x0004, int size = 0);
-
-	template<VertAttrib attrib>
-	void attach(VBO<attrib>* buffer);
-
-	template<VertAttrib attrib>
-	void detach();
-
-	void attach(int attrib_no, GLbuffer* buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
-
-	void detach(int attrib_no);
-
-	unsigned int get_handle() { return m_handle; }
-private:
-	void genVAO();
-
-	void findSize();
-
-	unsigned int m_handle;
-	int m_size;
-	VertAttrib m_size_attribute = V_None;
-};
+}

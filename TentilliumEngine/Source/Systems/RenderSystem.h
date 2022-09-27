@@ -6,14 +6,11 @@
 #include "../Components/Mesh.h"
 #include "../Components/Material.h"
 #include "../Rendering/Resources/ShaderProgram.h"
-#include "../Rendering/Resources/Framebuffer.h"
 #include <glm.hpp>
-
-//#define CLUSTER_DEBUG
 
 class RenderSystem : virtual protected entt::registry {
 public:
-	__declspec(property(get = getSize, put = setSize)) glm::ivec2 size;
+	__declspec(property(get=getSize, put=setSize)) glm::ivec2 size;
 	__declspec(property(get=getCamera,put=setCamera)) entt::entity camera;
 	
 	RenderSystem();
@@ -27,8 +24,40 @@ public:
 	void setCamera(entt::entity e);
 
 	entt::entity getCamera();
+
 private:
-	VIEW(render_scene_view, GET(VAO, Material, Transform::WorldMatrix), EXC());
+	class GeometryBuffer {
+	public:
+		Texture m_colourAttachment0; // position + depth
+		Texture m_colourAttachment1; // normal + gloss
+		Texture m_colourAttachment2; // diffuse + specular
+		
+		GeometryBuffer();
+		
+		~GeometryBuffer();
+
+		void resize(int width, int height);
+
+		void DrawTo() const;
+
+		void copyDepth(const glm::ivec2& size) const;
+
+	private:
+		unsigned int m_framebuffer;
+		unsigned int m_depthAttachment;
+	} m_geometryBuffer;
+
+	class ScreenMesh : private Mesh::VAO {
+	public:
+		ScreenMesh();
+		using Mesh::VAO::draw;
+
+	private:
+		Mesh::VBO<Mesh::V_Position> m_vbo;
+	} m_screenMesh;
+
+
+	VIEW(render_scene_view, GET(Mesh::VAO, Material, Transform::WorldMatrix), EXC());
 	VIEW(light_view, GET(PointLight), EXC());
 
 	entt::entity m_camera;
@@ -38,25 +67,18 @@ private:
 	glm::uvec3 m_clusterSize;
 
 	// shared storage buffer objects
-	GLbuffer m_renderDataBuffer;	// 0
-	GLbuffer m_clusterBuffer;		// 1
-	GLbuffer m_pointLightBuffer;	// 2
-	GLbuffer m_lightIndiceBuffer;	// 3
-	GLbuffer m_lightArrayBuffer;	// 4
-	GLbuffer m_visibleCountBuffer;	// 5
+	GLbuffer m_renderDataBuffer;	// stores basic data such as current screen size used in the render cycle
+	GLbuffer m_clusterBuffer;		// stores an unsorted collection of Axis Aligned Bounding Boxes for each cluster
+	GLbuffer m_pointLightBuffer;	// stores the point lights
+	GLbuffer m_lightIndiceBuffer;	// stores indices to the pointlights
+	GLbuffer m_lightArrayBuffer;	// stores an array per cluster of indices
+	GLbuffer m_visibleCountBuffer;	// stores an unsigned int counting the number of lights in the scene(counting repeats)
 
-	Framebuffer m_depth_framebuffer;
+	ShaderProgram<COMP>	m_clusterGenerationProgram{ "Resources/shaders/cluster_prepass.comp" };			// calculates cluster AABBs
+	ShaderProgram<COMP>	m_lightCullingProgram{ "Resources/shaders/cluster_culling.comp" };				// culls lights from clusters
+	ShaderProgram<VERT, FRAG> m_geometryPassProgram{ "Resources/shaders/geometry_pass.shader" };		// writes scene to geometry buffer
+	ShaderProgram<VERT, FRAG> m_deferredShadingProgram{ "Resources/shaders/deferred_shading.shader" };	// shades scene
 
-	ShaderProgram<COMP> m_prepass{ "Resources/shaders/cluster_prepass.comp" };
-	ShaderProgram<COMP> m_culling{ "Resources/shaders/cluster_culling.comp" };
-	ShaderProgram<VERT, FRAG> m_shading{ "Resources/shaders/cluster_shading.shader" };
-
-	//ShaderProgram<VERT, FRAG> m_depth_prepass{ "Resources/shaders/depth_prepass.shader" };
-
-#if defined(CLUSTER_DEBUG)
-	ShaderProgram<VERT, GEOM, FRAG> m_debug_cluster_program{ "Resources/shaders/debug_cluster.shader" };
-	VAO m_debug_cluster_vao;
-#endif
 	static void constructLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);
 
 	static void destroyLight(GLbuffer& buffer, entt::registry& reg, entt::entity e);

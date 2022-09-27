@@ -77,33 +77,20 @@
     <ClCompile Include="Source\Components\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Resources\Framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\shaders\default.frag">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
     <None Include="Resources\meshes\Hat.mtl">
       <Filter>Resource Files\meshes</Filter>
     </None>
-    <None Include="Resources\shaders\default.vert" />
-    <None Include="Resources\meshes\Person.fbx" />
-    <None Include="Resources\meshes\Owl.fbx" />
-    <None Include="Resources\meshes\Punk.fbx" />
-    <None Include="Resources\shaders\depth_prepass.frag" />
-    <None Include="Resources\shaders\depth_prepass.vert" />
-    <None Include="Resources\shaders\light_accumul.vert" />
-    <None Include="Resources\shaders\light_culling.comp" />
-    <None Include="Resources\shaders\light_accumul.frag" />
-    <None Include="Resources\shaders\cluster_shading.vert" />
+    <None Include="Resources\shaders\geometry_pass.frag" />
+    <None Include="Resources\shaders\geometry_pass.vert" />
     <None Include="Resources\shaders\cluster_culling.comp" />
     <None Include="Resources\shaders\cluster_prepass.comp" />
-    <None Include="Resources\shaders\cluster_shading.frag" />
-    <None Include="Resources\shaders\debug_cluster.frag" />
-    <None Include="Resources\shaders\debug_cluster.vert" />
-    <None Include="Resources\shaders\debug_cluster.geom" />
+    <None Include="Resources\shaders\debug\cluster.frag" />
+    <None Include="Resources\shaders\debug\cluster.vert" />
+    <None Include="Resources\shaders\debug\cluster.geom" />
+    <None Include="Resources\shaders\deferred_shading.frag" />
+    <None Include="Resources\shaders\deferred_shading.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
@@ -144,7 +131,6 @@
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Components\PointLight.h" />
-    <ClInclude Include="Source\Rendering\Resources\Framebuffer.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -170,12 +156,6 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\textures\pigeon.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\textures\grid.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

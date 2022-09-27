@@ -85,11 +85,16 @@ RenderSystem::RenderSystem() :
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_lightArrayBuffer.handle);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_visibleCountBuffer.handle);
 
-	m_depth_framebuffer.attach(Framebuffer::DEPTH, Texture(nullptr, 1, 1, Texture::Format::DEPTH));
+	m_deferredShadingProgram.setUniform1i("fboAttachment0", 0); // bind to texture slot 0, 1 and 2
+	m_deferredShadingProgram.setUniform1i("fboAttachment1",	1);
+	m_deferredShadingProgram.setUniform1i("fboAttachment2", 2);
 
-#ifdef CLUSTER_DEBUG
-	m_debug_cluster_vao.attach(V_Custom, &m_lightArrayBuffer, 2, GL_UNSIGNED_INT, false, 0);
-#endif
+	m_geometryPassProgram.setUniformBlock("Material", 0);
+
+	m_geometryPassProgram.setUniform1i("diffuseMap", 0); // bind to material textures to slot 0, 1, 2 and 3
+	m_geometryPassProgram.setUniform1i("specularMap", 1);
+	m_geometryPassProgram.setUniform1i("glossMap", 2);
+	m_geometryPassProgram.setUniform1i("normalMap", 3);
 }
 
 void RenderSystem::setSize(glm::ivec2 size)
@@ -99,14 +104,14 @@ void RenderSystem::setSize(glm::ivec2 size)
 	m_size = (glm::uvec2)size;
 	m_clusterSize = glm::uvec3(CALC_CLUSTER_SIZE(size));
 
+	m_geometryBuffer.resize(size.x, size.y);
+
 	if (!valid(m_camera)) return;
 	auto proj = try_get<Projection>(m_camera);
 	if (!proj) return;
 
 	proj->m_ratio = ((float)size.x) / size.y;
 	proj->m_proj = glm::perspective(proj->m_fovY, proj->m_ratio, proj->m_zNear, proj->m_zFar);
-
-	m_depth_framebuffer.resize(size);
 
 	float scale = m_clusterSize.z / std::log2f(proj->m_zFar / proj->m_zNear);
 	float bias = m_clusterSize.z * -std::log2f(proj->m_zNear) / std::log2f(proj->m_zFar / proj->m_zNear);
@@ -121,7 +126,7 @@ void RenderSystem::setSize(glm::ivec2 size)
 		proj->m_zFar,		
 		});
 
-	m_prepass.dispatch(m_clusterSize);
+	m_clusterGenerationProgram.dispatch(m_clusterSize);
 }
 
 glm::ivec2 RenderSystem::getSize() 
@@ -147,7 +152,7 @@ void RenderSystem::setCamera(entt::entity e)
 		proj.m_zFar,
 		});
 	
-	m_prepass.dispatch(m_clusterSize);
+	m_clusterGenerationProgram.dispatch(m_clusterSize);
 }
 
 entt::entity RenderSystem::getCamera()
@@ -162,48 +167,37 @@ void RenderSystem::render()
 	glm::mat4 view = get<Transform::WorldMatrix>(camera);
 	view = glm::inverse(view);
 
-	// depth prepass
-	/*
-	m_depth_framebuffer.bind();
-	m_depth_prepass.bind();
-	for (auto [entity, mesh, material, transform] : render_scene_view.each())
+	// geometry prepass
+	m_geometryBuffer.DrawTo();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_geometryPassProgram.bind();
+	for (auto [entity, mesh, material, model] : render_scene_view.each()) {
+		m_geometryPassProgram.setUniformMat4("model", model);
+		m_geometryPassProgram.setUniformMat4("MVP", proj * view * (glm::mat4)model);
+		material.bind(0); // binds material maps 0 - 3
 		mesh.draw();
-	Framebuffer::unbind();
-	*/
+	}
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 	// light culling
-	m_culling.bind();
-	m_culling.setUniformMat4("view", view);
-	m_culling.setUniform1i("lightCount", (int)storage<PointLight>().size());
-	m_culling.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
+	m_lightCullingProgram.bind();
+	m_lightCullingProgram.setUniformMat4("view", view);
+	m_lightCullingProgram.setUniform1i("lightCount", storage<PointLight>().size());
+	m_lightCullingProgram.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
 	
-	m_shading.bind();
-	for (auto [entity, mesh, material, model] : render_scene_view.each())
-	{
-		m_shading.setUniformMat4("model", model);
-		m_shading.setUniformMat4("MVP", proj * view * (glm::mat4)model);
-		material.bind();
-		mesh.draw();
-	};
 
-#if defined(CLUSTER_DEBUG)
-	glDisable(GL_DEPTH_TEST);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glDisable(GL_CULL_FACE);
+	// deferred pass
+	m_deferredShadingProgram.bind();
+	m_geometryBuffer.m_colourAttachment0.bindSlot(0); // binds geometry maps 0 - 2
+	m_geometryBuffer.m_colourAttachment1.bindSlot(1);
+	m_geometryBuffer.m_colourAttachment2.bindSlot(2);
+	m_screenMesh.draw(GL_TRIANGLE_STRIP);
 
-	m_debug_cluster_program.bind();
-	m_debug_cluster_program.setUniformMat4("VP", proj * view);
-	m_debug_cluster_vao.draw(GL_LINES, m_clusterSize.x * m_clusterSize.y * m_clusterSize.z);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
-
-	
-	
-#endif
+	// copy geometry depth buffer to main buffer
+	// forward render transparent objects
 }
+
+
 
 void RenderSystem::constructLight(GLbuffer& m_pointLightBuffer, entt::registry& reg, entt::entity e)
 {
@@ -229,4 +223,73 @@ void RenderSystem::destroyLight(GLbuffer& m_pointLightBuffer, entt::registry& re
 void RenderSystem::updateLight(GLbuffer& m_pointLightBuffer, entt::registry& reg, entt::entity e) {
 	auto index = reg.storage<PointLight>().index(e);
 	m_pointLightBuffer.set_data(reg.get<PointLight>(e).m_position, index * sizeof(PointLight) + offsetof(PointLight, m_position));
+}
+
+
+
+RenderSystem::GeometryBuffer::GeometryBuffer()
+{
+	glGenFramebuffers(1, &m_framebuffer);
+	glGenRenderbuffers(1, &m_depthAttachment);
+
+	m_colourAttachment0.setData(1, 1, Texture::Format::RGBA, false); // *important* NOT normalized
+	m_colourAttachment1.setData(1, 1, Texture::Format::RGBA, false);
+	m_colourAttachment2.setData(1, 1, Texture::Format::RGBA, false);
+	
+	m_colourAttachment0.filter = Texture::Filter::NEAREST;	// position + depth
+	m_colourAttachment1.filter = Texture::Filter::LINEAR;	// normal + 
+	m_colourAttachment2.filter = Texture::Filter::LINEAR;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+
+	// glBindTexture(GL_TEXTURE_2D, m_colourAttachment0.handle);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colourAttachment0.handle, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_colourAttachment1.handle, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_colourAttachment2.handle, 0);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, m_depthAttachment);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1, 1);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthAttachment);
+
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+RenderSystem::GeometryBuffer::~GeometryBuffer()
+{
+	glDeleteRenderbuffers(1, &m_depthAttachment);
+	glDeleteFramebuffers(1, &m_framebuffer);
+}
+
+void RenderSystem::GeometryBuffer::resize(int width, int height)
+{
+	m_colourAttachment0.setData(width, height, Texture::Format::RGBA, false);
+	m_colourAttachment1.setData(width, height, Texture::Format::RGBA, false);
+	m_colourAttachment2.setData(width, height, Texture::Format::RGBA, false);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, m_depthAttachment);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+}
+
+void RenderSystem::GeometryBuffer::DrawTo() const
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_framebuffer);
+}
+
+void RenderSystem::GeometryBuffer::copyDepth(const glm::ivec2& size) const
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer);
+	glBlitFramebuffer(0, 0, size.x, size.y, 0, 0, size.x, size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+}
+
+
+
+RenderSystem::ScreenMesh::ScreenMesh()
+	: m_vbo(std::vector<float>{ -1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0 })
+{
+	attach(&m_vbo);
 }

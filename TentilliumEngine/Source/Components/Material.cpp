@@ -2,43 +2,70 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 
-void Material::set_diffuse(Texture texture)
-{
-	m_textures.insert(std::pair(0, texture));
-	set_data(true, offsetof(UniformData, hasDiffuseMap));
+void Material::bind(int uniformBufferIndex) const {
+	glBindBufferBase(GL_UNIFORM_BUFFER, uniformBufferIndex, m_uniformBuffer.handle);
+	
+	if (m_DiffuseMap.handle != 0) 
+		m_DiffuseMap.bindSlot(0);
+
+	if (m_specularMap.handle != 0) 
+		m_specularMap.bindSlot(1);
+
+	if (m_glossMap.handle != 0) 
+		m_glossMap.bindSlot(2);
+
+	if (m_normalMap.handle != 0) 
+		m_normalMap.bindSlot(3);
 }
 
-void Material::set_diffuse(glm::vec4 value)
+void Material::setDiffuse(const glm::vec4& value)
 {
-	m_textures.erase(0);
-	set_data(value, offsetof(UniformData, diffuse));
-	set_data(false, offsetof(UniformData, hasDiffuseMap));
+	m_uniformBuffer.set_data(value, offsetof(UniformData, diffuse));
+	m_uniformBuffer.set_data(false, offsetof(UniformData, hasDiffuseMap));
+	m_DiffuseMap = Texture(0); // clear Texture value
 }
 
-void Material::set_specular(Texture texture)
+void Material::setDiffuse(const glm::vec3& value)
 {
-	m_textures.insert(std::pair(1, texture));
-	set_data(false, offsetof(UniformData, hasSpecularMap));
+	m_uniformBuffer.set_data(glm::vec4(value.x, value.y, value.z, 1), offsetof(UniformData, diffuse));
+	m_uniformBuffer.set_data(false, offsetof(UniformData, hasDiffuseMap));
+	m_DiffuseMap = Texture(0); // clear Texture value
 }
 
-void Material::set_specular(glm::vec4 value)
+void Material::setDiffuse(const Texture& value)
 {
-	m_textures.erase(1);
-	set_data(value, offsetof(UniformData, specular));
-	set_data(false, offsetof(UniformData, hasSpecularMap));
+	m_uniformBuffer.set_data(true, offsetof(UniformData, hasDiffuseMap));
+	m_DiffuseMap = value; // set Texture value
 }
 
-void Material::set_normal(Texture texture)
+void Material::setSpecular(float value)
 {
-	m_textures.insert(std::pair(2, texture));
-	set_data(false, offsetof(UniformData, hasNormalMap));
+	m_uniformBuffer.set_data(value, offsetof(UniformData, specular));
+	m_uniformBuffer.set_data(false, offsetof(UniformData, hasSpecularMap));
+	m_specularMap = Texture(0); // clear Texture value
 }
 
-void Material::bind(int index, int texture_slot_offset) const {
-	glBindBufferBase(GL_UNIFORM_BUFFER, index, GLbuffer::get_handle());
-	for (auto& [slot, texture] : m_textures)
-	{
-		glActiveTexture(GL_TEXTURE0 + texture_slot_offset + slot);
-		glBindTexture(GL_TEXTURE_2D, texture.handle);
-	}
+void Material::setSpecular(const Texture& value)
+{
+	m_uniformBuffer.set_data(true, offsetof(UniformData, hasSpecularMap));
+	m_specularMap = value; // set Texture value
+}
+
+void Material::setGloss(float value)
+{
+	m_uniformBuffer.set_data(value, offsetof(UniformData, gloss));
+	m_uniformBuffer.set_data(false, offsetof(UniformData, hasGlossMap));
+	m_glossMap = Texture(0); // clear Texture value
+}
+
+void Material::setGloss(const Texture& value)
+{
+	m_uniformBuffer.set_data(true, offsetof(UniformData, hasGlossMap));
+	m_glossMap = value; // set Texture value
+}
+
+void Material::setNormal(const Texture& value)
+{
+	m_uniformBuffer.set_data(true, offsetof(UniformData, hasNormalMap));
+	m_normalMap = value; // clear Texture value
 }

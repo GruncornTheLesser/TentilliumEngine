@@ -16,7 +16,9 @@
 */
 
 /* TODO:
-*	> Rendering
+*	> PointLight position, scale and (rotation + projection) association as well as directional + spotlights
+*	> Normal + Tangent VBO generation
+*	> decouple Material into maps and 
 *	> seperate rendering functionality further for mesh/camera/rendering type
 * 
 *	> Tidy AppWindow functionality into something less ugly
@@ -123,6 +125,7 @@ unsigned char RGBAtest[] = {
 };
 
 using namespace Transform;
+using namespace Mesh;
 
 class TestApp : public AppWindow
 {
@@ -189,7 +192,7 @@ public:
 			scene.set<VBO<V_Normal>>(box2, scene.get<VBO<V_Normal>>(box1));
 			scene.set<VBO<V_TexCoord>>(box2, scene.get<VBO<V_TexCoord>>(box1));
 			
-			scene.set<Material>(box2, Texture(RGBtest, 2, 2, Texture::Format::RGB));
+			scene.set<Material>(box2, Texture(2, 2, Texture::Format::RGB, true, RGBtest, Texture::Format::RGB, Texture::Type::UNSIGNED_BYTE));
 		}
 		
 		// floor (entity 4)
@@ -210,18 +213,17 @@ public:
 		// light 1 (entity 5)
 		{
 			light1 = scene.create();
-			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(1, 0, 0), 2.0f);
+			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(2, 0, 0), 10.0f);
 			scene.set<Position>(light1, 0.5f, 0, 0);
-			scene.set<Scale>(light1, 2.0f);
+			scene.set<Scale>(light1, 10.0f);
 		}
 		
 		// light 2 (entity 6)
 		{
 			light2 = scene.create();
-			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 1), 2.0f);
-			
+			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 2), 10.0f);
 			scene.set<Position>(light2, -0.5f, 0, 0);
-			scene.set<Scale>(light2, 2.0f);
+			scene.set<Scale>(light2, 10.0f);
 		}
 		
 	}

@@ -10,66 +10,17 @@
 #include <exception>
 #include <iostream>
 
-unsigned int generateTexture(void* data, int width, int height, Texture::Format data_format_hint, Texture::Format internal_format_hint, Texture::Type type_hint)
+Texture::Texture()
 {
-	unsigned int m_handle;
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+}
+
+Texture::Texture(std::string filepath, Wrap wrap, Filter filter)
+{
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
-	int internal_format, data_format, type;
-	switch (data_format_hint) {
-	case Texture::Format::R:  data_format = GL_RED; break;
-	case Texture::Format::RG:  data_format = GL_RG; break;
-	case Texture::Format::RGB:  data_format = GL_RGB; break;
-	case Texture::Format::RGBA:  data_format = GL_RGBA; break;
-	case Texture::Format::DEPTH:  data_format = GL_DEPTH_COMPONENT; break;
-	}
-
-	switch (internal_format_hint) {
-	case Texture::Format::R:  internal_format = GL_RED; break;
-	case Texture::Format::RG:  internal_format = GL_RG; break;
-	case Texture::Format::RGB:  internal_format = GL_RGB; break;
-	case Texture::Format::RGBA:  internal_format = GL_RGBA; break;
-	case Texture::Format::DEPTH: internal_format = GL_DEPTH_COMPONENT; break;
-	}
-
-	int selection = 0;
-	if (internal_format_hint == Texture::Format::NONE)	selection |= 1;
-	if (data_format_hint == Texture::Format::NONE)		selection |= 2;
-
-	switch (selection) {
-	case (1):
-		internal_format = data_format;
-		break;
-	case (2):
-		data_format = internal_format;
-		break;
-	case (3):
-		std::cerr << "[Input Error] - cannot infer format" << std::endl;
-		throw std::exception();
-	}
-
-	switch (type_hint) {
-	case Texture::Type::UNSIGNED_BYTE:	type = GL_UNSIGNED_BYTE; break;
-	case Texture::Type::UNSIGNED_INT:	type = GL_UNSIGNED_INT; break;
-	case Texture::Type::FLOAT:			type = GL_FLOAT; break;
-	case Texture::Type::NONE:			type = GL_UNSIGNED_BYTE; break;
-	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, type, data);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glBindTexture(GL_TEXTURE_2D, NULL);
-
-	return m_handle;
-}
-
-Texture::Texture(std::string filepath)
-{
 	int width, height, data_format;
 
 	// stbi and opengl disagree on uv practices, so flip necessary
@@ -84,25 +35,27 @@ Texture::Texture(std::string filepath)
 		throw std::exception();
 	}
 
-	// generate opengl texture from bitmap, format = NONE => data_format = internal_format
-	m_handle = generateTexture(data, width, height, (Format)data_format, Format::NONE, Type::UNSIGNED_BYTE);
+	// generate opengl texture from bitmap, internal_format = None means internal_format == data_format and vice versa
+	setData(width, height, Format::NONE, true, data, (Format)data_format, Type::UNSIGNED_BYTE);
 
-	// release stbi image
+	// release stbi image data
 	stbi_image_free(data);
 
 	create(m_handle);
+
+	setWrap(wrap);
+	setFilter(filter);
 }
 
-Texture::Texture(void* data, int width, int height, Format internal_format_hint, Format data_format_hint, Type type_hint)
+Texture::Texture(int width, int height, Format internal_format_hint, bool normalized, void* data, Format data_format_hint, Type type_hint, Wrap wrap, Filter filter)
 {
-	// if data nullptr create empty texture
-	if (!data) {
-		m_handle = generateTexture(nullptr, width, height, data_format_hint, internal_format_hint, type_hint);
-		return;
-	}
+	glGenTextures(1, &m_handle);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
 
-	// if data compressed image, decompress, get data, height, width, data format
-	if (height == 0 || width == 0) {
+	if (!data) { // if data empty create empty texture
+		setData(width, height, internal_format_hint, normalized);
+	}
+	else if (height == 0 || width == 0) {
 		stbi_set_flip_vertically_on_load(true);
 		data = stbi_load_from_memory((unsigned char*)data, std::max(1, width) * std::max(1, height), &width, &height, (int*)(&data_format_hint), 0);
 
@@ -111,16 +64,19 @@ Texture::Texture(void* data, int width, int height, Format internal_format_hint,
 			throw std::exception();
 		}
 
-		m_handle = generateTexture(data, width, height, data_format_hint, internal_format_hint, type_hint);
+		setData(width, height, internal_format_hint,normalized, data, data_format_hint, type_hint);
 
 		stbi_image_free(data);
 	}
 	else
 	{
-		m_handle = generateTexture(data, width, height, data_format_hint, internal_format_hint, type_hint);
+		setData(width, height, internal_format_hint, normalized, data, data_format_hint, type_hint);
 	}
 
 	create(m_handle);
+	
+	setWrap(wrap);
+	setFilter(filter);
 }
 
 Texture::~Texture()
@@ -132,6 +88,7 @@ Texture::~Texture()
 Texture::Texture(Texture const& other)
 {
 	create(other.m_handle);
+
 	if (destroy(m_handle))
 		glDeleteTextures(1, &m_handle);
 
@@ -172,6 +129,68 @@ const Texture& Texture::operator=(Texture&& other)
 	m_handle = other.m_handle;
 	other.m_handle = 0;
 	return *this;
+}
+
+void Texture::setData(int width, int height, Format internal_format_hint, bool normalized, void* data, Format data_format_hint, Type data_type_hint)
+{
+	glBindTexture(GL_TEXTURE_2D, m_handle);
+
+	int internal_format, data_format, type;
+
+	if (data_format_hint == Texture::Format::NONE && internal_format_hint == Texture::Format::NONE) {
+		internal_format_hint = Texture::Format::RGBA;
+		data_format_hint = Texture::Format::RGBA;
+	}
+	
+	if (internal_format_hint == Texture::Format::NONE)
+		internal_format_hint = data_format_hint;
+
+	if (normalized) {
+		switch (internal_format_hint) {
+		case Texture::Format::R:  internal_format = GL_RED; break;
+		case Texture::Format::RG:  internal_format = GL_RG; break;
+		case Texture::Format::RGB:  internal_format = GL_RGB; break;
+		case Texture::Format::RGBA:  internal_format = GL_RGBA; break;
+		case Texture::Format::DEPTH:  internal_format = GL_DEPTH_COMPONENT; break;
+		}
+	}
+	else
+	{
+		switch (internal_format_hint) {
+		case Texture::Format::R:  internal_format = GL_R16F; break;
+		case Texture::Format::RG:  internal_format = GL_RG16F; break;
+		case Texture::Format::RGB:  internal_format = GL_RGB16F; break;
+		case Texture::Format::RGBA:  internal_format = GL_RGBA16F; break;
+		case Texture::Format::DEPTH:  internal_format = GL_DEPTH_COMPONENT; break;
+		}
+	}
+
+	if (data_format_hint == Texture::Format::NONE)
+		data_format_hint = internal_format_hint;
+
+	switch (data_format_hint) {
+	case Texture::Format::R:  data_format = GL_RED; break;
+	case Texture::Format::RG:  data_format = GL_RG; break;
+	case Texture::Format::RGB:  data_format = GL_RGB; break;
+	case Texture::Format::RGBA:  data_format = GL_RGBA; break;
+	case Texture::Format::DEPTH:  data_format = GL_DEPTH_COMPONENT; break;
+	}
+
+	switch (data_type_hint) {
+	case Texture::Type::UNSIGNED_BYTE:	type = GL_UNSIGNED_BYTE; break;
+	case Texture::Type::UNSIGNED_INT:	type = GL_UNSIGNED_INT; break;
+	case Texture::Type::FLOAT:			type = GL_FLOAT; break;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, type, data);
+
+	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
+void Texture::bindSlot(unsigned int slot) const
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
 glm::ivec2 Texture::getSize() const

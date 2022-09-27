@@ -91,7 +91,7 @@ entt::entity LoadSystem::load(std::string filepath)
 		auto texPtr = scene->mTextures;
 		for (unsigned int i = 0; i < scene->mNumTextures; i++) {
 			textures.push_back(Texture::get_or_default(texPtr[i]->mFilename.C_Str(),
-				texPtr[i]->pcData, texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA));
+				texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA, texPtr[i]->pcData));
 		}
 	}
 
@@ -120,17 +120,17 @@ entt::entity LoadSystem::load(std::string filepath)
 					for (unsigned int index_i = 0; index_i < face.mNumIndices; index_i++)
 						indices.push_back(face.mIndices[index_i] + vertexOffset);
 				}
-				get_or_emplace<VBO<V_Index>>(e, nullptr, sizeof(int) * faceCount * 3)
+				get_or_emplace<Mesh::VBO<Mesh::V_Index>>(e, nullptr, sizeof(int) * faceCount * 3)
 					.set_data(&indices[0], sizeof(int) * 3 * aiMeshPtr->mNumFaces, sizeof(int) * 3 * faceOffset);
 			}
 
 			if (aiMeshPtr->HasPositions()) {
-				get_or_emplace<VBO<V_Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+				get_or_emplace<Mesh::VBO<Mesh::V_Position>>(e, nullptr, sizeof(float) * 3 * vertexCount)
 					.set_data(aiMeshPtr->mVertices, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 			}
 
 			if (aiMeshPtr->HasNormals()) {
-				get_or_emplace<VBO<V_Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
+				get_or_emplace<Mesh::VBO<Mesh::V_Normal>>(e, nullptr, sizeof(float) * 3 * vertexCount)
 					.set_data(aiMeshPtr->mNormals, sizeof(float) * 3 * aiMeshPtr->mNumVertices, sizeof(float) * 3 * vertexOffset);
 			}
 
@@ -140,7 +140,7 @@ entt::entity LoadSystem::load(std::string filepath)
 					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].x);
 					texCoords.push_back(aiMeshPtr->mTextureCoords[0][uv_i].y);
 				}
-				get_or_emplace<VBO<V_TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
+				get_or_emplace<Mesh::VBO<Mesh::V_TexCoord>>(e, nullptr, sizeof(float) * vertexCount * 2)
 					.set_data(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
 			}
 
@@ -156,22 +156,41 @@ entt::entity LoadSystem::load(std::string filepath)
 
 		auto& mat = emplace<Material>(e);
 
-		aiColor3D colour;
-		aiString texture;
+		{
+			aiColor3D colour;
+			aiString texture;
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
+				mat.setDiffuse(Texture::get(texture.C_Str()));
+			else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
+				mat.setDiffuse(glm::vec4(colour.r, colour.g, colour.b, 1));
+		}
 
-		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
-			mat.set_diffuse(Texture::get(texture.C_Str()));
-		else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
-			mat.set_diffuse(glm::vec4(colour.r, colour.g, colour.b, 1));
+		{
+			aiColor3D colour;
+			aiString texture;
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
+				mat.setSpecular(Texture::get(texture.C_Str()));
+			else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
+				mat.setSpecular(colour.r);
 
-		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
-			mat.set_specular(Texture::get(texture.C_Str()));
-		else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
-			mat.set_specular(glm::vec4(colour.r, colour.g, colour.b, 1));
+		}
 
-		if (aiMatPtr->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
-			mat.set_normal(Texture::get(texture.C_Str()));
+		{
+			float gloss;
+			aiString texture;
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
+				mat.setGloss(Texture::get(texture.C_Str()));
+			else if (aiMatPtr->Get(AI_MATKEY_SHININESS, gloss) == AI_SUCCESS)
+				mat.setGloss(gloss);
+		}
 
+		{
+			aiColor3D colour;
+			aiString texture;
+			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
+				mat.setNormal(Texture::get(texture.C_Str()));
+		}
+		
 	}
 
 	/*

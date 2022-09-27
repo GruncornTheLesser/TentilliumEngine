@@ -2,7 +2,7 @@
 #include <glew.h>
 #include <glfw3.h>
 
-GLbuffer::GLbuffer(void* data, size_t size, int usage) {
+GLbuffer::GLbuffer(const void* data, size_t size, int usage) {
     glCreateBuffers(1, &m_handle);
     glNamedBufferData(m_handle, size, data, usage);
     create(m_handle);

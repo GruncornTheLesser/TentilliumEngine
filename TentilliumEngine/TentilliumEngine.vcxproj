@@ -172,7 +172,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Components\Material.cpp" />
-    <ClCompile Include="Source\Rendering\Resources\Framebuffer.cpp" />
     <ClCompile Include="Source\Systems\HierarchySystem.cpp" />
     <ClCompile Include="Source\Systems\LoadSystem.cpp" />
     <ClCompile Include="Source\Rendering\Resources\GLbuffer.cpp" />
@@ -189,31 +188,22 @@
   <ItemGroup>
     <None Include="Resources\shaders\cluster_culling.comp" />
     <None Include="Resources\shaders\cluster_prepass.comp" />
-    <None Include="Resources\shaders\cluster_shading.frag" />
-    <None Include="Resources\shaders\cluster_shading.vert" />
-    <None Include="Resources\shaders\debug_cluster.vert" />
-    <None Include="Resources\shaders\light_accumul.frag" />
-    <None Include="Resources\shaders\light_culling.comp" />
-    <None Include="Resources\shaders\light_accumul.vert" />
-    <None Include="Resources\shaders\depth_prepass.frag" />
-    <None Include="Resources\shaders\depth_prepass.vert" />
-    <None Include="Resources\meshes\Person.fbx" />
-    <None Include="Resources\meshes\Owl.fbx" />
-    <None Include="Resources\meshes\Punk.fbx" />
-    <None Include="Resources\shaders\default.frag" />
+    <None Include="Resources\shaders\debug\cluster.vert" />
+    <None Include="Resources\shaders\deferred_shading.frag" />
+    <None Include="Resources\shaders\deferred_shading.vert" />
+    <None Include="Resources\shaders\geometry_pass.frag" />
+    <None Include="Resources\shaders\geometry_pass.vert" />
     <None Include="Resources\meshes\Hat.mtl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="Resources\shaders\default.vert" />
-    <None Include="Resources\shaders\debug_cluster.frag" />
-    <None Include="Resources\shaders\debug_cluster.geom" />
+    <None Include="Resources\shaders\debug\cluster.frag" />
+    <None Include="Resources\shaders\debug\cluster.geom" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Components\PointLight.h" />
-    <ClInclude Include="Source\Rendering\Resources\Framebuffer.h" />
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
@@ -250,7 +240,6 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\textures\grid.png" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />
@@ -259,7 +248,6 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png" />
-    <Image Include="Resources\textures\pigeon.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Source\notes.txt" />
