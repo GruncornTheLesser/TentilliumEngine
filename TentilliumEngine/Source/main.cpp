@@ -16,6 +16,11 @@
 */
 
 /* TODO:
+*	> Transparent objects
+*	> MegaTextures
+*	> Decals ???
+*	> probes ??? -> basically used for reflection maps, the scene is rendered to a cubemap
+* 
 *	> PointLight position, scale and (rotation + projection) association as well as directional + spotlights
 *	> Normal + Tangent VBO generation
 *	> decouple Material into maps and 
@@ -27,7 +32,18 @@
 *   > bones, skinning and animation
 *	> seperate Transform and Transform implementation
 */
-
+/* ToDo:
+*	
+*		tag transparent objects
+*		sort by depth in scene
+*		forward render
+*
+*	 -> allocate giant shared texture for diffuse, specular and gloss
+*				 -> shadow depth -> only update if tile in scene
+*
+*	Decals???
+*
+*/
 /* RESEARCH:
 *	> Morton encoding for position in a quad tree -> chunking???
 *	> ANGLE a library that compiles opengl calls into directx

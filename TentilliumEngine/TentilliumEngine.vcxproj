@@ -211,6 +211,7 @@
     <ClInclude Include="Source\Components\Material.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
+    <ClInclude Include="Source\Systems\MaterialSystem.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />

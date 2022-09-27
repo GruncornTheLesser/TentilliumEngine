@@ -154,42 +154,46 @@ entt::entity LoadSystem::load(std::string filepath)
 	if (scene->HasMaterials()) {
 		auto aiMatPtr = scene->mMaterials[0];
 
-		auto& mat = emplace<Material>(e);
-
+		std::variant<Texture, glm::vec4> diffuse;
+		std::variant<Texture, float> specular;
+		std::variant<Texture, float> gloss;
+		std::optional<Texture> normal;
 		{
 			aiColor3D colour;
 			aiString texture;
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
-				mat.setDiffuse(Texture::get(texture.C_Str()));
+				diffuse = Texture::get(texture.C_Str());
 			else if (aiMatPtr->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
-				mat.setDiffuse(glm::vec4(colour.r, colour.g, colour.b, 1));
+				diffuse = glm::vec4(colour.r, colour.g, colour.b, 1);
 		}
 
 		{
 			aiColor3D colour;
 			aiString texture;
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
-				mat.setSpecular(Texture::get(texture.C_Str()));
+				specular = Texture::get(texture.C_Str());
 			else if (aiMatPtr->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
-				mat.setSpecular(colour.r);
+				specular = colour.r;
 
 		}
 
 		{
-			float gloss;
+			float value;
 			aiString texture;
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
-				mat.setGloss(Texture::get(texture.C_Str()));
-			else if (aiMatPtr->Get(AI_MATKEY_SHININESS, gloss) == AI_SUCCESS)
-				mat.setGloss(gloss);
+				gloss = Texture::get(texture.C_Str());
+			else if (aiMatPtr->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS)
+				gloss = value;
 		}
 
 		{
 			aiColor3D colour;
 			aiString texture;
 			if (aiMatPtr->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
-				mat.setNormal(Texture::get(texture.C_Str()));
+				normal = Texture::get(texture.C_Str());
 		}
+
+		auto& mat = emplace<Material>(e, diffuse, specular, gloss, normal);
 		
 	}
 

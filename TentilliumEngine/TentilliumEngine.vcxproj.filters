@@ -132,6 +132,7 @@
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Components\PointLight.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
+    <ClInclude Include="Source\Systems\MaterialSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">

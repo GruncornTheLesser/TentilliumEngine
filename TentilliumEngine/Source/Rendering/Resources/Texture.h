@@ -9,7 +9,6 @@
 class Texture : public GL<Texture>, public FileManager<Texture>
 {
 	friend class GL<Texture>;
-	friend class Material;
 public:
 	enum class Filter { NEAREST, LINEAR };
 	enum class Wrap { CLAMP_EDGE, REPEAT, MIRRORED_REPEAT };
@@ -58,5 +57,4 @@ public:
 
 private:
 	static void destroy(unsigned int handle);
-	Texture(unsigned int handle) { m_handle = handle; }
 };
