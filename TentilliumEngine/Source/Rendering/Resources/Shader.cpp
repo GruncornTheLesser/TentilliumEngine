@@ -23,6 +23,18 @@ Shader<type>::Shader(std::string filepath)
 		case COMP: filepath.replace(it1, it2, ".comp"); break;
 		}
 	}
+	else if (!((type == VERT && fileExt == ".vert") || (type == GEOM && fileExt == ".geom") || (type == FRAG && fileExt == ".frag") || (type == COMP && fileExt == ".comp")))
+	{
+		std::cerr << "[Load error] - file extension does not match shader type. Type is '";
+		switch (type) { 
+		case VERT: std::cerr << "Vertex"; break;
+		case GEOM: std::cerr << "Geometry"; break;
+		case FRAG: std::cerr << "Fragment"; break;
+		case COMP: std::cerr << "Compute"; break;
+		}
+		std::cerr << "' in file '" << filepath << "'" << std::endl;
+
+	}
 
 	std::string data;
 

@@ -4,21 +4,21 @@
 #include <gtx/transform.hpp>
 #include <gtc/quaternion.hpp>
 
+using namespace Transform;
 
 TransformSystem::TransformSystem()
-
 {
-	on_construct<Transform::Position>().connect<attachTransform>();
-	on_construct<Transform::Scale>().connect<attachTransform>();
-	on_construct<Transform::Rotation>().connect<attachTransform>();
+	on_construct<Position>().connect<attachTransform>();
+	on_construct<Scale>().connect<attachTransform>();
+	on_construct<Rotation>().connect<attachTransform>();
 
-	on_update<Transform::Position>().connect<updateTransform>();
-	on_update<Transform::Scale>().connect<updateTransform>();
-	on_update<Transform::Rotation>().connect<updateTransform>();
+	on_update<Position>().connect<updateTransform>();
+	on_update<Scale>().connect<updateTransform>();
+	on_update<Rotation>().connect<updateTransform>();
 
-	on_destroy<Transform::Position>().connect<detachTransform>();
-	on_destroy<Transform::Scale>().connect<detachTransform>();
-	on_destroy<Transform::Rotation>().connect<detachTransform>();
+	on_destroy<Position>().connect<detachTransform>();
+	on_destroy<Scale>().connect<detachTransform>();
+	on_destroy<Rotation>().connect<detachTransform>();
 }
 
 void TransformSystem::update() {
@@ -62,21 +62,21 @@ void TransformSystem::update() {
 
 void TransformSystem::attachTransform(entt::registry& reg, entt::entity e)
 {
-	if (!reg.any_of<Transform::LocalMatrix>(e)) reg.emplace<Transform::LocalMatrix>(e);
-	if (!reg.any_of<Transform::WorldMatrix>(e)) reg.emplace<Transform::WorldMatrix>(e);
+	if (!reg.any_of<LocalMatrix>(e)) reg.emplace<LocalMatrix>(e);
+	if (!reg.any_of<WorldMatrix>(e)) reg.emplace<WorldMatrix>(e);
 	
-	if (!reg.any_of<Transform::UpdateTag>(e)) reg.emplace<Transform::UpdateTag>(e);
+	if (!reg.any_of<UpdateTag>(e)) reg.emplace<UpdateTag>(e);
 }
 
 void TransformSystem::detachTransform(entt::registry& reg, entt::entity e)
 {
-	if (!reg.any_of<Transform::Position, Transform::Scale, Transform::Rotation>(e)) {
-		reg.erase<Transform::LocalMatrix>(e);
-		reg.erase<Transform::WorldMatrix>(e);
+	if (!reg.any_of<Position, Scale, Rotation>(e)) {
+		reg.erase<LocalMatrix>(e);
+		reg.erase<WorldMatrix>(e);
 	}
 }
 
 void TransformSystem::updateTransform(entt::registry& reg, entt::entity e)
 {
-	if (!reg.any_of<Transform::UpdateTag>(e)) reg.emplace<Transform::UpdateTag>(e);
+	if (!reg.any_of<UpdateTag>(e)) reg.emplace<UpdateTag>(e);
 }

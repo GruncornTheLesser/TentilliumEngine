@@ -10,9 +10,6 @@ public:
 
 	void update();
 
-protected:
-	
-
 private:
 	VIEW(localUpdateView, GET(Transform::LocalMatrix, Transform::UpdateTag), EXC());
 	VIEW(worldUpdateView, GET(Parent, Transform::LocalMatrix, Transform::WorldMatrix), EXC());

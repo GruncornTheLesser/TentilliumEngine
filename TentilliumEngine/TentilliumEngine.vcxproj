@@ -182,13 +182,13 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
+    <ClCompile Include="Source\Systems\MeshSystem.cpp" />
     <ClCompile Include="Source\Systems\RenderSystem.cpp" />
     <ClCompile Include="Source\Systems\TransformSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\cluster_culling.comp" />
     <None Include="Resources\shaders\cluster_prepass.comp" />
-    <None Include="Resources\shaders\debug\cluster.vert" />
     <None Include="Resources\shaders\deferred_shading.frag" />
     <None Include="Resources\shaders\deferred_shading.vert" />
     <None Include="Resources\shaders\geometry_pass.frag" />
@@ -199,8 +199,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="Resources\shaders\debug\cluster.frag" />
-    <None Include="Resources\shaders\debug\cluster.geom" />
+    <None Include="Resources\shaders\geometryNorm_pass.frag" />
+    <None Include="Resources\shaders\geometryNorm_pass.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Components\PointLight.h" />
@@ -211,7 +211,6 @@
     <ClInclude Include="Source\Components\Material.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
-    <ClInclude Include="Source\Systems\MaterialSystem.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />

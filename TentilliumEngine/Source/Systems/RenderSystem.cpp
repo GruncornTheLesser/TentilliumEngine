@@ -18,34 +18,6 @@
 								std::sqrtf(OPTIMUM_TILE_COUNT * size.y / size.x), \
 								MAX_CLUSTER_COUNT / OPTIMUM_TILE_COUNT
 
-/* TODO:
-* > Light Chunk Management
-* 
-* > Camera Screen Buffer Update
-* 
-* > cluster_prepass				*DONE*
-*	> .comp script				*DONE*
-*	> verify buffers/bugfix		*DONE*
-* 
-* > depth framebuffer & prepass
-*   > depth prepass shader		*DONE*
-* 
-* > cluster_culling
-*	> .comp script
-*   > verify buffers/bugfix		
-* 
-* > cluster_light_culling
-*   > .comp script				*DONE*
-*	> verify buffers/bugfix 
-* 
-* > cluster_shading
-*	> .vert script				*DONE*
-*	> material rendering
-*	> .frag script 
-*	> verify buffers/bugfix 
-*	
-*/
-
 struct RenderData {
 	glm::mat4 invProj;
 	glm::uvec3 clusterSize;
@@ -85,16 +57,16 @@ RenderSystem::RenderSystem() :
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_lightArrayBuffer.handle);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_visibleCountBuffer.handle);
 	
-	m_deferredShadingProgram.setUniform1i("fboAttachment0", 0); // bind to texture slot 0, 1 and 2
-	m_deferredShadingProgram.setUniform1i("fboAttachment1",	1);
-	m_deferredShadingProgram.setUniform1i("fboAttachment2", 2);
+	m_deferredShadingProgram.setUniform("fboAttachment0", 0); // bind to texture slot 0, 1 and 2
+	m_deferredShadingProgram.setUniform("fboAttachment1", 1);
+	m_deferredShadingProgram.setUniform("fboAttachment2", 2);
 
 	m_geometryPassProgram.setUniformBlock("Material", 0);
 
-	m_geometryPassProgram.setUniform1i("diffuseMap", 0); // bind to material textures to slot 0, 1, 2 and 3
-	m_geometryPassProgram.setUniform1i("specularMap", 1);
-	m_geometryPassProgram.setUniform1i("glossMap", 2);
-	m_geometryPassProgram.setUniform1i("normalMap", 3);
+	m_geometryPassProgram.setUniform("diffuseMap", 0); // bind to material textures to slot 0, 1, 2 and 3
+	m_geometryPassProgram.setUniform("specularMap", 1);
+	m_geometryPassProgram.setUniform("glossMap", 2);
+	m_geometryPassProgram.setUniform("normalMap", 3);
 }
 
 void RenderSystem::setSize(glm::ivec2 size)
@@ -167,24 +139,23 @@ void RenderSystem::render()
 	glm::mat4 view = get<Transform::WorldMatrix>(camera);
 	view = glm::inverse(view);
 
-	// geometry prepass
+	// light culling
+	m_lightCullingProgram.bind();
+	m_lightCullingProgram.setUniform("view", view);
+	m_lightCullingProgram.setUniform("lightCount", (int)storage<PointLight>().size());
+	m_lightCullingProgram.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
+
+	// geometry prepass normal mapped
 	m_geometryBuffer.DrawTo();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_geometryPassProgram.bind();
 	for (auto [entity, mesh, material, model] : render_scene_view.each()) {
-		m_geometryPassProgram.setUniformMat4("model", model);
-		m_geometryPassProgram.setUniformMat4("MVP", proj * view * (glm::mat4)model);
+		m_geometryPassProgram.setUniform("model", model);
+		m_geometryPassProgram.setUniform("MVP", proj * view * (glm::mat4)model);
 		material.bind(0); // binds material maps 0 - 3
 		mesh.draw();
 	}
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-	// light culling
-	m_lightCullingProgram.bind();
-	m_lightCullingProgram.setUniformMat4("view", view);
-	m_lightCullingProgram.setUniform1i("lightCount", storage<PointLight>().size());
-	m_lightCullingProgram.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
-	
 
 	// deferred pass
 	m_deferredShadingProgram.bind();
@@ -288,8 +259,7 @@ void RenderSystem::GeometryBuffer::copyDepth(const glm::ivec2& size) const
 
 
 
-RenderSystem::ScreenMesh::ScreenMesh()
-	: m_vbo(std::vector<float>{ -1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0 })
+RenderSystem::ScreenMesh::ScreenMesh() : m_vbo(std::vector<float>{ -1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0 })
 {
-	attach(&m_vbo);
+	attach(Mesh::V_Position, m_vbo, 3, GL_FLOAT, false, 0);
 }

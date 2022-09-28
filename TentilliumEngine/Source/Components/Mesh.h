@@ -45,7 +45,7 @@
 
 namespace Mesh {
 
-	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None, };
+	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_Tangent, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None };
 
 	template<VertAttrib>
 	class VBO final : public Buffer {
@@ -57,41 +57,24 @@ namespace Mesh {
 		VBO(const std::vector<T>& data) : Buffer(&data[0], sizeof(T) * data.size()) { }
 	};
 
-	class VAO {
+	class VAO : private GL<VAO> {
+		friend class GL<VAO>;
 	public:
 		__declspec(property(get = get_handle)) unsigned int handle;
 
-		template<VertAttrib ... attribs>
-		VAO(VBO<attribs>* ... buffers)
-		{
-			genVAO();
-			(attach(buffers), ...);
-		}
-		~VAO();
-
-		VAO(const VAO&) = delete;
-		VAO& operator=(const VAO&) = delete;
-
-		VAO(VAO&&);
-		VAO& operator=(VAO&&);
+		VAO();
 
 		void draw(int primitive = 0x0004, int size = 0) const;
 
-		template<VertAttrib attrib>
-		void attach(VBO<attrib>* buffer);
-
-		template<VertAttrib attrib>
-		void detach();
-
-		void attach(int attrib_no, Buffer* buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
+		void attach(int attrib_no, const Buffer& buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
 
 		void detach(int attrib_no);
 
 		unsigned int get_handle() const { return m_handle; }
 	private:
-		void genVAO();
-
 		void findSize();
+
+		static void destroy(unsigned int m_handle);
 
 		unsigned int m_handle;
 		int m_size;

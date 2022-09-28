@@ -2,31 +2,9 @@
 #include <glew.h>
 #include <glfw3.h>
 
-Mesh::VAO::~VAO()
+Mesh::VAO::VAO()
 {
-	if (m_handle)
-		glDeleteVertexArrays(1, &m_handle);
-}
-
-Mesh::VAO::VAO(VAO&& other)
-{
-	m_handle = other.m_handle;
-	m_size_attribute = other.m_size_attribute;
-
-	other.m_handle = 0;
-}
-
-Mesh::VAO& Mesh::VAO::operator=(VAO&& other)
-{
-	if (m_handle)
-		glDeleteVertexArrays(1, &m_handle);
-
-	m_handle = other.m_handle;
-	m_size_attribute = other.m_size_attribute;
-
-	other.m_handle = 0;
-
-	return *this;
+	glGenVertexArrays(1, &m_handle);
 }
 
 void Mesh::VAO::draw(int primitive, int size) const
@@ -44,65 +22,13 @@ void Mesh::VAO::draw(int primitive, int size) const
 	glBindVertexArray(NULL);
 }
 
-template<> void Mesh::VAO::attach<Mesh::V_Index>(VBO<V_Index>* buffer)
+void Mesh::VAO::attach(int attrib_no, const Buffer& buffer, int attrib_size, int type, bool normalized, int stride)
 {
-	attach(V_Index, buffer, 1, GL_UNSIGNED_INT, false, 0);
-}
-
-template<> void Mesh::VAO::attach<Mesh::V_Position>(VBO<V_Position>* buffer) {
-	attach(V_Position, buffer, 3, GL_FLOAT, false, 0); 
-}
-
-template<> void Mesh::VAO::attach<Mesh::V_Normal>(VBO<V_Normal>* buffer) {
-	attach(V_Normal, buffer, 3, GL_FLOAT, false, 0); 
-}
-
-template<> void Mesh::VAO::attach<Mesh::V_TexCoord>(VBO<V_TexCoord>* buffer) {
-	attach(V_TexCoord, buffer, 2, GL_FLOAT, false, 0); 
-}
-
-template<> void Mesh::VAO::attach<Mesh::V_BoneID>(VBO<V_BoneID>* buffer) {
-	attach(V_BoneID, buffer, 4, GL_INT, false, 0); 
-}
-
-template<> void Mesh::VAO::attach<Mesh::V_BoneWeight>(VBO<V_BoneWeight>* buffer) {
-	attach(V_BoneWeight, buffer, 4, GL_FLOAT, false, 0); 
-}
-
-template<> void Mesh::VAO::detach<Mesh::V_Index>()
-{
-	detach(V_Index);
-}
-
-template<> void Mesh::VAO::detach<Mesh::V_Position>() {
-	detach(V_Position); 
-}
-
-template<> void Mesh::VAO::detach<Mesh::V_Normal>() {
-	detach(V_Normal); 
-}
-
-template<> void Mesh::VAO::detach<Mesh::V_TexCoord>() {
-	detach(V_TexCoord); 
-}
-
-template<> void Mesh::VAO::detach<Mesh::V_BoneID>() {
-	detach(V_BoneID); 
-}
-
-template<> void Mesh::VAO::detach<Mesh::V_BoneWeight>() {
-	detach(V_BoneWeight); 
-}
-
-void Mesh::VAO::attach(int attrib_no, Buffer* buffer, int attrib_size, int type, bool normalized, int stride)
-{
-	if (!buffer) return;
-
 	if (attrib_no == V_Index)
 	{
 		glBindVertexArray(m_handle);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->handle);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.handle);
 
 		glBindVertexArray(NULL);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
@@ -110,7 +36,7 @@ void Mesh::VAO::attach(int attrib_no, Buffer* buffer, int attrib_size, int type,
 	else
 	{
 		glBindVertexArray(m_handle);
-		glBindBuffer(GL_ARRAY_BUFFER, buffer->handle);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer.handle);
 
 		glVertexAttribPointer(attrib_no, attrib_size, type, normalized, stride, NULL);
 		glEnableVertexAttribArray(attrib_no);
@@ -121,7 +47,7 @@ void Mesh::VAO::attach(int attrib_no, Buffer* buffer, int attrib_size, int type,
 	
 	if (m_size_attribute > attrib_no) {
 		m_size_attribute = (VertAttrib)attrib_no;
-		m_size = buffer->length() / attrib_size / 4;
+		m_size = buffer.length() / attrib_size / 4;
 	}
 }
 
@@ -142,11 +68,6 @@ void Mesh::VAO::detach(int attrib_no)
 		findSize();
 
 	glBindVertexArray(NULL);
-}
-
-void Mesh::VAO::genVAO()
-{
-	glGenVertexArrays(1, &m_handle);
 }
 
 void Mesh::VAO::findSize()
@@ -175,4 +96,8 @@ void Mesh::VAO::findSize()
 	glBindVertexArray(NULL);
 
 	m_size = m_size / 4 / attrib_size;
+}
+
+void Mesh::VAO::destroy(unsigned int handle) {
+	glDeleteVertexArrays(1, &handle);
 }

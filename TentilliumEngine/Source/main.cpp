@@ -32,18 +32,7 @@
 *   > bones, skinning and animation
 *	> seperate Transform and Transform implementation
 */
-/* ToDo:
-*	
-*		tag transparent objects
-*		sort by depth in scene
-*		forward render
-*
-*	 -> allocate giant shared texture for diffuse, specular and gloss
-*				 -> shadow depth -> only update if tile in scene
-*
-*	Decals???
-*
-*/
+
 /* RESEARCH:
 *	> Morton encoding for position in a quad tree -> chunking???
 *	> ANGLE a library that compiles opengl calls into directx
@@ -229,7 +218,7 @@ public:
 		// light 1 (entity 5)
 		{
 			light1 = scene.create();
-			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(2, 0, 0), 10.0f);
+			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(10, 0, 0), 10.0f);
 			scene.set<Position>(light1, 0.5f, 0, 0);
 			scene.set<Scale>(light1, 10.0f);
 		}
@@ -237,7 +226,7 @@ public:
 		// light 2 (entity 6)
 		{
 			light2 = scene.create();
-			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 2), 10.0f);
+			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 10), 10.0f);
 			scene.set<Position>(light2, -0.5f, 0, 0);
 			scene.set<Scale>(light2, 10.0f);
 		}

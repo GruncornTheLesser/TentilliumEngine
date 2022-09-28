@@ -67,11 +67,11 @@ private:
 	glm::uvec3 m_clusterSize;
 
 	// shared storage buffer objects
-	Buffer m_renderDataBuffer;	// stores basic data such as current screen size used in the render cycle
-	Buffer m_clusterBuffer;		// stores an unsorted collection of Axis Aligned Bounding Boxes for each cluster
-	Buffer m_pointLightBuffer;	// stores the point lights
-	Buffer m_lightIndiceBuffer;	// stores indices to the pointlights
-	Buffer m_lightArrayBuffer;	// stores an array per cluster of indices
+	Buffer m_renderDataBuffer;		// stores basic data such as current screen size used in the render cycle
+	Buffer m_clusterBuffer;			// stores an unsorted collection of Axis Aligned Bounding Boxes for each cluster
+	Buffer m_pointLightBuffer;		// stores the point lights
+	Buffer m_lightIndiceBuffer;		// stores indices to the pointlights
+	Buffer m_lightArrayBuffer;		// stores an array per cluster of indices
 	Buffer m_visibleCountBuffer;	// stores an unsigned int counting the number of lights in the scene(counting repeats)
 
 	ShaderProgram<COMP>	m_clusterGenerationProgram{ "Resources/shaders/cluster_prepass.comp" };			// calculates cluster AABBs

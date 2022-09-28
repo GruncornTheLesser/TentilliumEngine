@@ -8,6 +8,8 @@
 // GL<Texture>
 // GL<Buffer>
 // GL<Shader>
+// GL<Program>
+// GL<VAO>
 template<class T>
 class GL {
 public:
@@ -28,6 +30,22 @@ public:
 		m_handle = other.m_handle;
 		return *this;
 	}
+
+	GL(GL<T>&& other) {
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
+	GL<T>& operator=(GL<T>&& other) {
+		if (this->m_handle == other.m_handle)
+			return *this;
+
+		destroyRef(m_handle);
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+
+		return *this;
+	}
+
 
 	unsigned int getHandle() const { return m_handle; }
 

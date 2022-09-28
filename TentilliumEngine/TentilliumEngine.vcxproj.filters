@@ -77,6 +77,9 @@
     <ClCompile Include="Source\Components\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Systems\MeshSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\meshes\Hat.mtl">
@@ -86,11 +89,10 @@
     <None Include="Resources\shaders\geometry_pass.vert" />
     <None Include="Resources\shaders\cluster_culling.comp" />
     <None Include="Resources\shaders\cluster_prepass.comp" />
-    <None Include="Resources\shaders\debug\cluster.frag" />
-    <None Include="Resources\shaders\debug\cluster.vert" />
-    <None Include="Resources\shaders\debug\cluster.geom" />
     <None Include="Resources\shaders\deferred_shading.frag" />
     <None Include="Resources\shaders\deferred_shading.vert" />
+    <None Include="Resources\shaders\geometryNorm_pass.frag" />
+    <None Include="Resources\shaders\geometryNorm_pass.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Rendering\Resources\Texture.h">
@@ -132,7 +134,6 @@
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Components\PointLight.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
-    <ClInclude Include="Source\Systems\MaterialSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
