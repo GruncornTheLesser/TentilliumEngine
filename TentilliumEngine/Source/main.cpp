@@ -4,10 +4,6 @@
 #include "Components/Projection.h"
 #include "Components/PointLight.h"
 
-/* FINALIZE:
-*
-*/
-
 /* REVIEW:
 *	> localize reference counting to Resource
 *	> replace current flag system with replace and a entt tag
@@ -17,7 +13,12 @@
 
 /* TODO:
 *	> Transparent objects
-*	> MegaTextures
+*		> Tag transparent objects on material initiation
+*		> 
+*	> MegaTextures -> copy all textures onto one giant 8k texture
+*		> store all materials into giant shared buffer
+*		> store only uv and material index data in geometryBuffer
+*		
 *	> Decals ???
 *	> probes ??? -> basically used for reflection maps, the scene is rendered to a cubemap
 * 
@@ -26,11 +27,18 @@
 *	> decouple Material into maps and 
 *	> seperate rendering functionality further for mesh/camera/rendering type
 * 
+* 
 *	> Tidy AppWindow functionality into something less ugly
 *		> rethink input system
 *	
+*	> Tidy Texture and rethink the scope of the class. 
+*		Texture is used in 2 places currently: Materials and Framebuffers
+*		Material desperately needs some way to pass multiple textures This can be done through
+*			> Megatextures/texture atlases
+*			> Texture Arrays
+*				> means material initation cant use the current texture file loading
+* 
 *   > bones, skinning and animation
-*	> seperate Transform and Transform implementation
 */
 
 /* RESEARCH:
@@ -50,58 +58,6 @@
 // with Position its a pointlight (and/or Scale)
 // with Position and Projection its a Spotlight (and/or Scale)
 // Scale determines Spotlight distance and Pointlight radius
-
-// mesh
-std::vector<float> positions = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f, -0.5f,
-	-0.5f,  0.5f,  0.5f
-};
-std::vector<float> normals = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f, -0.5f,
-	-0.5f,  0.5f,  0.5f
-};
-std::vector<float> texCoords = {
-	0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 
-	0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 
-	1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 
-	0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
-};
-std::vector<unsigned int> indices = {	// mesh indices
-	0, 2, 1, 2, 0, 3, 		// e(0, 2)	 = ---,++-	// back
-	4, 5, 6, 6, 7, 4,		// e(4, 6)   =	--+,+++	// front
-	8, 9, 10, 10, 4, 8,		// e(8, 10)  = -++,---	// right
-	11, 12, 2, 12, 11, 13, 	// e(11, 12) = +++,+--	// left
-	10, 14, 5, 5, 4, 10,	// e(5, 10)  = +-+,---	// bottom
-	2, 3, 11, 11, 3, 15		// e(3, 11)  = -+-,+++	// top
-};
 
 // textures
 unsigned char Rtest[] = {
@@ -140,7 +96,7 @@ public:
 
 	entt::entity obj;
 	entt::entity box1;
-	entt::entity box2;
+	entt::entity box2 = entt::tombstone;
 	entt::entity root;
 	entt::entity light1, light2;
 
@@ -170,21 +126,17 @@ public:
 
 		// create box1 (entity 2)
 		{
-			box1 = scene.create();
+			box1 = scene.load("Resources/meshes/ColourCube.fbx");
+
 			scene.set<Parent>(box1, obj);
-			
 			scene.set<Position>(box1, -0.5, 0, 0);
 			scene.set<Scale>(box1, 0.5f);
-			
-			scene.set<VBO<V_Index>>(box1, indices);
-			scene.set<VBO<V_Position>>(box1, positions);
-			scene.set<VBO<V_Normal>>(box1, normals);
-			scene.set<VBO<V_TexCoord>>(box1, texCoords);
-			
-			scene.set<Material>(box1, Texture("Resources/textures/pigeon.jpg"));
+
+			scene.set<Material>(box1, glm::vec4(1, 1, 1, 1), 0.0f, 0.0f, Texture("Resources/textures/bricks_normal.png"));
 		}
 
 		// create box2 (entity 3)
+		/*
 		{
 			box2 = scene.create();
 			scene.set<Parent>(box2, box1);
@@ -195,21 +147,23 @@ public:
 			scene.set<VBO<V_Index>>(box2, scene.get<VBO<V_Index>>(box1));
 			scene.set<VBO<V_Position>>(box2, scene.get<VBO<V_Position>>(box1));
 			scene.set<VBO<V_Normal>>(box2, scene.get<VBO<V_Normal>>(box1));
+			scene.set<VBO<V_Tangent>>(box2, scene.get<VBO<V_Tangent>>(box1));
 			scene.set<VBO<V_TexCoord>>(box2, scene.get<VBO<V_TexCoord>>(box1));
 			
 			scene.set<Material>(box2, Texture(2, 2, Texture::Format::RGB, true, RGBtest, Texture::Format::RGB, Texture::Type::UNSIGNED_BYTE));
 		}
-		
+		*/
 		// floor (entity 4)
 		{
 			entt::entity floor = scene.create();
 			
 			scene.set<Position>(floor, 0, -0.1f, 0);
-			scene.set<Scale>(floor, 1000, 0, 1000);
+			scene.set<Scale>(floor, 100, 0.1f, 100);
 			
 			scene.set<VBO<V_Index>>(floor, scene.get<VBO<V_Index>>(box1));
 			scene.set<VBO<V_Position>>(floor, scene.get<VBO<V_Position>>(box1));
 			scene.set<VBO<V_Normal>>(floor, scene.get<VBO<V_Normal>>(box1));
+			scene.set<VBO<V_Tangent>>(floor, scene.get<VBO<V_Tangent>>(box1));
 			scene.set<VBO<V_TexCoord>>(floor, scene.get<VBO<V_TexCoord>>(box1));
 			
 			scene.set<Material>(floor, Texture("Resources/textures/grid.png"));
@@ -218,19 +172,17 @@ public:
 		// light 1 (entity 5)
 		{
 			light1 = scene.create();
-			scene.set<PointLight>(light1, glm::vec3(0.5f, 0, 0), glm::vec3(10, 0, 0), 10.0f);
-			scene.set<Position>(light1, 0.5f, 0, 0);
-			scene.set<Scale>(light1, 10.0f);
+			scene.set<PointLight>(light1, glm::vec3(0, 1, 0), glm::vec3(2, 2, 2), 10.0f);
 		}
-		
+		/*
 		// light 2 (entity 6)
 		{
 			light2 = scene.create();
-			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 0, 10), 10.0f);
+			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 2, 2), 10.0f);
 			scene.set<Position>(light2, -0.5f, 0, 0);
 			scene.set<Scale>(light2, 10.0f);
 		}
-		
+		*/
 	}
 
 	void onProcess(float delta) {
@@ -269,7 +221,7 @@ public:
 		
 
 		scene.set<Position>(box1, cos(time), sin(time), 0.0f);
-		scene.set<Position>(box2, -sin(time), -cos(time), 0.0f);
+		//scene.set<Position>(box2, -sin(time), -cos(time), 0.0f);
 		scene.set<Rotation>(obj, 0.0, time, 0);
 	}
 

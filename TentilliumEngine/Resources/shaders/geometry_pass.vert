@@ -19,7 +19,7 @@ void main() {
 	gl_Position = MVP * vec4(position, 1);
 	vertex_out.texcoord = texcoord;
 	vertex_out.position = (model * vec4(position, 1)).xyz;
-	vertex_out.tangent = normalize(vec3(model * vec4(tangent, 0.0)));
-	vertex_out.normal = normalize(vec3(model * vec4(normal, 0.0)));
+	vertex_out.tangent = vec3(model * vec4(tangent, 0.0));
+	vertex_out.normal = vec3(model * vec4(normal, 0.0));
 
 };

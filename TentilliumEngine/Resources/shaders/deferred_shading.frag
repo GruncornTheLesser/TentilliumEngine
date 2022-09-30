@@ -22,6 +22,8 @@ uniform sampler2D fboAttachment0;	// position + specular
 uniform sampler2D fboAttachment1;	// normal + gloss
 uniform sampler2D fboAttachment2;	// diffuse + ao
 
+uniform vec3 viewPosition;
+
 // buffers
 layout(std430, binding = 0) readonly buffer RenderData {
     mat4 invProj;
@@ -71,37 +73,42 @@ uvec3 getClusterID(float depth) {
 }
 
 void main() {
-	vec2 uv = gl_FragCoord.xy / screenSize.xy;
+	vec2 screenUV = gl_FragCoord.xy / screenSize.xy;
 
-	vec4 attachment0 = texture(fboAttachment0, uv); // position + depth
-	vec4 attachment1 = texture(fboAttachment1, uv); // normal + gloss
-	vec4 attachment2 = texture(fboAttachment2, uv); // diffuse + specular
-
+	vec4 attachment0 = texture(fboAttachment0, screenUV); // position + depth
+	vec4 attachment1 = texture(fboAttachment1, screenUV); // normal + gloss
+	vec4 attachment2 = texture(fboAttachment2, screenUV); // diffuse + specular
+	
 	// geometry data
-	vec3 position = attachment0.rgb;
-	float depth = attachment0.a;
-	vec3 normal = attachment1.rgb;
+	vec3 fragPosition = attachment0.rgb;
+	float fragDepth = attachment0.a;
+	vec3 N = attachment1.rgb;
 	
 	// material data
 	float gloss = attachment1.a;
 	vec3 diffuse = attachment2.rgb;
 	float specular = attachment2.a;
 	
+	//f_colour = vec4(normal, 1);
+	//return;
 	
-	uvec3 ID = getClusterID(depth);
-	
+	uvec3 ID = getClusterID(fragDepth);	
 	uint clusterIndex = ID.x + ID.y * clusterSize.x + ID.z * clusterSize.x * clusterSize.y;
-
 	LightArray lightArray = lightArrays[clusterIndex];
 
-	vec3 ambiance = vec3(0.1, 0.1, 0.1);
-	vec3 radiance = vec3(0.0, 0.0, 0.0);
+	vec3 radiance = vec3(0.1, 0.1, 0.1);
 	for (uint i = lightArray.begin; i < lightArray.end; i++) 
 	{
 		PointLight light = lights[lightIndices[i]];
-		radiance += light.colour.xyz * attenuate(position.xyz - light.position.xyz, light.radius.r);
+		
+		// diffuse lighting
+		vec3 L = normalize(light.position.xyz - fragPosition);
+		vec3 E = normalize(viewPosition - fragPosition);
+		vec3 R = reflect(L, N);
+
+		float attn = attenuate(light.position.xyz - fragPosition.xyz, light.radius.r);
+		radiance += light.colour.xyz * max(dot(N, L), 0.0) * attn;	 // diffuse 
+		radiance += light.colour.xyz * pow(max(dot(R, E), 0.0), 16) * attn; // specular 
 	}
-	f_colour =  vec4(diffuse.xyz * ambiance, 1);
 	f_colour += vec4(diffuse.xyz * radiance, 1);
-	
 }

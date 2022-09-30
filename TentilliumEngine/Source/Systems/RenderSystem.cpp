@@ -137,6 +137,7 @@ void RenderSystem::render()
 	// get camera view
 	glm::mat4 proj = get<Projection>(camera);
 	glm::mat4 view = get<Transform::WorldMatrix>(camera);
+	m_geometryPassProgram.setUniform("viewPosition", glm::vec3(view[3]));
 	view = glm::inverse(view);
 
 	// light culling

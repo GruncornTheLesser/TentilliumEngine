@@ -9,5 +9,6 @@ private:
 	template<Mesh::VertAttrib attrib>
 	static void attachVBO(entt::registry& reg, entt::entity e);
 
-	static void detachVBO(Mesh::VertAttrib attrib, entt::registry& reg, entt::entity e);
+	template<Mesh::VertAttrib attrib>
+	static void detachVBO(entt::registry& reg, entt::entity e);
 };

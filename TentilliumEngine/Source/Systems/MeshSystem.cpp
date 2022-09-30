@@ -4,18 +4,18 @@
 
 using namespace Mesh;
 
-void MeshSystem::detachVBO(VertAttrib attrib, entt::registry& reg, entt::entity e)
+template<Mesh::VertAttrib attrib>
+void MeshSystem::detachVBO(entt::registry& reg, entt::entity e)
 {
-
 	reg.get<VAO>(e).detach(attrib);
 
 	if (!reg.any_of<VBO<V_Index>,
-					VBO<V_Position>,
-					VBO<V_Normal>,
-					VBO<V_Tangent>,
-					VBO<V_TexCoord>,
-					VBO<V_BoneID>,
-					VBO<V_BoneWeight>>(e)) 
+		VBO<V_Position>,
+		VBO<V_Normal>,
+		VBO<V_Tangent>,
+		VBO<V_TexCoord>,
+		VBO<V_BoneID>,
+		VBO<V_BoneWeight>>(e))
 	{
 		reg.erase<VAO>(e);
 	}
@@ -59,11 +59,11 @@ MeshSystem::MeshSystem()
 	on_construct<VBO<V_BoneID>>().connect<attachVBO<V_BoneID>>();
 	on_construct<VBO<V_BoneWeight>>().connect<attachVBO<V_BoneWeight>>();
 
-	on_destroy<VBO<V_Index>>().connect<detachVBO>(V_Index);
-	on_destroy<VBO<V_Position>>().connect<detachVBO>(V_Position);
-	on_destroy<VBO<V_Normal>>().connect<detachVBO>(V_Normal);
-	on_destroy<VBO<V_Tangent>>().connect<detachVBO>(V_Tangent);
-	on_destroy<VBO<V_TexCoord>>().connect<detachVBO>(V_TexCoord);
-	on_destroy<VBO<V_BoneID>>().connect<detachVBO>(V_BoneID);
-	on_destroy<VBO<V_BoneWeight>>().connect<detachVBO>(V_BoneWeight);
+	on_destroy<VBO<V_Index>>().connect<detachVBO<V_Index>>();
+	on_destroy<VBO<V_Position>>().connect<detachVBO<V_Position>>();
+	on_destroy<VBO<V_Normal>>().connect<detachVBO<V_Normal>>();
+	on_destroy<VBO<V_Tangent>>().connect<detachVBO<V_Tangent>>();
+	on_destroy<VBO<V_TexCoord>>().connect<detachVBO<V_TexCoord>>();
+	on_destroy<VBO<V_BoneID>>().connect<detachVBO<V_BoneID>>();
+	on_destroy<VBO<V_BoneWeight>>().connect<detachVBO<V_BoneWeight>>();
 }

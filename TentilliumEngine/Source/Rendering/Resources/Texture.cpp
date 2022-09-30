@@ -50,26 +50,7 @@ Texture::Texture(int width, int height, Format internal_format_hint, bool normal
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
-	if (!data) { // if data empty create empty texture
-		setData(width, height, internal_format_hint, normalized);
-	}
-	else if (height == 0 || width == 0) {
-		stbi_set_flip_vertically_on_load(true);
-		data = stbi_load_from_memory((unsigned char*)data, std::max(1, width) * std::max(1, height), &width, &height, (int*)(&data_format_hint), 0);
-
-		if (!data) {
-			std::cerr << "[Loading Error] - Failed decompress image: " << stbi_failure_reason() << std::endl;
-			throw std::exception();
-		}
-
-		setData(width, height, internal_format_hint,normalized, data, data_format_hint, type_hint);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		setData(width, height, internal_format_hint, normalized, data, data_format_hint, type_hint);
-	}
+	setData(width, height, internal_format_hint, normalized, data, data_format_hint, type_hint);
 
 	setWrap(wrap);
 	setFilter(filter);
@@ -77,6 +58,24 @@ Texture::Texture(int width, int height, Format internal_format_hint, bool normal
 
 void Texture::setData(int width, int height, Format internal_format_hint, bool normalized, void* data, Format data_format_hint, Type data_type_hint)
 {
+	bool compressed = height == 0 || width == 0;
+
+	if (compressed) {
+		if (!data) {
+			std::cerr << "[Loading Error] - cannot create image of size " << height << "x" << width << std::endl;
+			throw std::exception();
+		}
+
+		stbi_set_flip_vertically_on_load(true);
+		data = stbi_load_from_memory((unsigned char*)data, std::max(1, width) * std::max(1, height), &width, &height, (int*)(&data_format_hint), 0);
+
+		if (!data) {
+			std::cerr << "[Loading Error] - Failed decompress image: " << stbi_failure_reason() << std::endl;
+			throw std::exception();
+		}
+	}
+
+
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 
 	int internal_format, data_format, type;
@@ -129,6 +128,9 @@ void Texture::setData(int width, int height, Format internal_format_hint, bool n
 	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_format, type, data);
 
 	glBindTexture(GL_TEXTURE_2D, NULL);
+
+	if (compressed)
+		stbi_image_free(data);
 }
 
 void Texture::bindSlot(unsigned int slot) const

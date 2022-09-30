@@ -60,8 +60,7 @@ void Mesh::VAO::detach(int attrib_no)
 	}
 	else
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, NULL);
-		glVertexAttribPointer(attrib_no, 0, GL_FLOAT, GL_FALSE, 0, NULL);
+		glDisableVertexAttribArray(attrib_no);
 	}
 
 	if (m_size_attribute == attrib_no)
