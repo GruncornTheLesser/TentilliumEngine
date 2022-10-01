@@ -14,6 +14,7 @@ public:
 	__declspec(property(get=getCamera,put=setCamera)) entt::entity camera;
 	
 	RenderSystem();
+	~RenderSystem();
 
 	void render();
 
@@ -26,37 +27,6 @@ public:
 	entt::entity getCamera();
 
 private:
-	class GeometryBuffer {
-	public:
-		Texture m_colourAttachment0; // position + depth
-		Texture m_colourAttachment1; // normal + gloss
-		Texture m_colourAttachment2; // diffuse + specular
-		
-		GeometryBuffer();
-		
-		~GeometryBuffer();
-
-		void resize(int width, int height);
-
-		void DrawTo() const;
-
-		void copyDepth(const glm::ivec2& size) const;
-
-	private:
-		unsigned int m_framebuffer;
-		unsigned int m_depthAttachment;
-	} m_geometryBuffer;
-
-	class ScreenMesh : private Mesh::VAO {
-	public:
-		ScreenMesh();
-		using Mesh::VAO::draw;
-
-	private:
-		Mesh::VBO<Mesh::V_Position> m_vbo;
-	} m_screenMesh;
-
-
 	VIEW(render_scene_view, GET(Mesh::VAO, Material, Transform::WorldMatrix), EXC());
 	VIEW(light_view, GET(PointLight), EXC());
 
@@ -78,6 +48,16 @@ private:
 	ShaderProgram<COMP>	m_lightCullingProgram{ "Resources/shaders/cluster_culling.comp" };				// culls lights from clusters
 	ShaderProgram<VERT, FRAG> m_geometryPassProgram{ "Resources/shaders/geometry_pass.shader" };		// writes scene to geometry buffer
 	ShaderProgram<VERT, FRAG> m_deferredShadingProgram{ "Resources/shaders/deferred_shading.shader" };	// shades scene
+
+	Mesh::VAO m_screenVAO;
+	Mesh::VBO<Mesh::V_Position> m_screenVBO;
+
+	Texture m_colourAttachment0; // position + depth
+	Texture m_colourAttachment1; // normal + gloss
+	Texture m_colourAttachment2; // diffuse + specular
+
+	unsigned int m_geometryBuffer;
+	unsigned int m_depthAttachment;
 
 	static void constructLight(Buffer& buffer, entt::registry& reg, entt::entity e);
 

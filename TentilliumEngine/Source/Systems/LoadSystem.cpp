@@ -24,48 +24,32 @@
 //#define MAT_FILENAME(filepath, node, mat) filepath + "/" + node->mName.C_Str() + "/" + mat->GetName().C_Str()
 
 // TODO:
-// optimize scene graph
-//		-> not impressed by assimp graph optimization. 
-//		-> automatically sort the useless nodes and attach them to parents to reduce the node spam
-//		-> its kinda ridiculous
-//		-> requires collection of parts and delayed assigning of components???
-//		-> alternatively I could just assign the meshes to the parent entity
-
 // add bounding box to Transform vao combo for screen space culling optimizations
-//		-> Make Transform a requirement of Specular system???
-//		
+// boneID and transform indices
+// animation
 
-// how to solve multiple meshes per entity
-//		combine meshes in to single vaos and vbos 
-//			-> could adapt vao and material to distinguish meshes with indexes of the mesh
-//			-> probably best to keep them seperate tho
-//			-> requires manipulation of the raw data
-//			-> requires changes to material to identify the mesh groups
-//			changes to material:
-//				1:n relationship for entity to material
-//					-> complicated and not necessarily a performance improvement
-//					-> better syntax
-//				a vector in material to identify the seperations 
-//					-> simple
-//					-> nasty to set material properties
-// 
-//		make mesh a child entity with vbos, vao and components
-//			-> simple
-//			-> bad syntax
-//			-> not very data oriented
-//			-> doesnt have transform component so will get annoying 
-// 
-//		
-//		
-//			
-
-// blender's vertex count is wrong -> it does not identify unique vertices properly
-// if a 2 vertices have the same position but different normals it is incorrectly
-// marked as unique.
-
-// restructure to prioritise relevant nodes:
-// root node + Assimilated meshes + transform
-
+// Framebuffer Needs:
+//	position		vec3
+//	depth			float
+//	normal			vec3
+//	texcoord		vec2
+//	material Index	unsigned int
+struct MatUniformBuffer {
+	glm::vec3 diffuse;
+	float opacity;
+	glm::vec3 specular;
+	float shininess;
+	glm::vec3 emissive;
+	float ambientOcclusion;
+	uint64_t diffuseMap;
+	uint64_t opacityMap;
+	uint64_t specularMap;
+	uint64_t shininessMap;
+	uint64_t emissiveMap;
+	uint64_t ambientOcclusionMap;
+	uint64_t normalMap;
+	uint64_t heightMap;
+};
 entt::entity LoadSystem::load(std::string filepath)
 {
 	Assimp::Importer importer;
@@ -75,9 +59,10 @@ entt::entity LoadSystem::load(std::string filepath)
 		aiProcess_FlipUVs |
 		aiProcess_GlobalScale |
 		aiProcess_EmbedTextures |
-		aiProcess_OptimizeGraph | // doesnt do enough
+		aiProcess_OptimizeGraph | 
 		aiProcess_OptimizeMeshes |
 		aiProcess_CalcTangentSpace | 
+		aiProcess_GenUVCoords | 
 		aiProcess_JoinIdenticalVertices);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -85,7 +70,7 @@ entt::entity LoadSystem::load(std::string filepath)
 		std::cerr << "[Loading Error] : " << importer.GetErrorString() << std::endl;
 		throw std::exception();
 	}
-
+	/*
 	// array of textures
 	std::vector<Texture> textures;
 	if (scene->HasTextures()) {
@@ -95,7 +80,7 @@ entt::entity LoadSystem::load(std::string filepath)
 				texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA, false, texPtr[i]->pcData));
 		}
 	}
-
+	*/
 	entt::entity e = create();
 
 	if (scene->HasMeshes())
@@ -152,8 +137,6 @@ entt::entity LoadSystem::load(std::string filepath)
 			vertexOffset += aiMeshPtr->mNumVertices;
 			faceOffset += aiMeshPtr->mNumFaces;
 		}
-
-		// has bones
 	}
 
 	if (scene->HasMaterials()) {
@@ -178,9 +161,12 @@ entt::entity LoadSystem::load(std::string filepath)
 			}
 
 		}
-
+		
 		{
-			auto material = scene->mMaterials[0];
+			aiMaterial* material = scene->mMaterials[0];
+
+			//aiShadingMode shadingModel;
+			//material->Get(AI_MATKEY_SHADING_MODEL, shadingModel);
 
 			std::variant<Texture, glm::vec4> diffuse;
 			std::variant<Texture, float> specular;
@@ -225,5 +211,8 @@ entt::entity LoadSystem::load(std::string filepath)
 		
 		}
 	}
-	return e; // return scene root 
+	
+	
+	
+	return e;
 }

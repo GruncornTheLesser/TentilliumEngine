@@ -37,6 +37,8 @@
 *			> Megatextures/texture atlases
 *			> Texture Arrays
 *				> means material initation cant use the current texture file loading
+*			> bindless textures
+* 
 * 
 *   > bones, skinning and animation
 */
@@ -44,6 +46,7 @@
 /* RESEARCH:
 *	> Morton encoding for position in a quad tree -> chunking???
 *	> ANGLE a library that compiles opengl calls into directx
+*	> bindless textures
 */
 
 /*
