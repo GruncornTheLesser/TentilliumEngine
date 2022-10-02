@@ -13,7 +13,7 @@ public:
 		std::variant<Texture, glm::vec3> specular = glm::vec3(1, 1, 1);
 		std::variant<Texture, float> shininess = 1.0f;
 		std::variant<Texture, glm::vec3> emissive = glm::vec3(0, 0, 0);
-		std::variant<Texture, float> ambientOcclusion = 1.0f;
+		std::optional<Texture> ambientOcclusion;
 		std::optional<Texture> normal = std::optional<Texture>{};
 		std::optional<Texture> height = std::optional<Texture>{};
 	};
@@ -24,7 +24,7 @@ public:
 		glm::vec3 specular;
 		float shininess;
 		glm::vec3 emissive;
-		float ambientOcclusion;
+		int padding;
 
 		uint64_t diffuseMap;
 		uint64_t opacityMap;
@@ -51,9 +51,9 @@ public:
 			 std::variant<Texture, glm::vec3> specular = glm::vec3(1, 1, 1),
 			 std::variant<Texture, float> shininess = 1.0f,
 			 std::variant<Texture, glm::vec3> emissive = glm::vec3(0, 0, 0),
-			 std::variant<Texture, float> ambientOcclusion = 1.0f,
-			 std::optional<Texture> normal = std::optional<Texture>{},
-			 std::optional<Texture> height = std::optional<Texture>{});
+			 std::optional<Texture> ambientOcclusion = std::optional<Texture>{},
+			 std::optional<Texture> normal			 = std::optional<Texture>{},
+			 std::optional<Texture> height			 = std::optional<Texture>{});
 
 	void bind(int uniformBufferIndex) const; 
 
@@ -61,6 +61,7 @@ private:
 	Buffer m_uniformBuffer;
 	std::vector<Texture> m_maps;
 };
+
 
 class mat {
 public:
@@ -107,11 +108,4 @@ private:
 
 	InitData* m_initializerData;
 	std::vector<unsigned int> m_materialIndices;
-};
-
-template<unsigned int materialIndex = 0>
-class MaterialTEST {
-
-
-
 };

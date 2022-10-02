@@ -119,6 +119,12 @@ entt::entity LoadSystem::load(std::string filepath)
 					.setData(&texCoords[0], sizeof(float) * aiMeshPtr->mNumVertices * 2, sizeof(float) * vertexOffset * 2);
 			}
 
+			/*if (scene->HasMaterials())*/       {
+				std::vector<unsigned int> materialIndex(aiMeshPtr->mNumVertices, mesh_i);
+				get_or_emplace<Mesh::VBO<Mesh::V_MaterialIndex>>(e, nullptr, sizeof(unsigned int) * vertexCount)
+					.setData(&materialIndex[0], sizeof(unsigned int) * aiMeshPtr->mNumVertices, sizeof(unsigned int) * vertexOffset);
+			}
+
 			vertexOffset += aiMeshPtr->mNumVertices;
 			faceOffset += aiMeshPtr->mNumFaces;
 		}
@@ -126,75 +132,78 @@ entt::entity LoadSystem::load(std::string filepath)
 		//for (unsigned int material_i = 0; material_i < scene->mNumMeshes; material_i++)
 	}
 
-	if (scene->HasMaterials()) {
-		
-		for (unsigned int material_i = 0; material_i < scene->mNumMaterials; material_i++)
-		{
-			auto material = scene->mMaterials[material_i];
-			std::cout << "Material " << material->GetName().C_Str() << std::endl;
+	if (scene->HasMaterials())
+	{
+		aiMaterial* material = scene->mMaterials[0];
 
-			for (unsigned int property_i = 0; property_i < material->mNumProperties; property_i++) {
-				auto prop = material->mProperties[property_i];
-				
-				std::cout << "name: " << prop->mKey.C_Str() << " type: ";
-				if (prop->mType == aiPropertyTypeInfo::aiPTI_Buffer)std::cout << "buffer";
-				if (prop->mType == aiPropertyTypeInfo::aiPTI_Double)std::cout << "double";
-				if (prop->mType == aiPropertyTypeInfo::aiPTI_Float)std::cout << "float";
-				if (prop->mType == aiPropertyTypeInfo::aiPTI_Integer)std::cout << "int";
-				if (prop->mType == aiPropertyTypeInfo::aiPTI_String)std::cout << "string";
-				if (prop->mType == aiPropertyTypeInfo::_aiPTI_Force32Bit) std::cout << "force 32bits";
-				if (prop->mDataLength != 4) std::cout << " x " << prop->mDataLength / 4;
-				std::cout << std::endl;
-			}
+		Material::InitData data;
+		// diffuse map
+		{
+			aiColor3D colour;
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
+				data.diffuse = Texture::get(texture.C_Str());
+			else if (material->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
+				data.diffuse = glm::vec3(colour.r, colour.g, colour.b);
+		}
+		// opacity map
+		{
+			float value;
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_OPACITY(0), texture) == AI_SUCCESS)
+				data.opacity = Texture::get(texture.C_Str());
+			else if (material->Get(AI_MATKEY_OPACITY, value) == AI_SUCCESS)
+				data.opacity = value;
+		}
+		// specular map
+		{
+			aiColor3D colour;
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
+				data.specular = Texture::get(texture.C_Str());
+			else if (material->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
+				data.specular = glm::vec3(colour.r, colour.g, colour.b);
 
 		}
-		
+		// shininess map
 		{
-			aiMaterial* material = scene->mMaterials[0];
-
-			//aiShadingMode shadingModel;
-			//material->Get(AI_MATKEY_SHADING_MODEL, shadingModel);
-			Material::InitData data;
-			{
-				aiColor3D colour;
-				aiString texture;
-				if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
-					data.diffuse = Texture::get(texture.C_Str());
-				else if (material->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
-					data.diffuse = glm::vec3(colour.r, colour.g, colour.b);
-			}
-
-			{
-				aiColor3D colour;
-				aiString texture;
-				if (material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
-					data.specular = Texture::get(texture.C_Str());
-				else if (material->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
-					data.specular = glm::vec3(colour.r, colour.g, colour.b);
-
-			}
-
-			{
-				float value;
-				aiString texture;
-				if (material->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
-					data.shininess = Texture::get(texture.C_Str());
-				else if (material->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS)
-					data.shininess = value;
-			}
-
-			{
-				aiColor3D colour;
-				aiString texture;
-				if (material->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
-					data.normal = Texture::get(texture.C_Str());
-			}
-
-			auto& mat = emplace<Material>(e, data);
+			float value;
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
+				data.shininess = Texture::get(texture.C_Str());
+			else if (material->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS)
+				data.shininess = value;
 		}
+		// emissive map
+		{
+			aiColor3D colour;
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), texture) == AI_SUCCESS)
+				data.shininess = Texture::get(texture.C_Str());
+			else if (material->Get(AI_MATKEY_COLOR_EMISSIVE, colour) == AI_SUCCESS)
+				data.emissive = glm::vec3(colour.r, colour.g, colour.b);
+		}
+		// ambient occlusion map
+		{
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_LIGHTMAP(0), texture) == AI_SUCCESS)
+				data.ambientOcclusion = Texture::get(texture.C_Str());
+		}
+		// height map
+		{
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_HEIGHT(0), texture) == AI_SUCCESS)
+				data.ambientOcclusion = Texture::get(texture.C_Str());
+		}
+		// normal map
+		{
+			aiString texture;
+			if (material->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
+				data.normal = Texture::get(texture.C_Str());
+		}
+
+		auto& mat = emplace<Material>(e, data);
 	}
-	
-	
 	
 	return e;
 }

@@ -12,7 +12,7 @@ Material::Material(
 	std::variant<Texture, glm::vec3> specular, 
 	std::variant<Texture, float> shininess, 
 	std::variant<Texture, glm::vec3> emissive, 
-	std::variant<Texture, float> ambientOcclusion, 
+	std::optional<Texture> ambientOcclusion,
 	std::optional<Texture> normal, 
 	std::optional<Texture> height)
 	: m_uniformBuffer(nullptr, sizeof(UniformData))
@@ -84,17 +84,13 @@ Material::Material(
 		data.emissive = std::get<glm::vec3>(emissive);
 	}
 
-	data.ambientOcclusionHasMap = ambientOcclusion.index() == 0;
+	data.ambientOcclusionHasMap = ambientOcclusion.has_value();
 	if (data.ambientOcclusionHasMap)
 	{
-		Texture& map = std::get<Texture>(ambientOcclusion);
+		Texture& map = ambientOcclusion.value();
 		data.ambientOcclusionMap = glGetTextureHandleARB(map.handle);
 		map.setBindless(true);
 		m_maps.push_back(map);
-	}
-	else
-	{
-		data.ambientOcclusion = std::get<float>(ambientOcclusion);
 	}
 
 	data.normalHasMap = normal.has_value();
