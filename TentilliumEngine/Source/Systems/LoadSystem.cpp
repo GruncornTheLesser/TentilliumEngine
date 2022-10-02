@@ -34,22 +34,7 @@
 //	normal			vec3
 //	texcoord		vec2
 //	material Index	unsigned int
-struct MatUniformBuffer {
-	glm::vec3 diffuse;
-	float opacity;
-	glm::vec3 specular;
-	float shininess;
-	glm::vec3 emissive;
-	float ambientOcclusion;
-	uint64_t diffuseMap;
-	uint64_t opacityMap;
-	uint64_t specularMap;
-	uint64_t shininessMap;
-	uint64_t emissiveMap;
-	uint64_t ambientOcclusionMap;
-	uint64_t normalMap;
-	uint64_t heightMap;
-};
+
 entt::entity LoadSystem::load(std::string filepath)
 {
 	Assimp::Importer importer;
@@ -70,17 +55,17 @@ entt::entity LoadSystem::load(std::string filepath)
 		std::cerr << "[Loading Error] : " << importer.GetErrorString() << std::endl;
 		throw std::exception();
 	}
-	/*
+	
 	// array of textures
 	std::vector<Texture> textures;
 	if (scene->HasTextures()) {
 		auto texPtr = scene->mTextures;
 		for (unsigned int i = 0; i < scene->mNumTextures; i++) {
 			textures.push_back(Texture::get_or_default(texPtr[i]->mFilename.C_Str(),
-				texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA, false, texPtr[i]->pcData));
+				texPtr[i]->mWidth, texPtr[i]->mHeight, Texture::Format::RGBA, texPtr[i]->pcData));
 		}
 	}
-	*/
+	
 	entt::entity e = create();
 
 	if (scene->HasMeshes())
@@ -137,6 +122,8 @@ entt::entity LoadSystem::load(std::string filepath)
 			vertexOffset += aiMeshPtr->mNumVertices;
 			faceOffset += aiMeshPtr->mNumFaces;
 		}
+	
+		//for (unsigned int material_i = 0; material_i < scene->mNumMeshes; material_i++)
 	}
 
 	if (scene->HasMaterials()) {
@@ -167,27 +154,23 @@ entt::entity LoadSystem::load(std::string filepath)
 
 			//aiShadingMode shadingModel;
 			//material->Get(AI_MATKEY_SHADING_MODEL, shadingModel);
-
-			std::variant<Texture, glm::vec4> diffuse;
-			std::variant<Texture, float> specular;
-			std::variant<Texture, float> gloss;
-			std::optional<Texture> normal;
+			Material::InitData data;
 			{
 				aiColor3D colour;
 				aiString texture;
 				if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), texture) == AI_SUCCESS)
-					diffuse = Texture::get(texture.C_Str());
+					data.diffuse = Texture::get(texture.C_Str());
 				else if (material->Get(AI_MATKEY_COLOR_DIFFUSE, colour) == AI_SUCCESS)
-					diffuse = glm::vec4(colour.r, colour.g, colour.b, 1);
+					data.diffuse = glm::vec3(colour.r, colour.g, colour.b);
 			}
 
 			{
 				aiColor3D colour;
 				aiString texture;
 				if (material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), texture) == AI_SUCCESS)
-					specular = Texture::get(texture.C_Str());
+					data.specular = Texture::get(texture.C_Str());
 				else if (material->Get(AI_MATKEY_COLOR_SPECULAR, colour) == AI_SUCCESS)
-					specular = colour.r;
+					data.specular = glm::vec3(colour.r, colour.g, colour.b);
 
 			}
 
@@ -195,20 +178,19 @@ entt::entity LoadSystem::load(std::string filepath)
 				float value;
 				aiString texture;
 				if (material->Get(AI_MATKEY_TEXTURE_SHININESS(0), texture) == AI_SUCCESS)
-					gloss = Texture::get(texture.C_Str());
+					data.shininess = Texture::get(texture.C_Str());
 				else if (material->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS)
-					gloss = value;
+					data.shininess = value;
 			}
 
 			{
 				aiColor3D colour;
 				aiString texture;
 				if (material->Get(AI_MATKEY_TEXTURE_NORMALS(0), texture) == AI_SUCCESS)
-					normal = Texture::get(texture.C_Str());
+					data.normal = Texture::get(texture.C_Str());
 			}
 
-			auto& mat = emplace<Material>(e, diffuse, specular, gloss, normal);
-		
+			auto& mat = emplace<Material>(e, data);
 		}
 	}
 	

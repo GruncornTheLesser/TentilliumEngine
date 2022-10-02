@@ -1,5 +1,34 @@
 #version 460 core
 
+#extension GL_ARB_bindless_texture : require
+
+struct Material {
+	vec3 diffuse;
+	float opacity;
+	vec3 specular;
+	float shininess;
+	vec3 emissive;
+	float ambientOcclusion;
+
+	sampler2D diffuseMap;
+	sampler2D opacityMap;
+	sampler2D specularMap;
+	sampler2D shininessMap;
+	sampler2D emissiveMap;
+	sampler2D ambientOcclusionMap;
+	sampler2D normalMap;
+	sampler2D heightMap;
+
+	bool diffuseHasMap;
+	bool opacityHasMap;
+	bool specularHasMap;
+	bool shininessHasMap;
+	bool emissiveHasMap;
+	bool ambientOcclusionHasMap;
+	bool normalHasMap;
+	bool heightHasMap;
+};
+
 struct PointLight {
 	vec4 position;
 	vec4 colour;
@@ -18,11 +47,18 @@ struct LightArray {
 
 out vec4 f_colour;
 
-uniform sampler2D fboAttachment0;	// position + specular
-uniform sampler2D fboAttachment1;	// normal + gloss
-uniform sampler2D fboAttachment2;	// diffuse + ao
+layout(binding = 0) uniform sampler2D positionAttachment;
+layout(binding = 1) uniform sampler2D normalAttachment;
+layout(binding = 2) uniform sampler2D TexCoordAttachment;
+layout(binding = 3) uniform usampler2D MaterialAttachment;
+layout(binding = 4) uniform sampler2D DepthAttachment;
 
 uniform vec3 viewPosition;
+
+layout(std140, binding = 0) uniform MaterialBuffer {
+	Material materials[256];
+};
+
 
 // buffers
 layout(std430, binding = 0) readonly buffer RenderData {
@@ -55,6 +91,7 @@ layout(std430, binding = 5) readonly buffer LightCountBuffer {
 	uint visibleCount;
 };
 
+
 // functions
 float attenuate(vec3 lightVector, float radius) {
 	// Attenuate the point light intensity
@@ -72,24 +109,37 @@ uvec3 getClusterID(float depth) {
 	return ID;
 }
 
+vec3 getDiffuse(Material mat, vec2 texCoord) {
+	if (mat.diffuseHasMap) return texture(mat.diffuseMap, texCoord).rgb;
+	else				   return mat.diffuse;
+}
+
+vec3 getSpecular(Material mat, vec2 texCoord) {
+	if (mat.specularHasMap) return texture(mat.specularMap, texCoord).rgb;
+	else				    return mat.specular;
+}
+
+float getShininess(Material mat, vec2 texCoord) {
+	if (mat.shininessHasMap) return texture(mat.shininessMap, texCoord).r;
+	else				     return mat.shininess;
+}
+
+
 void main() {
 	vec2 screenUV = gl_FragCoord.xy / screenSize.xy;
 
-	vec4 attachment0 = texture(fboAttachment0, screenUV); // position + depth
-	vec4 attachment1 = texture(fboAttachment1, screenUV); // normal + gloss
-	vec4 attachment2 = texture(fboAttachment2, screenUV); // diffuse + specular
-	
-	// geometry data
-	vec3 fragPosition = attachment0.rgb;
-	float fragDepth = attachment0.a;
-	vec3 N = attachment1.rgb;
-	
+	vec3 fragPosition =		texture(positionAttachment, screenUV).rgb; // position
+	vec3 N =				texture(normalAttachment, screenUV).rgb;
+	vec2 texCoord =			texture(TexCoordAttachment, screenUV).rg;
+	uint materialIndex =	texture(MaterialAttachment, screenUV).r;
+	float fragDepth =		texture(DepthAttachment, screenUV).r;
+
 	// material data
-	float gloss = attachment1.a;
-	vec3 diffuse = attachment2.rgb;
-	float specular = attachment2.a;
+	vec3 diffuse = getDiffuse(materials[materialIndex], texCoord);
+	vec3 specular = getSpecular(materials[materialIndex], texCoord);
+	float shininess = getShininess(materials[materialIndex], texCoord);
 	
-	//f_colour = vec4(normal, 1);
+	//f_colour = vec4(texCoord, 0, 1);
 	//return;
 	
 	uvec3 ID = getClusterID(fragDepth);	
@@ -107,8 +157,8 @@ void main() {
 		vec3 R = reflect(L, N);
 
 		float attn = attenuate(light.position.xyz - fragPosition.xyz, light.radius.r);
-		radiance += light.colour.xyz * max(dot(N, L), 0.0) * attn;	 // diffuse 
-		radiance += light.colour.xyz * pow(max(dot(R, E), 0.0), 16) * attn; // specular 
+		radiance += light.colour.xyz * max(dot(N, L), 0.0) * attn;			// diffuse 
+		//radiance += light.colour.xyz * pow(max(dot(R, E), 0.0), 16) * attn; // specular 
 	}
 	f_colour += vec4(diffuse.xyz * radiance, 1);
 }

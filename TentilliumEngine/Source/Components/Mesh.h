@@ -69,14 +69,11 @@ namespace Mesh {
 		void attach(int attrib_no, const Buffer& buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
 
 		void detach(int attrib_no);
-
-		unsigned int get_handle() const { return m_handle; }
 	private:
 		void findSize();
 
 		static void destroy(unsigned int m_handle);
 
-		unsigned int m_handle;
 		int m_size;
 		VertAttrib m_size_attribute = V_None;
 };

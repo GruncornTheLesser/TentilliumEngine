@@ -43,18 +43,22 @@ private:
 	Buffer m_lightIndiceBuffer;		// stores indices to the pointlights
 	Buffer m_lightArrayBuffer;		// stores an array per cluster of indices
 	Buffer m_visibleCountBuffer;	// stores an unsigned int counting the number of lights in the scene(counting repeats)
+	Buffer m_materialBuffer;		// stores an array of unique materials
 
-	ShaderProgram<COMP>	m_clusterGenerationProgram{ "Resources/shaders/cluster_prepass.comp" };			// calculates cluster AABBs
-	ShaderProgram<COMP>	m_lightCullingProgram{ "Resources/shaders/cluster_culling.comp" };				// culls lights from clusters
+
+	ShaderProgram<COMP>		  m_clusterGenerationProgram{ "Resources/shaders/cluster_prepass.comp" };	// calculates cluster AABBs
+	ShaderProgram<COMP>		  m_lightCullingProgram{ "Resources/shaders/cluster_culling.comp" };		// culls lights from clusters
 	ShaderProgram<VERT, FRAG> m_geometryPassProgram{ "Resources/shaders/geometry_pass.shader" };		// writes scene to geometry buffer
 	ShaderProgram<VERT, FRAG> m_deferredShadingProgram{ "Resources/shaders/deferred_shading.shader" };	// shades scene
 
-	Mesh::VAO m_screenVAO;
+	Mesh::VAO					m_screenVAO;
 	Mesh::VBO<Mesh::V_Position> m_screenVBO;
 
-	Texture m_colourAttachment0; // position + depth
-	Texture m_colourAttachment1; // normal + gloss
-	Texture m_colourAttachment2; // diffuse + specular
+	Texture m_geomPosition;
+	Texture m_geomDepth;
+	Texture m_geomNormal;
+	Texture m_geomTexCoord;
+	Texture m_geomMaterial;
 
 	unsigned int m_geometryBuffer;
 	unsigned int m_depthAttachment;
@@ -64,4 +68,8 @@ private:
 	static void destroyLight(Buffer& buffer, entt::registry& reg, entt::entity e);
 
 	static void updateLight(Buffer& buffer, entt::registry& reg, entt::entity e);
+
+	static void constructMaterial(Buffer& buffer, entt::registry& reg, entt::entity e);
+
+	static void destroyMaterial(Buffer& buffer, entt::registry& reg, entt::entity e);
 };

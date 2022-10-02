@@ -6,81 +6,117 @@
 #include <optional>
 
 class Material {
-	friend class RenderSystem;
-
 public:
-	Material(
-		std::variant<Texture, glm::vec4> diffuse = glm::vec4(1, 1, 1, 1),
-		std::variant<Texture, float> specular = 1.0f,
-		std::variant<Texture, float> gloss = 1.0f,
-		std::optional<Texture> normal = std::optional<Texture>{});
+	struct InitData {
+		std::variant<Texture, glm::vec3> diffuse = glm::vec3(1, 1, 1);
+		std::variant<Texture, float> opacity = 1.0f;
+		std::variant<Texture, glm::vec3> specular = glm::vec3(1, 1, 1);
+		std::variant<Texture, float> shininess = 1.0f;
+		std::variant<Texture, glm::vec3> emissive = glm::vec3(0, 0, 0);
+		std::variant<Texture, float> ambientOcclusion = 1.0f;
+		std::optional<Texture> normal = std::optional<Texture>{};
+		std::optional<Texture> height = std::optional<Texture>{};
+	};
 
-	void bind(int uniformBufferIndex) const;
+	struct UniformData {
+		glm::vec3 diffuse;
+		float opacity;
+		glm::vec3 specular;
+		float shininess;
+		glm::vec3 emissive;
+		float ambientOcclusion;
+
+		uint64_t diffuseMap;
+		uint64_t opacityMap;
+		uint64_t specularMap;
+		uint64_t shininessMap;
+		uint64_t emissiveMap;
+		uint64_t ambientOcclusionMap;
+		uint64_t normalMap;
+		uint64_t heightMap;
+
+		int diffuseHasMap;
+		int opacityHasMap;
+		int specularHasMap;
+		int shininessHasMap;
+		int emissiveHasMap;
+		int ambientOcclusionHasMap;
+		int normalHasMap;
+		int heightHasMap;
+	};
+
+	Material(const InitData& data);
+	Material(std::variant<Texture, glm::vec3> diffuse = glm::vec3(1, 1, 1),
+			 std::variant<Texture, float> opacity = 1.0f,
+			 std::variant<Texture, glm::vec3> specular = glm::vec3(1, 1, 1),
+			 std::variant<Texture, float> shininess = 1.0f,
+			 std::variant<Texture, glm::vec3> emissive = glm::vec3(0, 0, 0),
+			 std::variant<Texture, float> ambientOcclusion = 1.0f,
+			 std::optional<Texture> normal = std::optional<Texture>{},
+			 std::optional<Texture> height = std::optional<Texture>{});
+
+	void bind(int uniformBufferIndex) const; 
+
+private:
+	Buffer m_uniformBuffer;
+	std::vector<Texture> m_maps;
+};
+
+
+class mat {
+public:
+	struct InitData {
+		std::variant<Texture, glm::vec3> diffuse = glm::vec3(1, 1, 1);
+		std::variant<Texture, float> opacity = 1.0f;
+		std::variant<Texture, glm::vec3> specular = glm::vec3(1, 1, 1);
+		std::variant<Texture, float> shininess = 1.0f;
+		std::variant<Texture, glm::vec3> emissive = glm::vec3(0, 0, 0);
+		std::variant<Texture, float> ambientOcclusion = 1.0f;
+		std::optional<Texture> normal = std::optional<Texture>{};
+		std::optional<Texture> height = std::optional<Texture>{};
+	};
+
+	mat(const std::vector<InitData>& materials);
 
 private:
 	struct UniformData {
-		glm::vec4 diffuse;
-		float specular;
-		float gloss;
-		int hasDiffuseMap;
-		int hasSpecularMap;
-		int hasGlossMap;
-		int hasNormalMap;
+		glm::vec3 diffuse;
+		float opacity;
+		glm::vec3 specular;
+		float shininess;
+		glm::vec3 emissive;
+		float ambientOcclusion;
+
+		uint64_t diffuseMap;
+		uint64_t opacityMap;
+		uint64_t specularMap;
+		uint64_t shininessMap;
+		uint64_t emissiveMap;
+		uint64_t ambientOcclusionMap;
+		uint64_t normalMap;
+		uint64_t heightMap;
+
+		int diffuseHasMap;
+		int opacityHasMap;
+		int specularHasMap;
+		int shininessHasMap;
+		int emissiveHasMap;
+		int ambientOcclusionHasMap;
+		int normalHasMap;
+		int heightHasMap;
 	};
 
-	Buffer m_uniformBuffer;
-
-	std::optional<Texture> m_diffuseMap;	
-	std::optional<Texture> m_specularMap;
-	std::optional<Texture> m_glossMap;
-	std::optional<Texture> m_normalMap;
+	InitData* m_initializerData;
+	std::vector<unsigned int> m_materialIndices;
 };
 
-class Mat2 {
-public:
-	Mat2(
-		std::variant<std::string, glm::vec4> diffuse = glm::vec4(1, 1, 1, 1),
-		std::variant<std::string, float> specular = 1.0f,
-		std::variant<std::string, float> gloss = 1.0f,
-		std::optional<std::string> normal = std::optional<std::string>{});
-
+class MaterialVBO : Buffer {
 private:
-	Buffer m_uniformBuffer;
+	unsigned int m_count;
+};
 
-	unsigned int m_textureArray;
-	// assimp material attributes
-	// string name
-	// vec3 color_diffuse
-	// vec3 color_specular
-	// vec3 color_ambient
-	// vec3 color_emissive
-	// vec3 color_transparent
-	// 
-	// bool use_wire_frame
-	// bool use_back_face_culling
-	// enum shading_model
-	// enum blend_func
-	// 
-	// float opacity
-	// float shininess
-	// float shininess_strength
-	// 
-	// float refractiveIndex
-	// 
-	// 
-	// 
-	// 
-	// 
-	// diffuse		or base colour
-	// specular		or metallic
-	// gloss		or roughness
-	// normal 
-	// ao
-	// bump
-	// emissive
-	// 
-	// Material Texture Packing
-	
+template<unsigned int materialIndex = 0>
+class MaterialTEST {
 
 
 

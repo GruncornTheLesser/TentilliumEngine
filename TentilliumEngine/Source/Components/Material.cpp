@@ -2,52 +2,123 @@
 #include <glew.h>	// GL extension wrangler
 #include <glfw3.h>	// GL framework
 
+Material::Material(const InitData& data)
+	: Material(data.diffuse, data.opacity, data.specular, data.shininess, data.emissive, data.ambientOcclusion, data.normal, data.height)
+{ }
+
 Material::Material(
-	std::variant<Texture, glm::vec4> diffuse, 
-	std::variant<Texture, float> specular, 
-	std::variant<Texture, float> gloss, 
-	std::optional<Texture> normal)
+	std::variant<Texture, glm::vec3> diffuse, 
+	std::variant<Texture, float> opacity, 
+	std::variant<Texture, glm::vec3> specular, 
+	std::variant<Texture, float> shininess, 
+	std::variant<Texture, glm::vec3> emissive, 
+	std::variant<Texture, float> ambientOcclusion, 
+	std::optional<Texture> normal, 
+	std::optional<Texture> height)
 	: m_uniformBuffer(nullptr, sizeof(UniformData))
 {
-	UniformData data{ glm::vec4(1, 1, 1, 1), 1, 1, false, false, false, false };
-	
-	data.hasDiffuseMap = diffuse.index() == 0;
-	if (data.hasDiffuseMap) 
-		m_diffuseMap = std::get<Texture>(diffuse);
-	else					
-		data.diffuse = std::get<glm::vec4>(diffuse);
-	
-	data.hasSpecularMap = specular.index() == 0;
-	if (data.hasSpecularMap) 
-		m_specularMap = std::get<Texture>(specular);
-	else					 
-		data.specular = std::get<float>(specular);
-	
-	data.hasGlossMap = gloss.index() == 0;
-	if (data.hasGlossMap)
-		m_glossMap = std::get<Texture>(gloss);
-	else				 
-		data.gloss = std::get<float>(gloss);
-	
-	data.hasNormalMap = normal.has_value();
-	if (data.hasNormalMap) 
-		m_normalMap = normal.value();
-	
+	UniformData data;
+
+	data.diffuseHasMap = diffuse.index() == 0;
+	if (data.diffuseHasMap)
+	{
+		Texture& map = std::get<Texture>(diffuse);
+		data.diffuseMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+	else 
+	{
+		data.diffuse = std::get<glm::vec3>(diffuse);
+	}
+
+	data.opacityHasMap = opacity.index() == 0;
+	if (data.opacityHasMap)
+	{
+		Texture& map = std::get<Texture>(opacity);
+		data.opacityMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+	else 
+	{
+		data.opacity = std::get<float>(opacity);
+	}
+
+	data.specularHasMap = opacity.index() == 0;
+	if (data.specularHasMap)
+	{
+		Texture& map = std::get<Texture>(specular);
+		data.specularMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+	else
+	{
+		data.specular = std::get<glm::vec3>(specular);
+	}
+
+	data.shininessHasMap = shininess.index() == 0;
+	if (data.shininessHasMap)
+	{
+		Texture& map = std::get<Texture>(shininess);
+		data.shininessMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+	else
+	{
+		data.shininess = std::get<float>(shininess);
+	}
+
+	data.emissiveHasMap = emissive.index() == 0;
+	if (data.emissiveHasMap)
+	{
+		Texture& map = std::get<Texture>(emissive);
+		data.emissiveMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+	else
+	{
+		data.emissive = std::get<glm::vec3>(emissive);
+	}
+
+	data.ambientOcclusionHasMap = ambientOcclusion.index() == 0;
+	if (data.ambientOcclusionHasMap)
+	{
+		Texture& map = std::get<Texture>(ambientOcclusion);
+		data.ambientOcclusionMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+	else
+	{
+		data.ambientOcclusion = std::get<float>(ambientOcclusion);
+	}
+
+	data.normalHasMap = normal.has_value();
+	if (data.normalHasMap)
+	{
+		Texture& map = normal.value();
+		data.normalMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+
+	data.heightHasMap = height.has_value();
+	if (height.has_value())
+	{
+		Texture& map = height.value();
+		data.heightMap = glGetTextureHandleARB(map.handle);
+		map.setBindless(true);
+		m_maps.push_back(map);
+	}
+
 	m_uniformBuffer.setData(data);
-} 
-void Material::bind(int uniformBufferIndex) const {
+}
 
+void Material::bind(int uniformBufferIndex) const
+{
 	glBindBufferBase(GL_UNIFORM_BUFFER, uniformBufferIndex, m_uniformBuffer.handle);
-
-	if (m_diffuseMap.has_value()) 
-		m_diffuseMap.value().bindSlot(0);
-
-	if (m_specularMap.has_value()) 
-		m_specularMap.value().bindSlot(1);
-
-	if (m_glossMap.has_value()) 
-		m_glossMap.value().bindSlot(2);
-
-	if (m_normalMap.has_value()) 
-		m_normalMap.value().bindSlot(3);
 }

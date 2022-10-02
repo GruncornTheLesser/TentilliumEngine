@@ -14,15 +14,11 @@
 /* TODO:
 *	> Transparent objects
 *		> Tag transparent objects on material initiation
-*		> 
-*	> MegaTextures -> copy all textures onto one giant 8k texture
-*		> store all materials into giant shared buffer
-*		> store only uv and material index data in geometryBuffer
-*		
-*	> Decals ???
-*	> probes ??? -> basically used for reflection maps, the scene is rendered to a cubemap
+*	
+*	> PointLight Buffer Pagination
+*	> Material Buffer Pagination
 * 
-*	> PointLight position, scale and (rotation + projection) association as well as directional + spotlights
+*	> Light updates on position, scale and (rotation + projection) association as well as directional + spotlights
 *	> Normal + Tangent VBO generation
 *	> decouple Material into maps and 
 *	> seperate rendering functionality further for mesh/camera/rendering type
@@ -135,7 +131,12 @@ public:
 			scene.set<Position>(box1, -0.5, 0, 0);
 			scene.set<Scale>(box1, 0.5f);
 
-			scene.set<Material>(box1, glm::vec4(1, 1, 1, 1), 0.0f, 0.0f, Texture("Resources/textures/bricks_normal.png"));
+			Material::InitData data;
+			data.diffuse = Texture(2, 2, Texture::Format::RGBA, RGBtest, Texture::Format::RGB);
+			data.normal = Texture("Resources/textures/bricks_normal.png");
+			scene.set<Material>(box1, data);
+
+			//auto x = Mat2();
 		}
 
 		// create box2 (entity 3)
@@ -175,7 +176,7 @@ public:
 		// light 1 (entity 5)
 		{
 			light1 = scene.create();
-			scene.set<PointLight>(light1, glm::vec3(0, 1, 0), glm::vec3(2, 2, 2), 10.0f);
+			scene.set<PointLight>(light1, glm::vec3(0, 1, 0), glm::vec3(5, 5, 5), 10.0f);
 		}
 		/*
 		// light 2 (entity 6)

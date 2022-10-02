@@ -55,23 +55,23 @@ Shader<type>::Shader(std::string filepath)
 	fs.close();
 
 	// create opengl object shader
-	GL<Shader<type>>::m_handle = glCreateShader(type);
+	m_handle = glCreateShader(type);
 
 	// add data to opengl object
 	const char* raw_data = (const char*)data.c_str();
-	glShaderSource(GL<Shader<type>>::m_handle, 1, &raw_data, &len);
+	glShaderSource(m_handle, 1, &raw_data, &len);
 
 	// compile shader
-	glCompileShader(GL<Shader<type>>::m_handle);
+	glCompileShader(m_handle);
 
 	// verify shader status
 	int status, infoLen;
-	glGetShaderiv(GL<Shader<type>>::m_handle, GL_COMPILE_STATUS, &status);
+	glGetShaderiv(m_handle, GL_COMPILE_STATUS, &status);
 	if (!status)
 	{
-		glGetShaderiv(GL<Shader<type>>::m_handle, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetShaderInfoLog(GL<Shader<type>>::m_handle, infoLen, &infoLen, message);
+		glGetShaderInfoLog(m_handle, infoLen, &infoLen, message);
 
 		std::cerr << "[Shader Error] - Shader '" << filepath << "' failed to compile: " << message << std::endl;
 		throw std::exception();

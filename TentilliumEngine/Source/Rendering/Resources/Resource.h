@@ -10,18 +10,18 @@
 // GL<Shader>
 // GL<Program>
 // GL<VAO>
-template<class T>
+template<class T, class Handle_t = unsigned int>
 class GL {
 public:
 	GL() = default;
 	~GL() {
 		destroyRef(m_handle);
 	}
-	GL(const GL<T>& other) {
+	GL(const GL<T, Handle_t>& other) {
 		createRef(other.m_handle);
 		m_handle = other.m_handle;
 	}
-	GL<T>& operator=(const GL<T>& other) {
+	GL<T, Handle_t>& operator=(const GL<T, Handle_t>& other) {
 		if (this->m_handle == other.m_handle)
 			return *this;
 
@@ -31,11 +31,11 @@ public:
 		return *this;
 	}
 
-	GL(GL<T>&& other) {
+	GL(GL<T, Handle_t>&& other) {
 		m_handle = other.m_handle;
 		other.m_handle = 0;
 	}
-	GL<T>& operator=(GL<T>&& other) {
+	GL<T, Handle_t>& operator=(GL<T, Handle_t>&& other) {
 		if (this->m_handle == other.m_handle)
 			return *this;
 
@@ -47,13 +47,13 @@ public:
 	}
 
 
-	unsigned int getHandle() const { return m_handle; }
+	Handle_t getHandle() const { return m_handle; }
 
 protected:
-	unsigned int m_handle = 0;
+	Handle_t m_handle = 0;
 
 private:
-	static void createRef(unsigned int handle) {
+	static void createRef(Handle_t handle) {
 		if (handle == 0) return;
 
 		auto it = m_ref_count.find(handle);
@@ -63,7 +63,7 @@ private:
 			it->second++;
 	}
 
-	static void destroyRef(unsigned int handle) {
+	static void destroyRef(Handle_t handle) {
 		if (handle == 0) return;
 
 		auto it = m_ref_count.find(handle);
@@ -73,7 +73,7 @@ private:
 			m_ref_count.erase(it);
 	}
 
-	inline static std::unordered_map<unsigned int, unsigned int> m_ref_count;
+	inline static std::unordered_map<Handle_t, unsigned int> m_ref_count;
 };
 
 

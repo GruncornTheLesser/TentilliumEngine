@@ -18,7 +18,9 @@ public:
 
 	Shader(std::string filepath);
 
+	unsigned int getHandle() const { return m_handle; }
 private:
+	unsigned int m_handle;
 	static void destroy(unsigned int handle);
 };
 
