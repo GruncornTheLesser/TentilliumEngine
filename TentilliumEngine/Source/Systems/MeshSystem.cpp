@@ -9,13 +9,8 @@ void MeshSystem::detachVBO(entt::registry& reg, entt::entity e)
 {
 	reg.get<VAO>(e).detach(attrib);
 
-	if (!reg.any_of<VBO<V_Index>,
-		VBO<V_Position>,
-		VBO<V_Normal>,
-		VBO<V_Tangent>,
-		VBO<V_TexCoord>,
-		VBO<V_BoneID>,
-		VBO<V_BoneWeight>>(e))
+	if (!reg.any_of<VBO<V_Index>, VBO<V_Position>, VBO<V_Normal>, VBO<V_Tangent>, 
+		VBO<V_TexCoord>, VBO<V_BoneID>, VBO<V_BoneWeight>, VBO<V_MaterialIndex>>(e))
 	{
 		reg.erase<VAO>(e);
 	}
@@ -49,6 +44,10 @@ template<> void MeshSystem::attachVBO<V_BoneWeight>(entt::registry& reg, entt::e
 	reg.get_or_emplace<VAO>(e).attach(V_BoneWeight, reg.get<VBO<V_BoneWeight>>(e), 4, GL_FLOAT, true, 0);
 }
 
+template<> void MeshSystem::attachVBO<V_MaterialIndex>(entt::registry& reg, entt::entity e) {
+	reg.get_or_emplace<VAO>(e).attach(V_MaterialIndex, reg.get<VBO<V_MaterialIndex>>(e), 1, GL_UNSIGNED_INT, true, 0);
+}
+
 MeshSystem::MeshSystem()
 {
 	on_construct<VBO<V_Index>>().connect<attachVBO<V_Index>>();
@@ -58,6 +57,7 @@ MeshSystem::MeshSystem()
 	on_construct<VBO<V_TexCoord>>().connect<attachVBO<V_TexCoord>>();
 	on_construct<VBO<V_BoneID>>().connect<attachVBO<V_BoneID>>();
 	on_construct<VBO<V_BoneWeight>>().connect<attachVBO<V_BoneWeight>>();
+	on_construct<VBO<V_MaterialIndex>>().connect<attachVBO<V_MaterialIndex>>();
 
 	on_destroy<VBO<V_Index>>().connect<detachVBO<V_Index>>();
 	on_destroy<VBO<V_Position>>().connect<detachVBO<V_Position>>();
@@ -66,4 +66,5 @@ MeshSystem::MeshSystem()
 	on_destroy<VBO<V_TexCoord>>().connect<detachVBO<V_TexCoord>>();
 	on_destroy<VBO<V_BoneID>>().connect<detachVBO<V_BoneID>>();
 	on_destroy<VBO<V_BoneWeight>>().connect<detachVBO<V_BoneWeight>>();
+	on_destroy<VBO<V_MaterialIndex>>().connect<detachVBO<V_MaterialIndex>>();
 }

@@ -62,7 +62,6 @@ private:
 	std::vector<Texture> m_maps;
 };
 
-
 class mat {
 public:
 	struct InitData {
@@ -108,11 +107,6 @@ private:
 
 	InitData* m_initializerData;
 	std::vector<unsigned int> m_materialIndices;
-};
-
-class MaterialVBO : Buffer {
-private:
-	unsigned int m_count;
 };
 
 template<unsigned int materialIndex = 0>

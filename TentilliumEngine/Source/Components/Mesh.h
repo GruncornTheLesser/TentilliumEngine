@@ -45,7 +45,7 @@
 
 namespace Mesh {
 
-	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_Tangent, V_TexCoord, V_BoneID, V_BoneWeight, V_Custom, V_None };
+	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_Tangent, V_TexCoord, V_BoneID, V_BoneWeight, V_MaterialIndex, V_Custom, V_None };
 
 	template<VertAttrib>
 	class VBO final : public Buffer {
@@ -60,12 +60,14 @@ namespace Mesh {
 	class VAO : private GL<VAO> {
 		friend class GL<VAO>;
 	public:
-		__declspec(property(get = get_handle)) unsigned int handle;
+		__declspec(property(get = getHandle)) unsigned int handle;
 
 		VAO();
 
-		void draw(int primitive = 0x0004, int size = 0) const;
+		// defaults to primitve = GL_TRIANGLES, size = 0
+		void draw(int primitive = 0x0004, int size = 0) const; 
 
+		// defaults to type = GL_FLOAT, normalized = false, stride = 0
 		void attach(int attrib_no, const Buffer& buffer_handle, int size, int type = 0x1406, bool normalized = false, int stride = 0);
 
 		void detach(int attrib_no);
