@@ -7,34 +7,34 @@
 
 template<ShaderType ... Ts>
 ShaderProgram<Ts...>::ShaderProgram(std::string filepath) : Shader<Ts>(filepath)... {
-	GL<ShaderProgram<Ts...>>::m_handle = glCreateProgram();
+	Shared<ShaderProgram<Ts...>>::m_handle = glCreateProgram();
 
-	(glAttachShader(GL<ShaderProgram<Ts...>>::m_handle, Shader<Ts>::getHandle()), ...);
+	(glAttachShader(Shared<ShaderProgram<Ts...>>::m_handle, Shader<Ts>::getHandle()), ...);
 
 	int infoLen;
 	int status;
 
-	glLinkProgram(GL<ShaderProgram<Ts...>>::m_handle);
+	glLinkProgram(Shared<ShaderProgram<Ts...>>::m_handle);
 
-	glGetProgramiv(GL<ShaderProgram<Ts...>>::m_handle, GL_LINK_STATUS, &status);
+	glGetProgramiv(Shared<ShaderProgram<Ts...>>::m_handle, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		glGetProgramiv(GL<ShaderProgram<Ts...>>::m_handle, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetProgramiv(Shared<ShaderProgram<Ts...>>::m_handle, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetProgramInfoLog(GL<ShaderProgram<Ts...>>::m_handle, infoLen, NULL, message);
+		glGetProgramInfoLog(Shared<ShaderProgram<Ts...>>::m_handle, infoLen, NULL, message);
 
 		std::cerr << "Failed to link program.\nErrorLog: '" << message << "'" << std::endl;
 		throw std::exception();
 	}
 
-	glValidateProgram(GL<ShaderProgram<Ts...>>::m_handle);
+	glValidateProgram(Shared<ShaderProgram<Ts...>>::m_handle);
 
-	glGetProgramiv(GL<ShaderProgram<Ts...>>::m_handle, GL_VALIDATE_STATUS, &status);
+	glGetProgramiv(Shared<ShaderProgram<Ts...>>::m_handle, GL_VALIDATE_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		glGetProgramiv(GL<ShaderProgram<Ts...>>::m_handle, GL_INFO_LOG_LENGTH, &infoLen);
+		glGetProgramiv(Shared<ShaderProgram<Ts...>>::m_handle, GL_INFO_LOG_LENGTH, &infoLen);
 		char* message = (char*)alloca(infoLen * sizeof(char));
-		glGetProgramInfoLog(GL<ShaderProgram<Ts...>>::m_handle, infoLen, NULL, message);
+		glGetProgramInfoLog(Shared<ShaderProgram<Ts...>>::m_handle, infoLen, NULL, message);
 
 		std::cerr << "Failed to validate program.\nErrorLog: '" << message << "'" << std::endl;
 		throw std::exception();
@@ -44,171 +44,171 @@ ShaderProgram<Ts...>::ShaderProgram(std::string filepath) : Shader<Ts>(filepath)
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::bind() const
 {
-	glUseProgram(GL<ShaderProgram<Ts...>>::m_handle);
+	glUseProgram(Shared<ShaderProgram<Ts...>>::m_handle);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, int value) const
 {
-	glProgramUniform1i(GL<ShaderProgram<Ts...>>::m_handle, location, value);
+	glProgramUniform1i(Shared<ShaderProgram<Ts...>>::m_handle, location, value);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, float value) const
 {
-	glProgramUniform1f(GL<ShaderProgram<Ts...>>::m_handle, location, value);
+	glProgramUniform1f(Shared<ShaderProgram<Ts...>>::m_handle, location, value);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::ivec2& value) const
 {
-	glProgramUniform2iv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
+	glProgramUniform2iv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::vec2& value) const
 {
-	glProgramUniform2fv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
+	glProgramUniform2fv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::ivec3& value) const
 {
-	glProgramUniform3iv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
+	glProgramUniform3iv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::vec3& value) const
 {
-	glProgramUniform3fv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
+	glProgramUniform3fv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::ivec4& value) const
 {
-	glProgramUniform4iv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
+	glProgramUniform4iv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::vec4& value) const
 {
-	glProgramUniform4fv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
+	glProgramUniform4fv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::mat2& value) const
 {
-	glProgramUniformMatrix2fv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, false, glm::value_ptr(value));
+	glProgramUniformMatrix2fv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, false, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::mat3& value) const
 {
-	glProgramUniformMatrix3fv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, false, glm::value_ptr(value));
+	glProgramUniformMatrix3fv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, false, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(int location, const glm::mat4& value) const
 {
-	glProgramUniformMatrix4fv(GL<ShaderProgram<Ts...>>::m_handle, location, 1, false, glm::value_ptr(value));
+	glProgramUniformMatrix4fv(Shared<ShaderProgram<Ts...>>::m_handle, location, 1, false, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, int value) const
 {
-	glProgramUniform1i(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), value);
+	glProgramUniform1i(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), value);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, float value) const
 {
-	glProgramUniform1f(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), value);
+	glProgramUniform1f(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), value);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::ivec2& value) const
 {
-	glProgramUniform2iv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
+	glProgramUniform2iv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::vec2& value) const
 {
-	glProgramUniform2fv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
+	glProgramUniform2fv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::ivec3& value) const
 {
-	glProgramUniform3iv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
+	glProgramUniform3iv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::vec3& value) const
 {
-	glProgramUniform3fv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
+	glProgramUniform3fv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::ivec4& value) const
 {
-	glProgramUniform4iv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
+	glProgramUniform4iv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::vec4& value) const
 {
-	glProgramUniform4fv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
+	glProgramUniform4fv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::mat2& value) const
 {
-	glProgramUniformMatrix2fv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, false, glm::value_ptr(value));
+	glProgramUniformMatrix2fv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, false, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::mat3& value) const
 {
-	glProgramUniformMatrix3fv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, false, glm::value_ptr(value));
+	glProgramUniformMatrix3fv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, false, glm::value_ptr(value));
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniform(std::string name, const glm::mat4& value) const
 {
-	glProgramUniformMatrix4fv(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, false, glm::value_ptr(value));
+	glProgramUniformMatrix4fv(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), 1, false, glm::value_ptr(value));
 }
 
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniformBlock(int location, unsigned int Binding) const
 {
-	glUniformBlockBinding(GL<ShaderProgram<Ts...>>::m_handle, location, Binding);
+	glUniformBlockBinding(Shared<ShaderProgram<Ts...>>::m_handle, location, Binding);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::setUniformBlock(std::string name, unsigned int Binding) const
 {
-	glUniformBlockBinding(GL<ShaderProgram<Ts...>>::m_handle, glGetUniformBlockIndex(GL<ShaderProgram<Ts...>>::m_handle, name.c_str()), Binding);
+	glUniformBlockBinding(Shared<ShaderProgram<Ts...>>::m_handle, glGetUniformBlockIndex(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str()), Binding);
 }
 
 template<ShaderType ... Ts>
 void ShaderProgram<Ts...>::dispatch(glm::uvec3 workGroups) requires IsComputeProgram<Ts...>
 {
-	glUseProgram(GL<ShaderProgram<Ts...>>::m_handle);
+	glUseProgram(Shared<ShaderProgram<Ts...>>::m_handle);
 	glDispatchCompute(workGroups.x, workGroups.y, workGroups.z);
 }
 
 template<ShaderType ... Ts>
 unsigned int ShaderProgram<Ts...>::getLocation(std::string name) const
 {
-	return glGetUniformLocation(GL<ShaderProgram<Ts...>>::m_handle, name.c_str());
+	return glGetUniformLocation(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str());
 }
 
 template<ShaderType ... Ts>
 unsigned int ShaderProgram<Ts...>::getBlockLocation(std::string name) const
 {
-	return glGetUniformBlockIndex(GL<ShaderProgram<Ts...>>::m_handle, name.c_str());
+	return glGetUniformBlockIndex(Shared<ShaderProgram<Ts...>>::m_handle, name.c_str());
 }
 
 template<ShaderType ... Ts>

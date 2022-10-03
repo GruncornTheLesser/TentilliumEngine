@@ -3,25 +3,20 @@
 #include <string>
 #include <iostream>
 #include <concepts>
+#include <optional>
 
-// used by:
-// GL<Texture>
-// GL<Buffer>
-// GL<Shader>
-// GL<Program>
-// GL<VAO>
 template<class T, class Handle_t = unsigned int>
-class GL {
+class Shared {
 public:
-	GL() = default;
-	~GL() {
+	Shared() = default;
+	~Shared() {
 		destroyRef(m_handle);
 	}
-	GL(const GL<T, Handle_t>& other) {
+	Shared(const Shared<T, Handle_t>& other) {
 		createRef(other.m_handle);
 		m_handle = other.m_handle;
 	}
-	GL<T, Handle_t>& operator=(const GL<T, Handle_t>& other) {
+	Shared<T, Handle_t>& operator=(const Shared<T, Handle_t>& other) {
 		if (this->m_handle == other.m_handle)
 			return *this;
 
@@ -31,11 +26,11 @@ public:
 		return *this;
 	}
 
-	GL(GL<T, Handle_t>&& other) {
+	Shared(Shared<T, Handle_t>&& other) {
 		m_handle = other.m_handle;
 		other.m_handle = 0;
 	}
-	GL<T, Handle_t>& operator=(GL<T, Handle_t>&& other) {
+	Shared<T, Handle_t>& operator=(Shared<T, Handle_t>&& other) {
 		if (this->m_handle == other.m_handle)
 			return *this;
 
@@ -45,9 +40,13 @@ public:
 
 		return *this;
 	}
-
 
 	Handle_t getHandle() const { return m_handle; }
+
+	bool isUnique() const {
+		auto it = m_ref_count.find(m_handle);
+		return it == m_ref_count.end();
+	}
 
 protected:
 	Handle_t m_handle = 0;
@@ -76,46 +75,49 @@ private:
 	inline static std::unordered_map<Handle_t, unsigned int> m_ref_count;
 };
 
-
-// used by:
-// FileManager<Texture>
-template<class T>
-class FileManager {
+template<class T, class Handle_t = std::string>
+class ResourceManager {
 public:
-	static void drop(std::string filepath)
+	void drop(Handle_t handle)
 	{
-		m_file_cache.erase(filepath);
+		m_res_cache.erase(handle);
 	}
 
-	static T get(std::string filepath)
+	std::optional<T> fetch(Handle_t handle)
 	{
-		auto it = m_file_cache.find(filepath);
-		if (it != m_file_cache.end())
+		auto it = m_res_cache.find(handle);
+		if (it != m_res_cache.end())
 			return T(it->second);
 
-		std::cerr << "[Resource Error] - " << "failed to get " << typeid(T).name() << " from '" << filepath << "'" << std::endl;
-		throw std::exception();
+		return std::optional<T>{};
 	}
 
-	/* gets value associated with 'filepath' or creates new value from args if none is found */
 	template<typename ... Ts> requires std::constructible_from<T, Ts...>
-	static T get_or_default(std::string filepath, Ts ... args)
-	{
-		auto it = m_file_cache.find(filepath);
-		if (it != m_file_cache.end())
-			return T(it->second);
-
+	T stash(Handle_t handle, Ts ... args) {
 		T value = T(std::move(args)...);
-		m_file_cache.emplace(filepath, value);
+		m_res_cache.emplace(handle, value);
 		return value;
 	}
 
-	/* gets value associated with 'filepath' or creates new value from filepath if none is found */
-	static T load(std::string filepath)
+	/* gets value associated with 'filepath' or creates new value from args if none is found */
+	template<typename ... Ts>
+	T fetch_or_default(Handle_t handle, Ts ... args)
 	{
-		return get_or_default(filepath, filepath);
+		std::optional<T> fetched = fetch(handle);
+		if (fetched.has_value()) return fetched.value();
+		else				     return stash(handle, args...);
+	}
+
+	/* gets value associated with 'handle' or creates new value from filepath if none is found */
+	T load(Handle_t handle)
+	{
+		return fetch_or_default(handle, handle);
+	}
+
+	unsigned int size() {
+		return m_res_cache.size();
 	}
 
 private:
-	inline static std::unordered_map<std::string, T> m_file_cache;
+	std::unordered_map<Handle_t, T> m_res_cache;
 };

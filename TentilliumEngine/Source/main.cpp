@@ -97,7 +97,6 @@ public:
 	entt::entity box1;
 	entt::entity box2 = entt::tombstone;
 	entt::entity root;
-	entt::entity light1, light2;
 
 	float time;
 
@@ -107,86 +106,30 @@ public:
 	{
 		scene.size = AppWindow::size;
 
-		// create camera (entity 0)
-		{ 
+		{
 			entt::entity cam = scene.create();
-			scene.set<Projection>(cam, glm::radians(60.0f), 800.0f / 600.0f, 0.02f, 100.0f);
-			scene.set<Position>(cam, 0, 1, 0);
-			scene.set<Rotation>(cam);
+			scene.emplace<Projection>(cam, glm::radians(60.0f), 800.0f / 600.0f, 0.02f, 50.0f);
+			scene.emplace<Position>(cam, 0, 1, 0);
+			scene.emplace<Rotation>(cam);
 			scene.camera = cam;
 		}
 
-		// create obj (entity 1)
 		{
-			obj = scene.load("Resources/meshes/Person.fbx");
-			scene.set<Position>(obj, 0, 0, -1);
-			scene.set<Rotation>(obj);
+			obj = scene.load("Resources/meshes/Sponza.fbx");
+			scene.emplace<Position>(obj, 0, 0, -1);
+			scene.emplace<Rotation>(obj);
 		}
 
-		// create box1 (entity 2)
-		{
-			box1 = scene.load("Resources/meshes/ColourCube.fbx");
-
-			scene.set<Parent>(box1, obj);
-			scene.set<Position>(box1, -0.5, 0, 0);
-			scene.set<Scale>(box1, 0.5f);
-
-			Material::InitData data;
-			data.diffuse = Texture(2, 2, Texture::Format::RGBA, RGBtest, Texture::Format::RGB);
-			data.normal = Texture("Resources/textures/bricks_normal.png");
-			scene.set<Material>(box1, data);
-
-			//auto x = Mat2();
+		for (int x = 0; x < 20; x++) {
+			for (int y = 0; y < 20; y++) {
+				for (int z = 0; z < 5; z++) {
+					entt::entity light = scene.create();
+					scene.emplace<PointLight>(light,
+						glm::vec3((rand() % 255 / 255.0f * 2 - 1) * 10, z * 2 + 1, (rand() % 255 / 255.0f * 2 - 1) * 10),
+						glm::vec3(rand() % 255 / 255.0f, rand() % 255 / 255.0f, rand() % 255 / 255.0f), 3.0f);
+				}
+			}
 		}
-
-		// create box2 (entity 3)
-		/*
-		{
-			box2 = scene.create();
-			scene.set<Parent>(box2, box1);
-			
-			scene.set<Position>(box2, 0.5, 0, 0);
-			scene.set<Scale>(box2, 0.5f);
-			
-			scene.set<VBO<V_Index>>(box2, scene.get<VBO<V_Index>>(box1));
-			scene.set<VBO<V_Position>>(box2, scene.get<VBO<V_Position>>(box1));
-			scene.set<VBO<V_Normal>>(box2, scene.get<VBO<V_Normal>>(box1));
-			scene.set<VBO<V_Tangent>>(box2, scene.get<VBO<V_Tangent>>(box1));
-			scene.set<VBO<V_TexCoord>>(box2, scene.get<VBO<V_TexCoord>>(box1));
-			
-			scene.set<Material>(box2, Texture(2, 2, Texture::Format::RGB, true, RGBtest, Texture::Format::RGB, Texture::Type::UNSIGNED_BYTE));
-		}
-		*/
-		// floor (entity 4)
-		{
-			entt::entity floor = scene.create();
-			
-			scene.set<Position>(floor, 0, -0.1f, 0);
-			scene.set<Scale>(floor, 100, 0.1f, 100);
-			
-			scene.set<VBO<V_Index>>(floor, scene.get<VBO<V_Index>>(box1));
-			scene.set<VBO<V_Position>>(floor, scene.get<VBO<V_Position>>(box1));
-			scene.set<VBO<V_Normal>>(floor, scene.get<VBO<V_Normal>>(box1));
-			scene.set<VBO<V_Tangent>>(floor, scene.get<VBO<V_Tangent>>(box1));
-			scene.set<VBO<V_TexCoord>>(floor, scene.get<VBO<V_TexCoord>>(box1));
-			
-			scene.set<Material>(floor, Texture("Resources/textures/grid.png"));
-		}
-
-		// light 1 (entity 5)
-		{
-			light1 = scene.create();
-			scene.set<PointLight>(light1, glm::vec3(0, 1, 0), glm::vec3(5, 5, 5), 10.0f);
-		}
-		/*
-		// light 2 (entity 6)
-		{
-			light2 = scene.create();
-			scene.set<PointLight>(light2, glm::vec3(-0.5f, 0, 0), glm::vec3(0, 2, 2), 10.0f);
-			scene.set<Position>(light2, -0.5f, 0, 0);
-			scene.set<Scale>(light2, 10.0f);
-		}
-		*/
 	}
 
 	void onProcess(float delta) {
@@ -205,7 +148,7 @@ public:
 			
 			camera_rotation = glm::normalize(yaw * pitch);
 
-			scene.set<Rotation>(scene.camera, camera_rotation);
+			scene.replace<Rotation>(scene.camera, camera_rotation);
 		}
 
 		glm::vec3 move_direction;
@@ -221,12 +164,12 @@ public:
 
 
 		if (move_direction != glm::vec3(0, 0, 0))
-			scene.set<Position>(scene.camera, camera_rotation * move_direction * delta + camera_position); // rotate direction by camera rotation
+			scene.replace<Position>(scene.camera, camera_rotation * move_direction * delta + camera_position); // rotate direction by camera rotation
 		
 
-		scene.set<Position>(box1, cos(time), sin(time), 0.0f);
+		//scene.replace<Position>(box1, cos(time), sin(time), 0.0f);
 		//scene.set<Position>(box2, -sin(time), -cos(time), 0.0f);
-		scene.set<Rotation>(obj, 0.0, time, 0);
+		//scene.replace<Rotation>(obj, 0.0, time, 0);
 	}
 
 	void onDraw() {

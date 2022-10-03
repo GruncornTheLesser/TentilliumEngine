@@ -54,6 +54,8 @@ Texture::Texture(int width, int height, Format internal_format_hint, void* data,
 
 void Texture::setData(int width, int height, Format internal_format_hint, void* data, Format data_format_hint)
 {
+	m_format = internal_format_hint;
+
 	bool compressed = height == 0 || width == 0;
 
 	if (compressed) {
@@ -122,41 +124,42 @@ void Texture::setData(int width, int height, Format internal_format_hint, void* 
 	}
 
 	switch (data_format_hint) {
-	case Format::R:
-	case Format::R_16F:
-	case Format::R_32F:data_format = GL_RED; break;
-
 	case Format::R_16I:
 	case Format::R_16UI:
 	case Format::R_32I:
 	case Format::R_32UI: data_format = GL_RED_INTEGER; break;
 
-	case Format::RG:
-	case Format::RG_16F:
-	case Format::RG_32F: data_format = GL_RG; break;
-
 	case Format::RG_16I:
-	case Format::RG_16UI:  
+	case Format::RG_16UI:
 	case Format::RG_32I:
 	case Format::RG_32UI: data_format = GL_RG_INTEGER;
-
-	case Format::RGB:
-	case Format::RGB_16F:
-	case Format::RGB_32F: data_format = GL_RGB; break;
 
 	case Format::RGB_16I:
 	case Format::RGB_16UI:
 	case Format::RGB_32I:
 	case Format::RGB_32UI: data_format = GL_RGB_INTEGER; break;
 
-	case Format::RGBA:
-	case Format::RGBA_16F:
-	case Format::RGBA_32F: data_format = GL_RGBA; break;
-
 	case Format::RGBA_16I:
 	case Format::RGBA_16UI:
 	case Format::RGBA_32I:
 	case Format::RGBA_32UI: data_format = GL_RGBA_INTEGER; break;
+
+	case Format::R:
+	case Format::R_16F:
+	case Format::R_32F:data_format = GL_RED; break;
+
+	case Format::RG:
+	case Format::RG_16F:
+	case Format::RG_32F: data_format = GL_RG; break;
+
+	case Format::RGB:
+	case Format::RGB_16F:
+	case Format::RGB_32F: data_format = GL_RGB; break;
+
+
+	case Format::RGBA:
+	case Format::RGBA_16F:
+	case Format::RGBA_32F: data_format = GL_RGBA; break;
 
 	case Format::DEPTH: data_format = GL_DEPTH_COMPONENT; break;
 	}
@@ -286,6 +289,11 @@ void Texture::setFilter(Texture::Filter filter)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilter);
 	glBindTexture(GL_TEXTURE_2D, NULL);
+}
+
+Texture::Format Texture::getFormat() const
+{
+	return m_format;
 }
 
 void Texture::destroy(unsigned int handle)

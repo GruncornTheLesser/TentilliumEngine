@@ -6,6 +6,7 @@
 #include "../Components/Mesh.h"
 #include "../Components/Material.h"
 #include "../Rendering/Resources/ShaderProgram.h"
+#include "../Rendering/Resources/Framebuffer.h"
 #include <glm.hpp>
 
 class RenderSystem : virtual protected entt::registry {
@@ -14,7 +15,6 @@ public:
 	__declspec(property(get=getCamera,put=setCamera)) entt::entity camera;
 	
 	RenderSystem();
-	~RenderSystem();
 
 	void render();
 
@@ -27,6 +27,19 @@ public:
 	entt::entity getCamera();
 
 private:
+	/*
+	
+	struct ClusterBuffer : Buffer { };
+
+	struct PointLightBuffer : Buffer { };
+	struct LightIndexBuffer : Buffer { };
+	struct LightArrayBuffer : Buffer { };
+
+	struct Camera { entt::entity id = entt::tombstone; };
+
+	struct GeometryBuffer : Framebuffer { GeometryBuffer(); };
+	*/
+
 	VIEW(render_scene_view, GET(Mesh::VAO, Material, Transform::WorldMatrix), EXC());
 	VIEW(light_view, GET(PointLight), EXC());
 
@@ -43,25 +56,14 @@ private:
 	Buffer m_lightIndiceBuffer;		// stores indices to the pointlights
 	Buffer m_lightArrayBuffer;		// stores an array per cluster of indices
 	Buffer m_visibleCountBuffer;	// stores an unsigned int counting the number of lights in the scene(counting repeats)
-	Buffer m_materialBuffer;		// stores an array of unique materials
-
+	//Buffer m_materialBuffer;		// stores an array of unique materials
 
 	ShaderProgram<COMP>		  m_clusterGenerationProgram{ "Resources/shaders/cluster_prepass.comp" };	// calculates cluster AABBs
 	ShaderProgram<COMP>		  m_lightCullingProgram{ "Resources/shaders/cluster_culling.comp" };		// culls lights from clusters
 	ShaderProgram<VERT, FRAG> m_geometryPassProgram{ "Resources/shaders/geometry_pass.shader" };		// writes scene to geometry buffer
 	ShaderProgram<VERT, FRAG> m_deferredShadingProgram{ "Resources/shaders/deferred_shading.shader" };	// shades scene
 
-	Mesh::VAO					m_screenVAO;
-	Mesh::VBO<Mesh::V_Position> m_screenVBO;
-
-	Texture m_geomPosition;
-	Texture m_geomDepth;
-	Texture m_geomNormal;
-	Texture m_geomTexCoord;
-	Texture m_geomMaterial;
-
-	unsigned int m_geometryBuffer;
-	unsigned int m_depthAttachment;
+	Framebuffer m_geometryBuffer;
 
 	static void constructLight(Buffer& buffer, entt::registry& reg, entt::entity e);
 

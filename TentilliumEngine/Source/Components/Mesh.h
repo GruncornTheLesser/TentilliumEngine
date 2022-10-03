@@ -45,10 +45,10 @@
 
 namespace Mesh {
 
-	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_Tangent, V_TexCoord, V_BoneID, V_BoneWeight, V_MaterialIndex, V_Custom, V_None };
+	enum VertAttrib { V_Index = -1, V_Position, V_Normal, V_Tangent, V_TexCoord, V_MaterialIndex, V_BoneID, V_BoneWeight, V_Custom, V_None };
 
 	template<VertAttrib>
-	class VBO final : public Buffer {
+	class VBO  : public Buffer {
 		friend class VAO;
 	public:
 		VBO(const void* data, size_t size) : Buffer(data, size) { }
@@ -57,8 +57,8 @@ namespace Mesh {
 		VBO(const std::vector<T>& data) : Buffer(&data[0], sizeof(T) * data.size()) { }
 	};
 
-	class VAO : private GL<VAO> {
-		friend class GL<VAO>;
+	class VAO : private Shared<VAO> {
+		friend class Shared<VAO>;
 	public:
 		__declspec(property(get = getHandle)) unsigned int handle;
 

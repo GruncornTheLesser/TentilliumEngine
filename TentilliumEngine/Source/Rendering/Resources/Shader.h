@@ -11,8 +11,8 @@ enum ShaderType : int {
 };
 
 template<ShaderType type>
-class Shader : public GL<Shader<type>> {
-	friend class GL<Shader<type>>;
+class Shader : public Shared<Shader<type>> {
+	friend class Shared<Shader<type>>;
 public:
 	__declspec(property(get=getHandle)) unsigned int handle;
 

@@ -80,6 +80,12 @@
     <ClCompile Include="Source\Systems\MeshSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Rendering\Resources\Framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Systems\MaterialSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\meshes\Hat.mtl">
@@ -132,6 +138,8 @@
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Components\PointLight.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
+    <ClInclude Include="Source\Systems\MaterialSystem.h" />
+    <ClInclude Include="Source\Rendering\Resources\Framebuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="Resources\meshes\Hat.obj">
@@ -153,6 +161,150 @@
     <Image Include="Resources\meshes\textures\normal.tga" />
     <Image Include="Resources\meshes\textures\rough.tga" />
     <Image Include="Resources\textures\Image4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Background_Albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Background_Normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\ChainTexture_Albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\ChainTexture_Normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Lion_Albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Lion_Normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Arch_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Arch_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Bricks_a_Albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Bricks_a_Normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Ceiling_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Ceiling_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_a_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_a_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_b_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_b_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_c_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_c_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Blue_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Blue_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Green_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Green_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Red_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Red_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Details_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Details_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Blue_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Blue_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Green_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Green_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Red_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Red_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_FlagPole_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_FlagPole_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Floor_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Floor_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Roof_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Roof_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Thorn_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Sponza_Thorn_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Vase_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\Vase_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\VaseHanging_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\VaseHanging_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\VasePlant_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\VasePlant_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\VaseRound_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\meshes\Sponza\VaseRound_normal.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

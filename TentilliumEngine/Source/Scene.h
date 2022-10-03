@@ -6,7 +6,7 @@
 #include "Systems/LoadSystem.h"
 #include "Systems/MeshSystem.h"
 
-class Scene : HierarchySystem, TransformSystem, RenderSystem, MeshSystem, LoadSystem
+class Scene : HierarchySystem, TransformSystem, MaterialSystem, RenderSystem, MeshSystem, LoadSystem
 {
 public:
 	// entt functions
@@ -18,12 +18,9 @@ public:
 	using entt::basic_registry<entt::entity>::all_of;
 	using entt::basic_registry<entt::entity>::any_of;
 	using entt::basic_registry<entt::entity>::clear;
-	// aliased entt functions
-	template<typename Component, typename ... Args>
-	void set(entt::entity e, Args&& ... args) {
-		emplace_or_replace<Component>(e, args...);
-	}
-
+	using entt::basic_registry<entt::entity>::emplace_or_replace;
+	using entt::basic_registry<entt::entity>::replace;
+	using entt::basic_registry<entt::entity>::emplace;
 
 	// render functions
 	using RenderSystem::size;

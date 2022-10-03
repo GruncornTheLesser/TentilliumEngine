@@ -6,9 +6,9 @@
 #include <unordered_map>
 
 
-class Texture : public GL<Texture>, public FileManager<Texture>
+class Texture : public Shared<Texture>
 {
-	friend class GL<Texture>;
+	friend class Shared<Texture>;
 public:
 	enum class Filter { NEAREST, LINEAR };
 	enum class Wrap { CLAMP_EDGE, REPEAT, MIRRORED_REPEAT };
@@ -28,6 +28,7 @@ public:
 
 	__declspec(property (put=setWrap, get=getWrap)) Wrap wrap;
 	__declspec(property (put=setFilter, get=getFilter)) Filter filter;
+	__declspec(property (get=getFormat)) Format format;
 
 public:
 	Texture(std::string filepath, Wrap wrap = Wrap::CLAMP_EDGE, Filter filter = Filter::NEAREST);
@@ -58,6 +59,9 @@ public:
 	Filter getFilter() const;
 	void setFilter(Filter filter);
 
+	Format getFormat() const;
+
 private:
+	Format m_format = Format::NONE;
 	static void destroy(unsigned int handle);
 };

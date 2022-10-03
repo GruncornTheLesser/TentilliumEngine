@@ -1,9 +1,9 @@
 #pragma once
 #include <unordered_map>
 #include "Resource.h"
-class Buffer : public GL<Buffer>
+class Buffer : public Shared<Buffer>
 {
-    friend class GL<Buffer>;
+    friend class Shared<Buffer>;
 public:
     __declspec(property(get=getHandle)) unsigned int handle;
 

@@ -66,6 +66,7 @@ vec3 getNormal() {
 void main() {
 	positionAttachment = getPosition();
 	normalAttachment = getNormal();
-	TexCoordAttachment = fragment_in.texcoord;
+	// hacky fix to problem of no texture wrap on bindless textures
+	TexCoordAttachment = abs(fragment_in.texcoord) - floor(abs(fragment_in.texcoord));
 	MaterialAttachment = fragment_in.materialIndex;
 };

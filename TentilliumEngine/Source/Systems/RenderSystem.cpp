@@ -1,4 +1,5 @@
 #include "RenderSystem.h"
+#include "MaterialSystem.h"
 #include "../Components/Mesh.h"
 
 #include <glew.h>
@@ -36,7 +37,7 @@ struct AABB {
 
 struct LightArray {
 	unsigned int begin;
-	unsigned int end;
+	unsigned int end; // or count
 };
 
 RenderSystem::RenderSystem() :
@@ -46,13 +47,12 @@ RenderSystem::RenderSystem() :
 	m_lightIndiceBuffer(nullptr, sizeof(int) * MAX_CLUSTER_COUNT * CLUSTER_MAX_LIGHTS, GL_DYNAMIC_DRAW),
 	m_lightArrayBuffer(nullptr, sizeof(LightArray) * MAX_CLUSTER_COUNT),
 	m_visibleCountBuffer(nullptr, sizeof(unsigned int)),
-	m_materialBuffer(nullptr, sizeof(Material::UniformData) * MAX_MATERIAL_COUNT),
-	m_screenVBO(std::vector<float>{ -1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0 }),
-	m_geomPosition(1, 1, Texture::Format::RGB_16F),
-	m_geomDepth(1, 1, Texture::Format::DEPTH),
-	m_geomNormal(1, 1, Texture::Format::RGB),
-	m_geomTexCoord(1, 1, Texture::Format::RG),
-	m_geomMaterial(1, 1, Texture::Format::R_32UI)
+	m_geometryBuffer({ 
+		std::pair(GL_DEPTH_ATTACHMENT, Texture::Format::DEPTH), 
+		std::pair(GL_COLOR_ATTACHMENT0, Texture::Format::RGB_16F), 
+		std::pair(GL_COLOR_ATTACHMENT1, Texture::Format::RGB),
+		std::pair(GL_COLOR_ATTACHMENT2, Texture::Format::RG),
+		std::pair(GL_COLOR_ATTACHMENT3, Texture::Format::R_32UI)})
 {
 	// set point light events
 	{
@@ -77,7 +77,7 @@ RenderSystem::RenderSystem() :
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_lightArrayBuffer.handle);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_visibleCountBuffer.handle);
 
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_materialBuffer.handle);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, ctx<MaterialSystem::MaterialBuffer>().handle);
 
 		m_deferredShadingProgram.setUniform("positionAttachment", 0); // bind to texture slot 0, 1 and 2
 		m_deferredShadingProgram.setUniform("normalAttachment", 1);
@@ -89,38 +89,6 @@ RenderSystem::RenderSystem() :
 		m_geometryPassProgram.setUniformBlock("MaterialBuffer", 0);
 		
 	}
-	
-	// init framebuffer and screen mesh
-	{
-		// screen mesh
-		m_screenVAO.attach(Mesh::V_Position, m_screenVBO, 3, GL_FLOAT, false, 0);
-
-		// frame buffer
-		glGenFramebuffers(1, &m_geometryBuffer);
-		glGenRenderbuffers(1, &m_depthAttachment);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, m_geometryBuffer);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_geomPosition.handle, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_geomNormal.handle, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_geomTexCoord.handle, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_geomMaterial.handle, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_geomDepth.handle, 0);
-		
-		unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-		glDrawBuffers(4, attachments);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			std::cerr << "[init error] - Framebuffer failed to initate" << std::endl;
-			throw std::exception();
-		}
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-}
-
-RenderSystem::~RenderSystem() {
-	glDeleteRenderbuffers(1, &m_depthAttachment);
-	glDeleteFramebuffers(1, &m_geometryBuffer);
 }
 
 void RenderSystem::setSize(glm::ivec2 size)
@@ -130,11 +98,7 @@ void RenderSystem::setSize(glm::ivec2 size)
 	m_size = (glm::uvec2)size;
 	m_clusterSize = glm::uvec3(CALC_CLUSTER_SIZE(size));
 
-	m_geomPosition.setData(size.x, size.y, Texture::Format::RGB_16F);
-	m_geomDepth.setData(size.x, size.y, Texture::Format::DEPTH);
-	m_geomNormal.setData(size.x, size.y, Texture::Format::RGB);
-	m_geomTexCoord.setData(size.x, size.y, Texture::Format::RG);
-	m_geomMaterial.setData(size.x, size.y, Texture::Format::R_32UI);
+	m_geometryBuffer.resize(size);
 
 	if (!valid(m_camera)) return;
 	auto proj = try_get<Projection>(m_camera);
@@ -205,29 +169,25 @@ void RenderSystem::render()
 	m_lightCullingProgram.dispatch(glm::uvec3(1, 1, m_clusterSize.z));
 
 	// geometry prepass normal mapped
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_geometryBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_geometryBuffer.handle);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_geometryPassProgram.bind();
 	for (auto [entity, mesh, material, model] : render_scene_view.each()) 
 	{
 		m_geometryPassProgram.setUniform("model", model);
 		m_geometryPassProgram.setUniform("MVP", proj * view * (glm::mat4)model);
-		material.bind(0); // binds material maps 0 - 3
 		mesh.draw();
 	}
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, NULL);
 
-	// deferred pass
+	// shaded pass
 	m_deferredShadingProgram.bind();
-	m_geomPosition.bindSlot(0);
-	m_geomNormal.bindSlot(1);
-	m_geomTexCoord.bindSlot(2);
-	m_geomMaterial.bindSlot(3);
-	m_geomDepth.bindSlot(4);
-	m_screenVAO.draw(GL_TRIANGLE_STRIP);
-
-	// copy geometry depth buffer to main buffer
-	// forward render transparent objects
+	m_geometryBuffer.getAttachment(GL_COLOR_ATTACHMENT0).bindSlot(0); // Position
+	m_geometryBuffer.getAttachment(GL_COLOR_ATTACHMENT1).bindSlot(1); // Normal
+	m_geometryBuffer.getAttachment(GL_COLOR_ATTACHMENT2).bindSlot(2); // texCoord
+	m_geometryBuffer.getAttachment(GL_COLOR_ATTACHMENT3).bindSlot(3); // materialID
+	m_geometryBuffer.getAttachment(GL_DEPTH_ATTACHMENT).bindSlot(4);
+	m_geometryBuffer.draw();
 }
 
 void RenderSystem::constructLight(Buffer& buffer, entt::registry& reg, entt::entity e)
@@ -255,25 +215,3 @@ void RenderSystem::updateLight(Buffer& buffer, entt::registry& reg, entt::entity
 	auto index = reg.storage<PointLight>().index(e);
 	buffer.setData(reg.get<PointLight>(e).m_position, index * sizeof(PointLight) + offsetof(PointLight, m_position));
 }
-
-void RenderSystem::constructMaterial(Buffer& buffer, entt::registry& reg, entt::entity e)
-{
-	if (reg.storage<Material>().size() == MAX_MATERIAL_COUNT)
-		throw std::exception();
-
-	// add light to end of buffer array
-	auto back = reg.storage<Material>().size() - 1;
-
-	buffer.setData(reg.get<Material>(e), back * sizeof(Material));
-}
-
-void RenderSystem::destroyMaterial(Buffer& buffer, entt::registry& reg, entt::entity e)
-{
-	size_t index = reg.storage<Material>().index(e);
-	size_t back = reg.storage<Material>().size() - 1;
-	if (index == back) return;
-
-	// remove light by swapping with last light
-	buffer.setData(reg.get<Material>(reg.storage<Material>().at(back)), index * sizeof(Material));
-}
-

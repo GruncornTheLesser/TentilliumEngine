@@ -172,6 +172,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Components\Material.cpp" />
+    <ClCompile Include="Source\Rendering\Resources\Framebuffer.cpp" />
     <ClCompile Include="Source\Systems\HierarchySystem.cpp" />
     <ClCompile Include="Source\Systems\LoadSystem.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Buffer.cpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Texture.cpp" />
     <ClCompile Include="Source\Rendering\Resources\Shader.cpp" />
+    <ClCompile Include="Source\Systems\MaterialSystem.cpp" />
     <ClCompile Include="Source\Systems\MeshSystem.cpp" />
     <ClCompile Include="Source\Systems\RenderSystem.cpp" />
     <ClCompile Include="Source\Systems\TransformSystem.cpp" />
@@ -202,6 +204,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Components\PointLight.h" />
+    <ClInclude Include="Source\Rendering\Resources\Framebuffer.h" />
     <ClInclude Include="Source\Systems\HierarchySystem.h" />
     <ClInclude Include="Source\Systems\LoadSystem.h" />
     <ClInclude Include="Source\Components\Mesh.h" />
@@ -209,6 +212,7 @@
     <ClInclude Include="Source\Components\Material.h" />
     <ClInclude Include="Source\Rendering\Resources\ShaderProgram.h" />
     <ClInclude Include="Source\Rendering\Window\Inputs.h" />
+    <ClInclude Include="Source\Systems\MaterialSystem.h" />
     <ClInclude Include="Source\Systems\MeshSystem.h" />
     <ClInclude Include="Source\Systems\RenderSystem.h" />
     <ClInclude Include="Source\Systems\TransformSystem.h" />
@@ -232,6 +236,54 @@
     </Object>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\meshes\Sponza\Background_Albedo.png" />
+    <Image Include="Resources\meshes\Sponza\Background_Normal.png" />
+    <Image Include="Resources\meshes\Sponza\ChainTexture_Albedo.png" />
+    <Image Include="Resources\meshes\Sponza\ChainTexture_Normal.png" />
+    <Image Include="Resources\meshes\Sponza\Lion_Albedo.png" />
+    <Image Include="Resources\meshes\Sponza\Lion_Normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Arch_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Arch_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Bricks_a_Albedo.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Bricks_a_Normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Ceiling_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Ceiling_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_a_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_a_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_b_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_b_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_c_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Column_c_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Blue_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Blue_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Green_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Green_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Red_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Curtain_Red_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Details_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Details_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Blue_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Blue_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Green_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Green_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Red_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Fabric_Red_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_FlagPole_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_FlagPole_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Floor_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Floor_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Roof_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Roof_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Thorn_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Sponza_Thorn_normal.png" />
+    <Image Include="Resources\meshes\Sponza\VaseHanging_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\VaseHanging_normal.png" />
+    <Image Include="Resources\meshes\Sponza\VasePlant_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\VasePlant_normal.png" />
+    <Image Include="Resources\meshes\Sponza\VaseRound_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\VaseRound_normal.png" />
+    <Image Include="Resources\meshes\Sponza\Vase_diffuse.png" />
+    <Image Include="Resources\meshes\Sponza\Vase_normal.png" />
     <Image Include="Resources\textures\Image1.png" />
     <Image Include="Resources\textures\Image2.png" />
     <Image Include="Resources\textures\Image3.png" />

@@ -45,7 +45,7 @@ template<> void MeshSystem::attachVBO<V_BoneWeight>(entt::registry& reg, entt::e
 }
 
 template<> void MeshSystem::attachVBO<V_MaterialIndex>(entt::registry& reg, entt::entity e) {
-	reg.get_or_emplace<VAO>(e).attach(V_MaterialIndex, reg.get<VBO<V_MaterialIndex>>(e), 1, GL_UNSIGNED_INT, true, 0);
+	reg.get_or_emplace<VAO>(e).attach(V_MaterialIndex, reg.get<VBO<V_MaterialIndex>>(e), 1, GL_FLOAT, false, 0); // why does float work???
 }
 
 MeshSystem::MeshSystem()

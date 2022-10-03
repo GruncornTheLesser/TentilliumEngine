@@ -8,8 +8,8 @@ template<ShaderType ... Ts>
 concept IsComputeProgram = sizeof...(Ts) == 1 && ((Ts == COMP) & ...);
 
 template<ShaderType ... Ts>
-class ShaderProgram : Shader<Ts>..., GL<ShaderProgram<Ts...>> {
-	friend class GL<ShaderProgram<Ts...>>;
+class ShaderProgram : Shader<Ts>..., Shared<ShaderProgram<Ts...>> {
+	friend class Shared<ShaderProgram<Ts...>>;
 public:
 	ShaderProgram(std::string filepath);
 
