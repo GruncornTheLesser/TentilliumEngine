@@ -20,20 +20,9 @@
 * 
 *	> Light updates on position, scale and (rotation + projection) association as well as directional + spotlights
 *	> Normal + Tangent VBO generation
-*	> decouple Material into maps and 
-*	> seperate rendering functionality further for mesh/camera/rendering type
-* 
 * 
 *	> Tidy AppWindow functionality into something less ugly
 *		> rethink input system
-*	
-*	> Tidy Texture and rethink the scope of the class. 
-*		Texture is used in 2 places currently: Materials and Framebuffers
-*		Material desperately needs some way to pass multiple textures This can be done through
-*			> Megatextures/texture atlases
-*			> Texture Arrays
-*				> means material initation cant use the current texture file loading
-*			> bindless textures
 * 
 * 
 *   > bones, skinning and animation
@@ -41,8 +30,6 @@
 
 /* RESEARCH:
 *	> Morton encoding for position in a quad tree -> chunking???
-*	> ANGLE a library that compiles opengl calls into directx
-*	> bindless textures
 */
 
 /*

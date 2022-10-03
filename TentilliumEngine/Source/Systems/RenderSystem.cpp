@@ -77,7 +77,7 @@ RenderSystem::RenderSystem() :
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_lightArrayBuffer.handle);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_visibleCountBuffer.handle);
 
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, ctx<MaterialSystem::MaterialBuffer>().handle);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, entt::registry::ctx().at<MaterialSystem::MaterialBuffer>().handle);
 
 		m_deferredShadingProgram.setUniform("positionAttachment", 0); // bind to texture slot 0, 1 and 2
 		m_deferredShadingProgram.setUniform("normalAttachment", 1);

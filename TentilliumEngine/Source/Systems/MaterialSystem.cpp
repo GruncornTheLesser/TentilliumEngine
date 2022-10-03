@@ -2,9 +2,9 @@
 
 MaterialSystem::MaterialSystem()
 {
-	set<Members>();
-	set<ResourceManager<Material::Index, size_t>>();
-	set<MaterialBuffer>();
+	ctx().emplace<Members>();
+	ctx().emplace<ResourceManager<Material::Index, size_t>>();
+	ctx().emplace<MaterialBuffer>();
 	
 	on_construct<Material>().connect<createMaterial>();
 	on_destroy<Material>().connect<destroyMaterial>();
@@ -12,9 +12,9 @@ MaterialSystem::MaterialSystem()
 
 void MaterialSystem::createMaterial(entt::registry& reg, entt::entity e)
 {
-	auto& sysMembers = reg.ctx<Members>();
-	auto& resManager = reg.ctx<ResourceManager<Material::Index, size_t>>();
-	auto& matBuffer =  reg.ctx<MaterialBuffer>();
+	auto& sysMembers = reg.ctx().at<Members>();
+	auto& resManager = reg.ctx().at<ResourceManager<Material::Index, size_t>>();
+	auto& matBuffer =  reg.ctx().at<MaterialBuffer>();
 
 	Material& material = reg.get<Material>(e);
 
@@ -50,8 +50,8 @@ void MaterialSystem::updateMaterial(entt::registry& reg, entt::entity e)
 
 void MaterialSystem::destroyMaterial(entt::registry& reg, entt::entity e)
 {
-	auto& sysMembers = reg.ctx<Members>();
-	auto& resManager = reg.ctx<ResourceManager<Material::Index, size_t>>();
+	auto& sysMembers = reg.ctx().at<Members>();
+	auto& resManager = reg.ctx().at<ResourceManager<Material::Index, size_t>>();
 
 	Material& material = reg.get<Material>(e);
 
