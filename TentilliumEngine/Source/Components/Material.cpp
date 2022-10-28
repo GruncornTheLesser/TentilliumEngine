@@ -7,88 +7,33 @@ Material::UniformData Material::Data::toUniformData()
 	UniformData data;
 
 	data.diffuseHasMap = diffuse.index() == 0;
-	if (data.diffuseHasMap)
-	{
-		Texture& texture = std::get<Texture>(diffuse);
-		data.diffuseMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
-	else
-	{
-		data.diffuse = std::get<glm::vec3>(diffuse);
-	}
+	if (data.diffuseHasMap) data.diffuseMap = std::get<Texture>(diffuse).getBindless();
+	else					data.diffuse = std::get<glm::vec3>(diffuse);
 
 	data.opacityHasMap = opacity.index() == 0;
-	if (data.opacityHasMap)
-	{
-		Texture& texture = std::get<Texture>(opacity);
-		data.opacityMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
-	else
-	{
-		data.opacity = std::get<float>(opacity);
-	}
+	if (data.opacityHasMap) data.opacityMap = std::get<Texture>(opacity).getBindless();
+	else					data.opacity = std::get<float>(opacity);
 
 	data.specularHasMap = specular.index() == 0;
-	if (data.specularHasMap)
-	{
-		Texture& texture = std::get<Texture>(specular);
-		data.specularMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
-	else
-	{
-		data.specular = std::get<glm::vec3>(specular);
-	}
+	if (data.specularHasMap) data.specularMap = std::get<Texture>(specular).getBindless();
+	else					 data.specular = std::get<glm::vec3>(specular);
 
 	data.shininessHasMap = shininess.index() == 0;
-	if (data.shininessHasMap)
-	{
-		Texture& texture = std::get<Texture>(shininess);
-		data.shininessMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
-	else
-	{
-		data.shininess = std::get<float>(shininess);
-	}
+	if (data.shininessHasMap) data.shininessMap = std::get<Texture>(shininess).getBindless();
+	else					  data.shininess = std::get<float>(shininess);
 
 	data.emissiveHasMap = emissive.index() == 0;
-	if (data.emissiveHasMap)
-	{
-		Texture& texture = std::get<Texture>(emissive);
-		data.emissiveMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
-	else
-	{
-		data.emissive = std::get<glm::vec3>(emissive);
-	}
+	if (data.emissiveHasMap) data.emissiveMap = std::get<Texture>(emissive).getBindless();
+	else					 data.emissive = std::get<glm::vec3>(emissive);
 
 	data.ambientOcclusionHasMap = ambientOcclusion.has_value();
-	if (data.ambientOcclusionHasMap)
-	{
-		Texture& texture = ambientOcclusion.value();
-		data.ambientOcclusionMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
+	if (data.ambientOcclusionHasMap) data.ambientOcclusionMap = ambientOcclusion.value().getBindless();
 
 	data.normalHasMap = normal.has_value();
-	if (data.normalHasMap)
-	{
-		Texture& texture = normal.value();
-		data.normalMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
+	if (data.normalHasMap) data.normalMap = normal.value().getBindless();
 
 	data.heightHasMap = height.has_value();
-	if (height.has_value())
-	{
-		Texture& texture = height.value();
-		data.heightMap = glGetTextureHandleARB(texture.handle);
-		texture.setBindless(true);
-	}
+	if (height.has_value()) data.heightMap = height.value().getBindless();
 
 	return data;
 }

@@ -45,32 +45,6 @@
 // with Position and Projection its a Spotlight (and/or Scale)
 // Scale determines Spotlight distance and Pointlight radius
 
-// textures
-unsigned char Rtest[] = {
-	0xff, 
-	0x7f,
-	0x3f, 
-	0x1f, 
-};
-unsigned char RGtest[] = {
-	0xff, 0x00,
-	0x00, 0xff,
-	0x00, 0xff,
-	0xff, 0x00,
-};
-unsigned char RGBtest[] = {
-	0xff, 0x00, 0xff, 
-	0x00, 0x00, 0xff, 
-	0x00, 0x00, 0xff, 
-	0xff, 0x00, 0xff, 
-};
-unsigned char RGBAtest[] = {
-	0xff, 0x00, 0xff, 0xff,
-	0x00, 0x00, 0xff, 0xff,
-	0x00, 0x00, 0xff, 0xff,
-	0xff, 0x00, 0xff, 0xff,
-};
-
 using namespace Transform;
 using namespace Mesh;
 
@@ -82,7 +56,7 @@ public:
 
 	entt::entity obj;
 	entt::entity box1;
-	entt::entity box2 = entt::tombstone;
+	entt::entity box2;
 	entt::entity root;
 
 	float time;
@@ -106,17 +80,37 @@ public:
 			scene.emplace<Position>(obj, 0, 0, -1);
 			scene.emplace<Rotation>(obj);
 		}
-
+		
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
 				for (int z = 0; z < 5; z++) {
 					entt::entity light = scene.create();
 					scene.emplace<PointLight>(light,
-						glm::vec3((rand() % 255 / 255.0f * 2 - 1) * 10, z * 2 + 1, (rand() % 255 / 255.0f * 2 - 1) * 10),
+						glm::vec3((rand() % 255 / 255.0f * 2 - 1) * 15, z * 2 + 1, (rand() % 255 / 255.0f * 2 - 1) * 15),
 						glm::vec3(rand() % 255 / 255.0f, rand() % 255 / 255.0f, rand() % 255 / 255.0f), 3.0f);
 				}
 			}
 		}
+		/*
+		{
+			entt::entity floor = scene.load("Resources/meshes/Cube.obj");
+			scene.emplace<Position>(floor, 0, -0.2, 0);
+			scene.emplace<Rotation>(floor, 0, 0, 0);
+			scene.emplace<Scale>(floor, 1000, 0.2, 1000);
+		}
+		
+		{
+			box1 = scene.load("Resources/meshes/Cube.obj");
+			scene.emplace<Parent>(box1, obj);
+			scene.emplace<Position>(box1, 0, 0, 0);
+		}
+
+		{
+			box2 = scene.load("Resources/meshes/Cube.obj");
+			scene.emplace<Parent>(box2, box1);
+			scene.emplace<Position>(box2, 0, 0, 0);
+		}
+		*/
 	}
 
 	void onProcess(float delta) {
@@ -152,11 +146,7 @@ public:
 
 		if (move_direction != glm::vec3(0, 0, 0))
 			scene.replace<Position>(scene.camera, camera_rotation * move_direction * delta + camera_position); // rotate direction by camera rotation
-		
 
-		//scene.replace<Position>(box1, cos(time), sin(time), 0.0f);
-		//scene.set<Position>(box2, -sin(time), -cos(time), 0.0f);
-		//scene.replace<Rotation>(obj, 0.0, time, 0);
 	}
 
 	void onDraw() {

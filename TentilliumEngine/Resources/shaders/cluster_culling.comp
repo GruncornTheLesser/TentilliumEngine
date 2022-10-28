@@ -6,9 +6,10 @@
 layout (local_size_x = OPTIMUM_TILE_COUNT, local_size_y = 1, local_size_z = 1) in;
 
 struct PointLight {
-	vec4 position;
-	vec4 color;
-	vec4 radius;
+	vec3 position;
+	bool enabled;
+	vec3 colour;
+	float radius;
 };
 
 struct AABB {		// axis aligned bounding box
@@ -82,8 +83,11 @@ void main() {
 	
 	if (gl_LocalInvocationID.x < threadCount)			// only search for lights in active invocations
 	{
-		for(uint lightID = 0; lightID < lightCount; lightID++)				// for each light in the scene
+		uint lightID;
+		for(lightID = 0; lightID < lightCount; lightID++)				// for each light in the scene
 		{
+			if (!lights[lightID].enabled) continue;
+
 			if(SphereIntersectAABB(lights[lightID], clusters[clusterID]))	// is light in cluster AABB
 			{
 				localIndices[localCount] = lightID;			// add light to local collection

@@ -47,7 +47,7 @@ public:
 		Format data_format_hint = Format::NONE
 	);
 
-	void setBindless(bool value);
+	uint64_t getBindless();
 
 	void bindSlot(unsigned int slot) const;
 

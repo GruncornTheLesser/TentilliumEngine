@@ -30,9 +30,10 @@ struct Material {
 };
 
 struct PointLight {
-	vec4 position;
-	vec4 colour;
-	vec4 radius;
+	vec3 position;
+	bool enabled;
+	vec3 colour;
+	float radius;
 };
 
 struct AABB {		// axis aligned bounding box
@@ -139,7 +140,7 @@ void main() {
 	vec3 specular = getSpecular(materials[materialIndex], texCoord);
 	float shininess = getShininess(materials[materialIndex], texCoord);
 	
-	//f_colour = vec4(texCoord, 0, 1);
+	//f_colour = vec4(texCoord - floor(texCoord), 0, 1);
 	//return;
 	
 	uvec3 ID = getClusterID(fragDepth);	

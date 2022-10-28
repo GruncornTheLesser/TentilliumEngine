@@ -31,9 +31,9 @@ Texture::Texture(std::string filepath, Wrap wrap, Filter filter)
 
 	setWrap(wrap);
 	setFilter(filter);
-
+	
 	// generate opengl texture from bitmap, internal_format = None means internal_format == data_format and vice versa
-	setData(width, height, Format::NONE, data, (Format)data_format);
+	setData(width, height, (Format)data_format, data);
 
 	// release stbi image data
 	stbi_image_free(data);
@@ -44,10 +44,10 @@ Texture::Texture(int width, int height, Format internal_format_hint, void* data,
 {
 	glGenTextures(1, &m_handle);
 	glBindTexture(GL_TEXTURE_2D, m_handle);
-
+	
 	setWrap(wrap);
 	setFilter(filter);
-
+	
 	setData(width, height, internal_format_hint, data, data_format_hint);
 
 }
@@ -85,10 +85,10 @@ void Texture::setData(int width, int height, Format internal_format_hint, void* 
 		data_format_hint = internal_format_hint;
 
 	switch (internal_format_hint) {
-		case Format::R: internal_format = GL_RED; break;
-		case Format::RG: internal_format = GL_RG; break;
-		case Format::RGB: internal_format = GL_RGB; break;
-		case Format::RGBA:	internal_format = GL_RGBA; break;
+		case Format::R: internal_format = GL_R8; break;
+		case Format::RG: internal_format = GL_RG8; break;
+		case Format::RGB: internal_format = GL_RGB8; break;
+		case Format::RGBA:	internal_format = GL_RGBA8; break;
 
 		case Format::R_16F: internal_format = GL_R16F; break;
 		case Format::RG_16F: internal_format = GL_RG16F; break;
@@ -211,14 +211,12 @@ void Texture::setData(int width, int height, Format internal_format_hint, void* 
 		stbi_image_free(data);
 }
 
-void Texture::setBindless(bool value)
+uint64_t Texture::getBindless()
 {
 	std::uint64_t handle = glGetTextureHandleARB(m_handle);
-	if (glIsTextureHandleResidentARB(handle) != (GLboolean)value)
-	{
-		if (value) glMakeTextureHandleResidentARB(handle);
-		else	   glMakeTextureHandleNonResidentARB(handle);
-	}
+	if (!glIsTextureHandleResidentARB(handle))
+		glMakeTextureHandleResidentARB(handle);
+	return handle;
 }
 
 void Texture::bindSlot(unsigned int slot) const
@@ -239,10 +237,10 @@ glm::ivec2 Texture::getSize() const
 
 Texture::Wrap Texture::getWrap() const
 {
-	int wrap;
+	GLint w;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wrap);
-	switch (wrap) {
+	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &w);
+	switch (w) {
 	case GL_CLAMP_TO_EDGE:		return Texture::Wrap::CLAMP_EDGE;
 	case GL_MIRRORED_REPEAT:	return Texture::Wrap::MIRRORED_REPEAT;
 	case GL_REPEAT:				return Texture::Wrap::REPEAT;
@@ -250,44 +248,44 @@ Texture::Wrap Texture::getWrap() const
 	return (Texture::Wrap)wrap;
 }
 
-void Texture::setWrap(Texture::Wrap wrap)
+void Texture::setWrap(Texture::Wrap value)
 {
-	int glWrap;
-	switch (wrap) {
-	case Texture::Wrap::CLAMP_EDGE:			glWrap = GL_CLAMP_TO_EDGE; break;
-	case Texture::Wrap::MIRRORED_REPEAT:	glWrap = GL_MIRRORED_REPEAT; break;
-	case Texture::Wrap::REPEAT:				glWrap = GL_REPEAT; break;
+	GLint w;
+	switch (value) {
+	case Texture::Wrap::CLAMP_EDGE:			w = GL_CLAMP_TO_EDGE; break;
+	case Texture::Wrap::MIRRORED_REPEAT:	w = GL_MIRRORED_REPEAT; break;
+	case Texture::Wrap::REPEAT:				w = GL_REPEAT; break;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, w);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, w);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 }
 
 Texture::Filter Texture::getFilter() const
 {
-	int filter;
+	GLint f;
 	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &filter);
-	switch (filter) {
+	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &f);
+	switch (f) {
 	case GL_LINEAR:		return Texture::Filter::LINEAR;
 	case GL_NEAREST:	return Texture::Filter::NEAREST;
 	}
-	return (Texture::Filter)wrap;
+	return (Texture::Filter)filter;
 }
 
-void Texture::setFilter(Texture::Filter filter)
+void Texture::setFilter(Texture::Filter value)
 {
-	int glFilter;
-	switch (filter) {
-	case Texture::Filter::LINEAR:	glFilter = GL_LINEAR; break;
-	case Texture::Filter::NEAREST:	glFilter = GL_NEAREST; break;
+	GLint f;
+	switch (value) {
+	case Texture::Filter::LINEAR:	f = GL_LINEAR; break;
+	case Texture::Filter::NEAREST:	f = GL_NEAREST; break;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, m_handle);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 }
 

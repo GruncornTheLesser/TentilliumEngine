@@ -40,33 +40,25 @@ in VERTEX_OUT {
 
 layout(location = 0) out vec3 positionAttachment; 
 layout(location = 1) out vec3 normalAttachment;
-layout(location = 2) out vec2 TexCoordAttachment;
-layout(location = 3) out uint MaterialAttachment;
+layout(location = 2) out vec2 texcoordAttachment;
+layout(location = 3) out uint materialAttachment;
 
 layout(std140, binding = 0) uniform MaterialBuffer {
 	Material materials[256];
 };
 
-vec3 getPosition() {
-	return fragment_in.position;
-}
-
-vec3 getNormal() {
-	vec3 normal = normalize(fragment_in.normal);
-	
-	if (!materials[fragment_in.materialIndex].normalHasMap) return normal;
-
-	vec3 tangent = normalize(fragment_in.tangent);
-	vec3 bitangent = cross(tangent, normal);
-	mat3 TBN = mat3(tangent, bitangent, normal);
-
-	return normalize(TBN * (2 * texture(materials[fragment_in.materialIndex].normalMap, fragment_in.texcoord).xyz - 1));
-}
-
 void main() {
-	positionAttachment = getPosition();
-	normalAttachment = getNormal();
-	// hacky fix to problem of no texture wrap on bindless textures
-	TexCoordAttachment = abs(fragment_in.texcoord) - floor(abs(fragment_in.texcoord));
-	MaterialAttachment = fragment_in.materialIndex;
+	positionAttachment = fragment_in.position;
+	texcoordAttachment = fragment_in.texcoord;
+	materialAttachment = fragment_in.materialIndex;
+	normalAttachment = normalize(fragment_in.normal);
+
+	if (materials[fragment_in.materialIndex].normalHasMap) 
+	{
+		vec3 tangent = normalize(fragment_in.tangent);
+		vec3 bitangent = cross(tangent, normalAttachment);
+		mat3 TBN = mat3(tangent, bitangent, normalAttachment);
+
+		normalAttachment = normalize(TBN * (2 * texture(materials[fragment_in.materialIndex].normalMap, fragment_in.texcoord).xyz - 1));
+	}
 };

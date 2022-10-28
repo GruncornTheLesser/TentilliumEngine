@@ -26,6 +26,7 @@ public:
 	using RenderSystem::size;
 	using RenderSystem::setSize;
 	using RenderSystem::getSize;
+
 	using RenderSystem::camera;
 	using RenderSystem::setCamera;
 	using RenderSystem::getCamera;

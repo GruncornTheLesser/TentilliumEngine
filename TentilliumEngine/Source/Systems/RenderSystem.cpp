@@ -4,12 +4,7 @@
 
 #include <glew.h>
 #include <glfw3.h>
-/*
-#define CLUSTER_MAX_LIGHTS 256		// the maximum number of lights per cluster
-#define SCENE_MAX_LIGHTS 1048576	// the maximum number of lights in the entire scene
-#define OPTIMUM_TILE_COUNT 128		// the target number of clusters per depth
-#define MAX_CLUSTER_COUNT 4096		// the maximum number of clusters
-*/
+
 #define CLUSTER_MAX_LIGHTS 256		// the maximum number of lights per cluster
 #define SCENE_MAX_LIGHTS 65536		// the maximum number of lights in the entire scene
 #define OPTIMUM_TILE_COUNT 144		// the target number of clusters per depth
@@ -49,10 +44,10 @@ RenderSystem::RenderSystem() :
 	m_visibleCountBuffer(nullptr, sizeof(unsigned int)),
 	m_geometryBuffer({ 
 		std::pair(GL_DEPTH_ATTACHMENT, Texture::Format::DEPTH), 
-		std::pair(GL_COLOR_ATTACHMENT0, Texture::Format::RGB_16F), 
-		std::pair(GL_COLOR_ATTACHMENT1, Texture::Format::RGB),
-		std::pair(GL_COLOR_ATTACHMENT2, Texture::Format::RG),
-		std::pair(GL_COLOR_ATTACHMENT3, Texture::Format::R_32UI)})
+		std::pair(GL_COLOR_ATTACHMENT0, Texture::Format::RGB_32F), // position    16 bytes
+		std::pair(GL_COLOR_ATTACHMENT1, Texture::Format::RGB),	   // normal	  3 bytes
+		std::pair(GL_COLOR_ATTACHMENT2, Texture::Format::RG_16F),  // texcoord    4 bytes
+		std::pair(GL_COLOR_ATTACHMENT3, Texture::Format::R_32UI)}) // materialID  4 bytes
 {
 	// set point light events
 	{
@@ -86,6 +81,7 @@ RenderSystem::RenderSystem() :
 		m_deferredShadingProgram.setUniform("depthAttachment", 4);
 
 		m_deferredShadingProgram.setUniformBlock("MaterialBuffer", 0);
+
 		m_geometryPassProgram.setUniformBlock("MaterialBuffer", 0);
 		
 	}
